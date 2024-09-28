@@ -1,0 +1,42 @@
+{
+  "telemetry": {
+    "p": {
+      "pc_timestamp": "f",
+      "pc_cpu_temp": "f",
+      "pc_hard_armed": "?",
+      "pc_soft_armed": "?",
+      "pc_redlines_armed": "?",
+      "pc_state": "h",
+      "pc_scr_tag": "h",
+      "adc_channels": {
+        "pc_adc1_c1": "f",
+        "pc_adc1_c2": "f",
+        "pc_adc1_c3": "f",
+        "pc_adc1_c4": "f",
+        "pc_adc2_c1": "f",
+        "pc_adc2_c2": "f",
+        "pc_adc2_c3": "f",
+        "pc_adc2_c4": "f"
+      }
+    },
+    "f": {
+      "fc_timestamp": "f",
+      "fc_cpu_temp": "f",
+      "fc_hard_armed": "?",
+      "fc_soft_armed": "?",
+      "fc_redlines_armed": "?",
+      "fc_state": "h",
+      "fc_scr_tag": "h",
+      "adc_channels": {
+        "fc_adc1_c1": "f",
+        "fc_adc1_c2": "f",
+        "fc_adc1_c3": "f",
+        "fc_adc1_c4": "f",
+        "fc_adc2_c1": "f",
+        "fc_adc2_c2": "f",
+        "fc_adc2_c3": "f",
+        "fc_adc2_c4": "f"
+      }
+    }
+  }
+}

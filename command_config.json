@@ -1,0 +1,20 @@
+{
+    "command": {
+      "p": {
+        "pc_state": "h",
+        "pc_soft_armed": "?",
+        "pc_fire": "?",
+        "pc_redlines_armed": "?",
+        "pc_pulse": "i",
+        "pc_pdelay": "i"
+      },
+      "f": {
+        "fc_state": "h",
+        "fc_soft_armed": "?",
+        "fc_redlines_armed": "?",
+        "fc_pulse": "i",
+        "fc_pdelay": "i"
+      }
+    }
+  }
+  

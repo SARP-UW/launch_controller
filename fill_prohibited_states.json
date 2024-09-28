@@ -1,0 +1,13 @@
+{
+	"mutual_exclusions": [
+		["BV-01", "BV-03"],
+		["BV-01", "BV-04"],
+		["BV-03", "BV-04"]
+	],
+	"mutual_inclusions": [
+		["BV-01", "BV-05"],
+		["BV-03", "BV-07"],
+		["BV-04", "BV-07"]
+	]
+}
+

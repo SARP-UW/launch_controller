@@ -1,0 +1,7 @@
+{
+	"mutual_exclusions": [
+	],
+	"mutual_inclusions": [
+		["igniter", "injector"]
+	]
+}
