@@ -2,7 +2,7 @@
 Codec format for commands.
 """
 
-from sarp_utils.codec import Codec
+from codec import Codec
 from collections import OrderedDict
 
 # Map of all channel names to data types. For more info see:

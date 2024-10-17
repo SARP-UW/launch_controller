@@ -8,10 +8,10 @@ import logging
 from relays import Relays
 from prop_sensors import PropSensors
 from fill_sensors import FillSensors
-from sarp_utils.telem_codec import TelemCodec
-from sarp_utils.command_codec import CommandCodec
-from sarp_utils.network_node import SendNode, ReceiveNode
-from sarp_utils.bitfield_utils import Utils
+from telem_codec import TelemCodec
+from command_codec import CommandCodec
+from network_node import SendNode, ReceiveNode
+from bitfield_utils import Utils
 
 logging.basicConfig(level=logging.INFO)
 

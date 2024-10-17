@@ -30,13 +30,3 @@ msg_schema = OrderedDict([
 class PropTelemCodec(Codec):
     def __init__(self):
         super(PropTelemCodec, self).__init__(msg_schema)
-
-
-
-
-
-
-
-
-
-# 

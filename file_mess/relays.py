@@ -2,7 +2,7 @@ import time
 import json
 import logging
 from pathlib import Path
-from sarp_utils.bitfield_utils import Utils
+from bitfield_utils import Utils
 import pdb
 
 logging.basicConfig(level=logging.DEBUG)

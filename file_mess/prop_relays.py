@@ -2,7 +2,7 @@ import time
 import json
 import logging
 logging.basicConfig(level=logging.DEBUG)
-from sarp_utils.bitfield_utils import Utils
+from bitfield_utils import Utils
 
 
 class Relays:
