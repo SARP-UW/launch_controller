@@ -1,3 +1,3 @@
-# Controller
+# Launch Controller
 
-Controller software for Launch Operations modular controller architecture.
+Software architecture for Launch Controller Operations.
