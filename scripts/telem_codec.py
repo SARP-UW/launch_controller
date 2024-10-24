@@ -12,6 +12,11 @@ from collections import OrderedDict
 # h = short
 # ? = _Bool
 
+
+"""
+TelemCodec class is designed to handle the encoding and decoding of telemetry data for the system. 
+It extends the `Codec` class and initializes a schema based on the control type read from a configuration file
+"""
 class TelemCodec(Codec):
     def __init__(self):
         # Intialize base Codec class with loaded schema    

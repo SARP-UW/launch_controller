@@ -5,6 +5,7 @@ from pathlib import Path
 from bitfield_utils import Utils
 import pdb
 
+# Set up basic logging configuration for debugging purposes
 logging.basicConfig(level=logging.DEBUG)
 
 class Relays:
@@ -15,6 +16,8 @@ class Relays:
      1   2   3   4   5   6   7   8   9   10
     [__, __, __, __, __, __, __, __, __, __]
     """
+
+    # GPIO pins mapped to relay positions
     GPIO_MAPPING = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
 
     def __init__(self, GPIO, config_path="/home/pi/controller/telemetry_config.json"):
@@ -26,14 +29,17 @@ class Relays:
         # closed state - all valves closed
         global CLOSED_STATE
         self._control = open("/home/pi/controller/control.txt", "r").read()[0]
-        self._armed = True
-        self._inj = False
+        self._armed = True # Relay system starts armed
+        self._inj = False # Initialize injection state as false
+        
+        # Set up each pin as an output and set its initial state to LOW (OFF)
         for pin in self.GPIO_MAPPING:
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, GPIO.LOW)
 
         request = []
-        # for default state, fill is set to venting state
+        # Define initial vent and closed states based on the control state (e.g., "fill")
+
         if self._control == "fill":
             VENT_STATE = [0, 0, 0, 0, 0, 1, 0, 1, 1, 0]
             CLOSED_STATE = [0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
@@ -45,6 +51,7 @@ class Relays:
             self._state = VENT_STATE
             request = CLOSED_STATE
 
+        # Set initial requested state to CLOSED_STATE and update relay statuses
         self.request_state(request, 0)
         self.update(GPIO)
         self._armed = False
@@ -62,6 +69,7 @@ class Relays:
         self._SCR_tag = 0
 
     def load_config(self, config_path):
+        # Load configuration from a JSON file
         try:
             with open(config_path, 'r') as f:
                 return json.load(f)
@@ -70,10 +78,12 @@ class Relays:
             return None
 
     def arm(self, GPIO):
+        # Arm the relay system, allowing state changes
         self._armed = True
         logging.info("ARMED")
 
     def disarm(self, GPIO):
+        # Disarm the system and set it to CLOSED_STATE if not already there
         if (self._state != CLOSED_STATE):
                 self.request_state(CLOSED_STATE, 0)
                 self.update(GPIO)
@@ -82,13 +92,15 @@ class Relays:
         logging.info("DISARMED")
 
     def is_armed(self):
+        # Check if the relay system is armed
         return self._armed
 
     def get_state(self):
+        # Get the current state of relays
         return self._state
 
     def get_telemetry(self):
-        # Convert bit array of states into number
+        # Generate a telemetry report with relay state and tags
         states = Utils.num(self._state)
 
         telemObject = {
@@ -100,11 +112,14 @@ class Relays:
         return telemObject
 
     def request_state(self, request, tag):
+        # Store the requested state and set the corresponding _SCR_tag
         self._requested_state = request.copy()
         self._SCR_tag = tag
 
     def INITIATE_FIRE_SEQUENCE(self, GPIO):
+        # Handles the process of igniting and managing fuel/ox valves in a firing sequence
         if (self._inj):
+            # Shut down injection if already active
             GPIO.output(self.GPIO_MAPPING[5], GPIO.LOW)
             time.sleep(0.02)
             GPIO.output(self.GPIO_MAPPING[6], GPIO.LOW)
@@ -112,16 +127,18 @@ class Relays:
             return
 
         if (self._armed):
-            #self._inj = True
+            # Ignite the system by powering the ignitor and opening fuel/ox valves
+            #self._inj = True 
             # power ignitor
-            GPIO.output(self.GPIO_MAPPING[0], GPIO.HIGH)
+            GPIO.output(self.GPIO_MAPPING[0], GPIO.HIGH) # Ignitor ON
             # delay 2000 ms
-            time.sleep(3.5)
+            time.sleep(3.5) # Delay for ignition
             # open solenoid (injector)
             
-            GPIO.output(self.GPIO_MAPPING[5], GPIO.HIGH)  # OX
+            # Open solenoids for oxygen and fuel
+            GPIO.output(self.GPIO_MAPPING[5], GPIO.HIGH)  # OX solenoid
             time.sleep(0.0055)
-            GPIO.output(self.GPIO_MAPPING[6], GPIO.HIGH)  # FUEL
+            GPIO.output(self.GPIO_MAPPING[6], GPIO.HIGH)  # FUEL solenoid
             # delay 30 ms
             #time.sleep(0.5)
             
