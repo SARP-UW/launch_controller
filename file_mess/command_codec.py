@@ -14,17 +14,17 @@ from collections import OrderedDict
 class CommandCodec(Codec):
     def __init__(self):
         # Intialize base Codec class with loaded schema    
-        self._control = open("/home/pi/controller/control.txt", "r").read()[0]
+        self._control = self.config['control_key'] 
         
-        json_path = '/home/pi/controller/command_config.json'
+        json_path = '/home/pi/controller/GSE_master.json'
         control_key = self._control[0]
         
         with open(json_path, 'r') as file:
             schema_json = json.load(file)
 
         # Extract the schema section for the given control_key
-        schema = schema_json.get('command', {})
-        control_schema = schema.get(control_key, {})
+        command_config = schema_json.get('command_config', {})
+        control_schema = command_config.get(control_key, {})
 
         # Create an OrderedDict to maintain the order
         msg_schema = OrderedDict()
@@ -32,7 +32,6 @@ class CommandCodec(Codec):
         # Add top-level values
         for key, value in control_schema.items():
             msg_schema[key] = value
-        
 
         super(CommandCodec, self).__init__(msg_schema)
         

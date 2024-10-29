@@ -29,8 +29,10 @@ class FillController:
         self.networkOkay = False
 
         addresses= {}
-        with open("addresses.json") as addresses_f:
-            addresses = json.load(addresses_f)
+        with open("/home/pi/controller/GSE_master.json") as gse_master_f:
+            gse_master = json.load(gse_master_f)
+
+        addresses = gse_master["addresses"]
 
         self.tlmServer = SendNode((addresses["addresses"]["TLM_SERVER_ADDR_IP"], addresses["addresses"]["TLM_SERVER_ADDR_PORT"]),
                                   (addresses["addresses"]["GC_ADDR_IP"], addresses["addresses"]["GC_ADDR_PORT"]),

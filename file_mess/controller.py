@@ -28,23 +28,28 @@ class Controller:
     def __init__(self):
         GPIO.setmode(GPIO.BCM)
         # control.txt will be either "fill" or "prop" to note what pi we are using
-        self._control = open("/home/pi/controller/control.txt", "r").read()[0:4]
+        self._control = self.config['control_key'] 
         self.relays = Relays(GPIO)
         self.redlines_armed = False
         self.lastPing = time.time()
         self.og_time = 0.0
         self.first_time = True
-        # pull appropriate sensor file
-        with open("/home/pi/controller/" + self._control +"_pt_scale.json") as pt_scalings:
-            pt_scaling = json.load(pt_scalings)
-            if self._control == "fill":
-                self.sensors = FillSensors(pt_scaling["pt_scale"]["max_p"])
-            else:
-                self.sensors = PropSensors(pt_scaling["pt_scale"]["max_p"])
+        
+         # Load GSE_master.json file
+        with open("/home/pi/controller/GSE_master.json") as gse_master_f:
+            gse_master = json.load(gse_master_f)
 
-        addresses= {}
-        with open("/home/pi/controller/addresses.json") as addresses_f:
-            addresses = json.load(addresses_f)
+        # Extract the pt_scale based on self._control from the loaded master file
+        if self._control == "fill":
+            pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
+            self.sensors = FillSensors(pt_scaling["max_p"])
+        else:
+            pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
+            self.sensors = PropSensors(pt_scaling["max_p"])
+
+        addresses= {}   
+        # Extract the "addresses" section from GSE_master.json
+        addresses = gse_master["addresses"]
 
         self.gc_address = addresses["addresses"]["GC_ADDR_IP"]
         self.tlmServer = SendNode((addresses["addresses"]["TLM_SERVER_ADDR_IP"], addresses["addresses"]["TLM_SERVER_ADDR_PORT"]),

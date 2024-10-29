@@ -17,15 +17,17 @@ class Relays:
     """
     GPIO_MAPPING = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
 
-    def __init__(self, GPIO, config_path="/home/pi/controller/telemetry_config.json"):
+    def __init__(self, GPIO, config_path="/home/pi/controller/GSE_master.json"):
         # Load the configuration file 
         self.config = self.load_config(config_path)
+
+        # Retrieve control parameters directly from the master JSON
+        self._control = self.config['control_key'] 
         # vent and closed state are both variable to the board it is on
         # vent state - all valves unpowered
         global VENT_STATE
         # closed state - all valves closed
         global CLOSED_STATE
-        self._control = open("/home/pi/controller/control.txt", "r").read()[0]
         self._armed = True
         self._inj = False
         for pin in self.GPIO_MAPPING:
@@ -92,9 +94,9 @@ class Relays:
         states = Utils.num(self._state)
 
         telemObject = {
-            self.config['telemetry'][self._control[0]][self._control[0] + 'c_soft_armed']: self.is_armed(),
-            self.config['telemetry'][self._control[0]][self._control[0] +'c_state']: states,
-            self.config['telemetry'][self._control[0]][self._control[0] +'c_scr_tag']: self._SCR_tag
+            self.config['telemetry_config'][self._control[0]][self._control[0] + 'c_soft_armed']: self.is_armed(),
+            self.config['telemetry_config'][self._control[0]][self._control[0] +'c_state']: states,
+            self.config['telemetry_config'][self._control[0]][self._control[0] +'c_scr_tag']: self._SCR_tag
         }
         
         return telemObject
@@ -193,11 +195,9 @@ class Relays:
 
         relay_map = {}
         prohibited_states = {}
-        with open("/home/pi/controller/" + self._control + "_relay_map.json") as relays_f:
-            relay_map = json.load(relays_f)
-
-        with open(f"/home/pi/controller/{self._control}_prohibited_states.json") as states_f:
-            prohibited_states = json.load(states_f)
+        
+        relay_map = self.config["relay_maps"][self._control]
+        prohibited_states = self.config["prohibited_states"][self._control]
 
         # check for states we know must be mutually exclusive
         for mutex in prohibited_states["mutual_exclusions"]:

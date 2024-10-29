@@ -15,10 +15,10 @@ ADC_GAIN = 4
 ADC_SAMPLE_RATE = 20
 
 class Sensors:
-    def __init__(self, config_path="/home/pi/controller/telemetry_config.json"):
+    def __init__(self, config_path="/home/pi/controller/GSE_master.json"):
         self.adc = []
         self.config = self.load_config(config_path)
-        self._control = open("/home/pi/controller/control.txt", "r").read()[0]
+        self._control = self.config['control_key'] 
         if (ONTARGET):
             self.cpu = CPUTemperature()
             for i in range(1, 9):
@@ -57,14 +57,14 @@ class Sensors:
         """
         readings = self.get_adc_readings()
         telemObject = {
-            self.config['telemetry'][self._control[0]][self._control[0] + 'c_cpu_temp']: self.get_cpu_temp()
+            self.config['telemetry_config'][self._control[0]][self._control[0] + 'c_cpu_temp']: self.get_cpu_temp()
         }
 
-        adc_channels = self.config['telemetry'][self._control[0]]['adc_channels']
+        adc_channels = self.config['telemetry_config'][self._control[0]]['adc_channels']
         for i, channel_name in enumerate(adc_channels):
             if i < len(readings):
                 telemObject[channel_name] = readings[i]
         
-        telemObject[self.config['telemetry'][self._control[0]][self._control[0] + 'c_hard_armed']] = self.get_hard_armed()
+        telemObject[self.config['telemetry_config'][self._control[0]][self._control[0] + 'c_hard_armed']] = self.get_hard_armed()
           
         return telemObject

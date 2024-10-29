@@ -120,11 +120,13 @@ class Relays:
         # initialize dicitionaries that will hold json file contents and read them in
         relay_map = {}
         prohibited_states = {}
-        with open("relay_map.json") as relays_f:
-            relay_map = json.load(relays_f)
+        
+        # Load the GSE master configuration
+        with open("/home/pi/controller/GSE_master.json") as gse_master_f:
+            gse_master = json.load(gse_master_f)
 
-        with open("prohibited_states.json") as states_f:
-            prohibited_states = json.load(states_f)
+        relay_map = gse_master["relay_maps"]["fill"]
+        prohibited_states = gse_master["prohibited_states"]
 
         # check for states we know must be mutually exclusive
         for mutex in prohibited_states["mutual_exclusions"]:
