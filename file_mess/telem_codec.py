@@ -12,12 +12,9 @@ from collections import OrderedDict
 # ? = _Bool
 
 class TelemCodec(Codec):
-    def __init__(self):
-        # Intialize base Codec class with loaded schema    
-        self._control = self.config['control_key'] 
-        
+    def __init__(self):        
         json_path = '/home/pi/controller/GSE_master.json'
-        control_key = self._control[0]
+        control_key = json_path['control_key']
         
         with open(json_path, 'r') as file:
             schema_json = json.load(file)

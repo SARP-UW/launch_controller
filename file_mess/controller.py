@@ -27,8 +27,6 @@ class Controller:
 
     def __init__(self):
         GPIO.setmode(GPIO.BCM)
-        # control.txt will be either "fill" or "prop" to note what pi we are using
-        self._control = self.config['control_key'] 
         self.relays = Relays(GPIO)
         self.redlines_armed = False
         self.lastPing = time.time()
@@ -39,6 +37,9 @@ class Controller:
         with open("/home/pi/controller/GSE_master.json") as gse_master_f:
             gse_master = json.load(gse_master_f)
 
+        # gse_master will be either "fill" or "prop" to note what pi we are using
+        self._control = gse_master_f['control_key'] 
+        
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
