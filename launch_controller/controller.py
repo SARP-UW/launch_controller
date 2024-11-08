@@ -5,6 +5,7 @@ import time
 import pdb
 import logging
 
+# Custom Modules
 from relays import Relays
 from prop_sensors import PropSensors
 from fill_sensors import FillSensors
@@ -13,11 +14,14 @@ from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
 from bitfield_utils import Utils
 
+# Configure logging to output information to console
 logging.basicConfig(level=logging.INFO)
 
+# Block to import RPi.GPIO for controlling GPIO pins on Raspberry PI
 try:
     import RPi.GPIO as GPIO
 except (RuntimeError, ModuleNotFoundError):
+    # If theres an issue imports spoof GPIO library
     print("Spoofing GPIO.")
     import fake_rpigpio.utils
     fake_rpigpio.utils.install()
@@ -26,7 +30,10 @@ except (RuntimeError, ModuleNotFoundError):
 class Controller:
 
     def __init__(self):
+        # Set GPIO mode to BCM (Broadcom pin-numbering scheme)
         GPIO.setmode(GPIO.BCM)
+
+        # Initalize the relays using the GPIO instance
         self.relays = Relays(GPIO)
         self.redlines_armed = False
         self.lastPing = time.time()
@@ -52,15 +59,17 @@ class Controller:
         # Extract the "addresses" section from GSE_master.json
         addresses = gse_master["addresses"]
 
+        # Initialize the telemtry server for sending data
         self.gc_address = addresses["addresses"]["GC_ADDR_IP"]
         self.tlmServer = SendNode((addresses["addresses"]["TLM_SERVER_ADDR_IP"], addresses["addresses"]["TLM_SERVER_ADDR_PORT"]),
                                   (addresses["addresses"]["GC_ADDR_IP"], addresses["addresses"]["GC_ADDR_PORT"]),
                                   TelemCodec())
 
+        # initialize command receiver to receive commands from ground control
         self.cmdReceiver = ReceiveNode((addresses["addresses"]["CMD_RECEIVER_ADDR_IP"], addresses["addresses"]["CMD_RECEIVER_ADDR_PORT"]),
                                        CommandCodec())
 
-        # set config for log files
+        # set up loggers for telemtry and control logs
         self.soft_arm = False
         self.telem_logger = self.set_logger('telem', 'telem.log')
         self.cntrl_logger = self.set_logger('cntrl', 'control.log')
@@ -82,17 +91,17 @@ class Controller:
         if command is not None:
             self.cntrl_logger.info(command)
 
-            # check if we are firing
+            # Check if the system is controlling propellant ("prop" mode) and initiate fire sequence
             if self._control[0] == 'p':
                 if command['pc_fire']:
                     self.relays.INITIATE_FIRE_SEQUENCE(GPIO)
 
-            # pulse valve
+            # Pulse a valve if a pulse command was received
             pulse_valve = command[f"{self._control[0]}c_pulse"]
             if pulse_valve >= 0:
                 self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{self._control[0]}c_pdelay"])
 
-            # check if software is armed
+            # Arm or disarm the software-controlled relays based on the command
             if command[f"{self._control[0]}c_soft_armed"]:
                 self.soft_arm = True
                 self.relays.arm(GPIO)
@@ -100,15 +109,19 @@ class Controller:
                 self.soft_arm = False
                 self.relays.disarm(GPIO)
 
+            # Arm redlines if requested
             if command[f"{self._control[0]}c_redlines_armed"]:
                 self.redlines_armed = True
             else:
                 self.ignore_redlines = True
 
+            # Process the relay state from the command
             stateRequest = Utils.bitfield(command[f"{self._control[0]}c_state"])
             if len(stateRequest) > 10:
                 # do special command stuff
+                # ???????????
                 pass
+            # Request state change from relays
             self.relays.request_state(stateRequest, 0)
 
     def checkRedlines(self):
@@ -116,6 +129,7 @@ class Controller:
         Check PT readings for thresholds to update valves in event of dangerous state realized from
         sensor readings.
         """
+        # ????????
         if (self.redlines_armed):
             pass
         else:
@@ -123,17 +137,14 @@ class Controller:
 
     async def updateActuators(self):
         """
-        Update relays but first check if the update is safe.
+        Periodically updates relays while checking for safety and processing commands.
         """
         while True:
-            # Override SCR if applicable
-            self.checkRedlines()
-            # Submit SCR if command
-            self.processRequest()
-            # Apply latest SCR
-            self.relays.update(GPIO)
-            # logging.info("update actuators")
-            await asyncio.sleep(.5)
+            self.checkRedlines()  # Ensure safety thresholds are checked
+            self.processRequest()  # Process any new commands
+            self.relays.update(GPIO)  # Update relays based on current state
+            await asyncio.sleep(.5)  # Pause for 500ms before the next update cycle
+
 
     async def sendTelemetry(self):
         """
@@ -145,63 +156,66 @@ class Controller:
             relayTelem = self.relays.get_telemetry()
 
             fullTelem = {}
-            # Add time stamp to fullTelem
+            # Add a timestamp to the telemetry data
             if self.first_time:
                 self.og_time = time.time()
                 self.first_time = False
             fullTelem[f"{self._control[0]}c_timestamp"] = time.time() - self.og_time
 
-            # Add redlines_armed to fullTelem
+            # Add the redlines_armed status to the telemetry
             fullTelem[f"{self._control[0]}c_redlines_armed"] = self.redlines_armed
 
-            # Add sensors and relays to telemetry
+            # Merge sensor and relay telemetry into the full telemetry package
             fullTelem.update(sensorTelem)
             fullTelem.update(relayTelem)
+            
+            # Try sending the telemetry, log errors if they occur
             try:
                 self.tlmServer.send(fullTelem)
             except Exception as e:
                 self.telem_logger.error('Network error:')
             if self.soft_arm:
+                # Log telemetry if system is armed
                 self.telem_logger.info(fullTelem)
-            await asyncio.sleep(.5)
+            await asyncio.sleep(.5)  # Pause for 500ms before the next telemetry cycle
 
     async def checkNetwork(self):
         """
-            ping gc to check connection
-            set network status based on response
+        Periodically checks network connection by pinging the ground control server.
         """
         count = 0
         while True:
-            # ping gc
+            # Ping the ground control address
             response = os.system("ping -c 1 -w 10 " + str(self.gc_address))
 
             # if valid ping
             if response == 0:
-                # keep track of last successful ping
+                # If the ping is successful, reset the count and update the lastPing timestamp
                 count = 0
                 self.lastPing = time.time()
             else:
-                # check 10 minute time out
+                # If the ping fails, increment the count and check for a timeout
                 count += 1
                 if count > 1:
                     self.cntrl_logger.error("Bad network state detected")
+                    # If no valid ping for over 10 minutes, vent the system
                     if time.time() - self.lastPing > 600:
-                        # disarm and vent
                         self.relays.SET_VENT_STATE(GPIO, 3)
                         # self.relays.disarm(GPIO) # disarm sets closed, we want to leave open
-                    # set to closed state if not venting
+                    # Otherwise, set the system to a closed state
                     else:
                         self.relays.SET_CLOSED_STATE(GPIO, 3)
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(10)  # Pause for 10 seconds before the next network check
 
 
     def main(self):
+        # Create an event loop and run the async tasks
         pool = asyncio.get_event_loop()
-        pool.create_task(self.checkNetwork())
-        pool.create_task(self.updateActuators())
-        pool.create_task(self.sendTelemetry())
-        pool.run_forever()
+        pool.create_task(self.checkNetwork())  # Check network connection periodically
+        pool.create_task(self.updateActuators())  # Periodically update actuators
+        pool.create_task(self.sendTelemetry())  # Periodically send telemetry
+        pool.run_forever()  # Keep the loop running indefinitely
 
 
 if __name__ == "__main__":

@@ -12,7 +12,8 @@ from collections import OrderedDict
 # ? = _Bool
 
 class TelemCodec(Codec):
-    def __init__(self):        
+    def __init__(self): 
+         # Intialize the gse master json class with loaded schema           
         json_path = '/home/pi/controller/GSE_master.json'
         control_key = json_path['control_key']
         
