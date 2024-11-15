@@ -12,20 +12,21 @@ from fill_sensors import FillSensors
 from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
-from bitfield_utils import Utils
+from bitfield_utils import Utils #TODO: Change the name of either one of the utils functions.
+from utils import Utils
 
 # Configure logging to output information to console
 logging.basicConfig(level=logging.INFO)
 
-# Block to import RPi.GPIO for controlling GPIO pins on Raspberry PI
-try:
-    import RPi.GPIO as GPIO
-except (RuntimeError, ModuleNotFoundError):
-    # If theres an issue imports spoof GPIO library
-    print("Spoofing GPIO.")
-    import fake_rpigpio.utils
-    fake_rpigpio.utils.install()
-    import RPi.GPIO as GPIO
+# # Block to import RPi.GPIO for controlling GPIO pins on Raspberry PI
+# try:
+    # import RPi.GPIO as GPIO
+# except (RuntimeError, ModuleNotFoundError):
+#     # If theres an issue imports spoof GPIO library
+#     print("Spoofing GPIO.")
+#     import fake_rpigpio.utils
+#     fake_rpigpio.utils.install()
+#     import RPi.GPIO as GPIO
 
 class Controller:
 
@@ -40,16 +41,21 @@ class Controller:
         self.og_time = 0.0
         self.first_time = True
         
-         # Load GSE_master.json file
-        with open("/home/pi/controller/GSE_master.json") as gse_master_f:
-            gse_master = json.load(gse_master_f)
+        #  # Load GSE_master.json file
+        # with open("/home/pi/controller/GSE_master.json") as gse_master_f:
+        #     gse_master = json.load(gse_master_f)
+
+        gse_master = Utils.load_config("/home/pi/controller/GSE_master.json")
 
         # gse_master will be either "fill" or "prop" to note what pi we are using
-        self._control = gse_master_f['control_key'] 
+        # self._control = gse_master_f['control_key'] 
+        self. _control= gse_master['control_key']
+        assert self._control == "prop" or "fill" #TEST
         
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
+            assert 
             self.sensors = FillSensors(pt_scaling["max_p"])
         else:
             pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
