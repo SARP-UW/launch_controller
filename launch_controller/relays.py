@@ -210,7 +210,7 @@ class Relays:
         prohibited_states = {}
         
         relay_map = self.config["relay_maps"][self._control]
-        prohibited_states = self.config["prohibited_states"][self._control]
+        prohibited_states = self.config["prop_fill_prohibited_states"][self._control]
 
         # check for states we know must be mutually exclusive
         for mutex in prohibited_states["mutual_exclusions"]:
