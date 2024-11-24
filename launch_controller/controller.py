@@ -13,7 +13,7 @@ from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
 from bitfield_utils import Utils #TODO: Change the name of either one of the utils functions.
-from utils import Utils
+from utils import Utils 
 
 # Configure logging to output information to console
 logging.basicConfig(level=logging.INFO)
@@ -55,18 +55,28 @@ class Controller:
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
-            assert 
+            assert pt_scaling == {"max_p" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 5000],"max_v" : 4.5,"min_v" : 0.5}
             self.sensors = FillSensors(pt_scaling["max_p"])
         else:
             pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
+            assert pt_scaling == {"max_p" : [0, 0, 0, 0, 0, 0, 0, 0],"max_v" : 5,"min_v" : 0.5}
             self.sensors = PropSensors(pt_scaling["max_p"])
 
         addresses= {}   
         # Extract the "addresses" section from GSE_master.json
         addresses = gse_master["addresses"]
+        #TEST
+        assert addresses == {     
+        "TLM_SERVER_ADDR_IP": "",
+        "TLM_SERVER_ADDR_PORT": 31000,
+        "CMD_RECEIVER_ADDR_IP": "",
+        "CMD_RECEIVER_ADDR_PORT": 31002,
+        "GC_ADDR_IP": "10.0.0.100",
+        "GC_ADDR_PORT": 31000
+        }
 
         # Initialize the telemtry server for sending data
-        self.gc_address = addresses["addresses"]["GC_ADDR_IP"]
+        self.gc_address = addresses["addresses"]["GC_ADDR_IP"] 
         self.tlmServer = SendNode((addresses["addresses"]["TLM_SERVER_ADDR_IP"], addresses["addresses"]["TLM_SERVER_ADDR_PORT"]),
                                   (addresses["addresses"]["GC_ADDR_IP"], addresses["addresses"]["GC_ADDR_PORT"]),
                                   TelemCodec())

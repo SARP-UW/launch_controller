@@ -24,6 +24,7 @@ class Relays:
 
         # Retrieve control parameters directly from the master JSON
         self._control = self.config['control_key'] 
+        assert self._control == 'prop'
         # vent and closed state are both variable to the board it is on
         # vent state - all valves unpowered
         global VENT_STATE
@@ -210,7 +211,23 @@ class Relays:
         prohibited_states = {}
         
         relay_map = self.config["relay_maps"][self._control]
-        prohibited_states = self.config["prohibited_states"][self._control]
+        assert relay_map == {
+            "igniter":0,
+            "injector":1,
+            "SV-02":2,
+            "power":4
+        }
+
+        prohibited_states = self.config["prop_fill_prohibited_states"][self._control]  ## added Prop fill before prohibited states
+        assert prohibited_states == {
+            "mutual_exclusions": [
+                ["BV-01", "BV-02"],
+                ["igniter", "injector"]
+            ],
+            "mutual_inclusions": [
+                ["igniter", "injector"]
+            ]
+        } 
 
         # check for states we know must be mutually exclusive
         for mutex in prohibited_states["mutual_exclusions"]:
