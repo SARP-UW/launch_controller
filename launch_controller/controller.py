@@ -20,13 +20,17 @@ logging.basicConfig(level=logging.INFO)
 
 # # Block to import RPi.GPIO for controlling GPIO pins on Raspberry PI
 # try:
-    # import RPi.GPIO as GPIO
+#     import RPi.GPIO as GPIO
 # except (RuntimeError, ModuleNotFoundError):
 #     # If theres an issue imports spoof GPIO library
 #     print("Spoofing GPIO.")
 #     import fake_rpigpio.utils
 #     fake_rpigpio.utils.install()
 #     import RPi.GPIO as GPIO
+
+import fake_rpigpio.utils
+fake_rpgpio.utils.install()
+import Rpi.GPIO as GPIO 
 
 class Controller:
 
@@ -55,17 +59,20 @@ class Controller:
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
-            assert pt_scaling == {"max_p" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 5000],"max_v" : 4.5,"min_v" : 0.5}
+            assert "max_p" is in pt_scaling and "min_v" is in pt_scaling and "max_v" is in pt_scaling
+            #assert pt_scaling == {"max_p" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 5000],"max_v" : 4.5,"min_v" : 0.5}
             self.sensors = FillSensors(pt_scaling["max_p"])
         else:
             pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
-            assert pt_scaling == {"max_p" : [0, 0, 0, 0, 0, 0, 0, 0],"max_v" : 5,"min_v" : 0.5}
+            assert "max_p" is in pt_scaling and "max_v" is in pt_scaling and "min_v" is in pt_scaling
+            # assert pt_scaling == {"max_p" : [0, 0, 0, 0, 0, 0, 0, 0],"max_v" : 5,"min_v" : 0.5}
             self.sensors = PropSensors(pt_scaling["max_p"])
 
         addresses= {}   
         # Extract the "addresses" section from GSE_master.json
         addresses = gse_master["addresses"]
         #TEST
+        assert "TLM_SERVER_ADDR_IP" is in addresses and "TLM_SERVER_ADDR_PORT" is in addresses and "CMD_RECEIVER_ADDR_IP" is in addresses
         assert addresses == {     
         "TLM_SERVER_ADDR_IP": "",
         "TLM_SERVER_ADDR_PORT": 31000,

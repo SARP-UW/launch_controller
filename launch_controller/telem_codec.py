@@ -2,7 +2,7 @@
 The template codec format for telemetry.
 """
 import json
-from sarp_utils.codec import Codec 
+from codec import Codec 
 from collections import OrderedDict
 from utils import Utils
 
