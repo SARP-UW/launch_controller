@@ -4,22 +4,27 @@ logging.basicConfig(level=logging.DEBUG)
 try:
     from gpiozero import CPUTemperature
     import PROP_ADC_Driver
-    ONTARGET = True
 except:
-    ONTARGET = False
+    pass
 
 ADC_GAIN_PROP = 4
 ADC_SAMPLE_RATE_PROP = 20 #same for both fill + prop, need separate?
 ADC_GAIN_FILL = 2/3
 
 class Sensors:
-    def __init__(self, pt_scale):
+    def __init__(self, pt_scale, test_adc_drivers=None, test_cpu_temp=None):
         self.is_fill = True # setting initial state of this class to be Fill Sensor, need a way to change between
         self.is_prop = False
         self.adc = []
         self.PT_scaling = pt_scale
-        if (ONTARGET):
+        self.ontarget = True
+
+        try:
             self.cpu = CPUTemperature()
+        except:
+            self.ontarget = False
+
+        if (self.ontarget):
             if self.is_fill:
                 self.adc.append(PROP_ADC_Driver.ADS1115(gain=ADC_GAIN_FILL, addr=0x48))
                 self.adc.append(PROP_ADC_Driver.ADS1115(gain=ADC_GAIN_FILL, addr=0x49))
@@ -27,15 +32,22 @@ class Sensors:
                 self.adc.append(PROP_ADC_Driver.ADS1115(gain=ADC_GAIN_PROP, addr=0x48))
                 self.adc.append(PROP_ADC_Driver.ADS1115(gain=ADC_GAIN_PROP, addr=0x49))  
 
+        if test_adc_drivers and test_cpu_temp:
+            self.adc = test_adc_drivers
+            self.cpu = test_cpu_temp
+
     def get_cpu_temp(self):
-        if (ONTARGET):
+        """
+        Return temperature if connected to Pi Zero ?
+        """
+        if (self.ontarget):
             return self.cpu.temperature
         else:
             return 0
 
     def get_adc_readings(self):
         readings = []
-        if (ONTARGET):
+        if (self.ontarget):
             for num, adc in enumerate(self.adc):
                 for channel in range(0, 4):
                     # 4 pts with max 1k psi
@@ -80,16 +92,16 @@ class Sensors:
             }
         else:
             telemObject = {
-            "fc_cpu_temp": self.get_cpu_temp(),
-            "fc_adc1_c1" : readings[0],
-            "fc_adc1_c2" : readings[1],
-            "fc_adc1_c3" : readings[2],
-            "fc_adc1_c4" : readings[3],
-            "fc_adc2_c1" : readings[4],
-            "fc_adc2_c2" : readings[5],
-            "fc_adc2_c3" : readings[6],
-            "fc_adc2_c4" : readings[7],
-            "fc_hard_armed" : self.get_hard_armed()
-        }
+                "fc_cpu_temp": self.get_cpu_temp(),
+                "fc_adc1_c1" : readings[0],
+                "fc_adc1_c2" : readings[1],
+                "fc_adc1_c3" : readings[2],
+                "fc_adc1_c4" : readings[3],
+                "fc_adc2_c1" : readings[4],
+                "fc_adc2_c2" : readings[5],
+                "fc_adc2_c3" : readings[6],
+                "fc_adc2_c4" : readings[7],
+                "fc_hard_armed" : self.get_hard_armed()
+            }
 
         return telemObject
