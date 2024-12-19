@@ -1,6 +1,6 @@
 import sys, os
-sys.path.append(os.path.join(os.path.dirname(sys.path[0]), ''))
-from launch_controller import sensors as Sensors
+sys.path.append(os.path.dirname(os.getcwd()) + '/launch_controller')
+from sensors import Sensors
 import logging
 import pytest
 logging.basicConfig(level=logging.DEBUG)
