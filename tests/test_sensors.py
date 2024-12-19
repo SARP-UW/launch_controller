@@ -7,10 +7,18 @@ logging.basicConfig(level=logging.DEBUG)
 
 # sensors.py uses gpiozero library only available on RPi OS
 class TestSensors:
-    @pytest.fixture
-    def get_sensor(self):
-        self.sensor = Sensors()
+    """
+    Test class for the sensors module
+    
+    run 'pytest -rA test_sensors.py' for detailed info on each test
+    """
 
-    def test_sensor(self, get_sensor):
-        sensor1 = get_sensor
-        assert(sensor1.get_cpu_temp() >= 0)
+    def setup_method(self, method):
+        print(f"Setting up {method}")
+        self.sensor = Sensors("placeholder")
+
+    def teardown_method(self, method):
+        print(f"Tearing down {method}")
+
+    def test_get_cpu_temp(self):
+        assert self.sensor.get_cpu_temp() == 0
