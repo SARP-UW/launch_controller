@@ -1,6 +1,6 @@
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]), ''))
-from sensors import Sensors
+from launch_controller import sensors as Sensors
 import logging
 import pytest
 logging.basicConfig(level=logging.DEBUG)
