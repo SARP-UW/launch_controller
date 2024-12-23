@@ -31,7 +31,6 @@
     "prop_fill_prohibited_states": {
         "prop": {
             "mutual_exclusions": [
-                ["BV-01", "BV-02"],
                 ["igniter", "injector"]
             ],
             "mutual_inclusions": [
@@ -40,12 +39,18 @@
         },
         "fill": {
             "mutual_exclusions": [
+                ["BV-01", "BV-02"],
                 ["BV-01", "BV-03"],
-                ["BV-01", "BV-04"]
+                ["BV-01", "BV-04"],
+                ["BV-02", "BV-03"],
+                ["BV-02", "BV-04"],
+                ["BV-03", "BV-04"]
             ],
             "mutual_inclusions": [
-                ["BV-01", "BV-05"],
-                ["BV-03", "BV-07"]
+                ["BV-05", "BV-01"],
+                ["BV-05", "BV-02"],
+                ["BV-07", "BV-03"],
+                ["BV-07", "BV-04"]
             ]
         }
     }, 
@@ -82,23 +87,6 @@
             "SV-02":2,
             "power":4
         }
-    },
-
-    "prohibited_states": {
-        "prohibited_states_mutual_exclusions": [
-            ["BV-01", "BV-02"],
-            ["BV-01", "BV-03"],
-            ["BV-01", "BV-04"],
-            ["BV-02", "BV-03"],
-            ["BV-02", "BV-04"],
-            ["BV-03", "BV-04"]
-        ],
-        "prohibited_states_mutual_inclusions": [
-            ["BV-05", "BV-01"],
-            ["BV-05", "BV-02"],
-            ["BV-07", "BV-03"],
-            ["BV-07", "BV-04"]
-        ]
     },
     
     "sensor_map": {
