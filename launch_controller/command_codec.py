@@ -4,6 +4,7 @@ The template codec format for command.
 import json
 from sarp_utils.codec import Codec
 from collections import OrderedDict
+from util import config_util
 
 # Map of all channel names to data types. For more info see:
 # https://docs.python.org/3/library/struct.html#struct-format-strings
@@ -14,15 +15,11 @@ from collections import OrderedDict
 class CommandCodec(Codec):
     def __init__(self):
         # Intialize base Codec class from gse_master with loaded schema            
-        json_path = '/home/pi/controller/GSE_master.json'
-        control_key = json_path['control_key'] 
-
-        with open(json_path, 'r') as file:
-            schema_json = json.load(file)
+        self.config = config_util.load_config("/home/pi/controller/GSE_master.json")
+        control_key = self.config['control_key'] 
 
         # Extract the schema section for the given control_key
-        command_config = schema_json.get('command_config', {})
-        control_schema = command_config.get(control_key, {})
+        control_schema = self.config['command_config'][control_key[0]]
 
         # Create an OrderedDict to maintain the order
         msg_schema = OrderedDict()
