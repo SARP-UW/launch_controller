@@ -98,6 +98,10 @@ class Relays:
         """
         NOTE TO SELF: CREATE DICTIONARY FOR 'SCR_tag' IN ORDER TO LOG WHAT IS HAPPENING
         """
+
+        """
+        NOTE TO SELF: CREATE DICTIONARY FOR 'SCR_tag' IN ORDER TO LOG WHAT IS HAPPENING
+        """
         """
         SCR_tag tracks what triggered latest state change request. Meaning of each SCR_tag value:
         000 - Current state is that of the request from the user
@@ -130,6 +134,9 @@ class Relays:
         logging.info("DISARMED")
 
     def is_armed(self):
+        """ 
+        Check if the relay system is armed
+        """
         """ 
         Check if the relay system is armed
         """
@@ -188,8 +195,16 @@ class Relays:
         """
         Generate a telemetry report with relay state and tags
         """
+        """
+        Generate a telemetry report with relay state and tags
+        """
         states = Utils.num(self._state)
 
+        telemetry_config = self.config['telemetry_config'][self._control[0]]
+
+        """
+        NOTE: CAN WE CHANGE THE NAMING CONVENTION IN THE JSON?
+        """
         telemObject = {
             #need to go into specific control key first before going into the specific values from a specific subsection
             self.config['telemetry_config'][control_key[0]][control_key[0] + 'c_soft_armed']: self.is_armed(),
@@ -203,9 +218,15 @@ class Relays:
         """
         Store the requested state and set the corresponding _SCR_tag
         """
+        """
+        Store the requested state and set the corresponding _SCR_tag
+        """
         self._requested_state = request.copy()
         self._SCR_tag = tag
 
+    """
+    NOTE: CLARIFY CODE IN THIS METHOD WITH 'set_GPIO()' METHOD
+    """
     """
     NOTE: CLARIFY CODE IN THIS METHOD WITH 'set_GPIO()' METHOD
     """
@@ -213,10 +234,15 @@ class Relays:
         """
         Handles the process of igniting and managing fuel/ox valves in a firing sequence
         """
+        """
+        Handles the process of igniting and managing fuel/ox valves in a firing sequence
+        """
         if (self._inj):
             # Shut down injection if already active
             self.set_GPIO(GPIO, 'ox', 'off')
+            self.set_GPIO(GPIO, 'ox', 'off')
             time.sleep(0.02)
+            self.set_GPIO(GPIO, 'fuel', 'off')
             self.set_GPIO(GPIO, 'fuel', 'off')
             self._inj = False
             return
@@ -231,6 +257,9 @@ class Relays:
             time.sleep(3.5) # Delay for ignition
             # open solenoid (injector)
             
+            # Open solenoids for oxidizer and fuel
+            self.set_GPIO(GPIO, 'ox', 'on')
+            print("Oxidizer on")
             # Open solenoids for oxidizer and fuel
             self.set_GPIO(GPIO, 'ox', 'on')
             print("Oxidizer on")
@@ -250,15 +279,29 @@ class Relays:
     """
     NOTE: CORRECT BUGGED CODE, SIMPLIFY WITH 'flip_state()'
     """
+            self.set_GPIO(GPIO, 'ox', 'off')
+            self.set_GPIO(GPIO, 'fuel', 'off')
+            self.set_GPIO(GPIO, 'ignitor', 'off')
+            print("Oxidizer, fuel and ignition off")
+
+    """
+    NOTE: CORRECT BUGGED CODE, SIMPLIFY WITH 'flip_state()'
+    """
     def PULSE_VALVE(self, GPIO, valve, delay):
         # flip requested valve
         # self._requested_state[valve] = not self._requested_state[valve]
         self.flip_state(valve)
+        # self._requested_state[valve] = not self._requested_state[valve]
+        self.flip_state(valve)
         self.update(GPIO)
+
 
         # valve delay
         time.sleep(delay/1000)
+
         # flip to previous state
+        # self._requested_state[valve] = not self._requested_state[valve]
+        self.flip_state(valve)
         # self._requested_state[valve] = not self._requested_state[valve]
         self.flip_state(valve)
         self.update(GPIO)
@@ -266,10 +309,17 @@ class Relays:
     def SET_VENT_STATE(self, GPIO, tag):
         """
         Set relays to safe state and update SCR tag with given tag.
+        Set relays to safe state and update SCR tag with given tag.
         """
         self.request_state(VENT_STATE, tag)
         self.update(GPIO)
         time.sleep(0.5)
+        # self._requested_state[1] = not self._requested_state[1]
+        """
+        NOTE: WHY ARE WE OPENING THIS VALVE?
+        """
+        self.flip_state(1)
+
         # self._requested_state[1] = not self._requested_state[1]
         """
         NOTE: WHY ARE WE OPENING THIS VALVE?
@@ -304,15 +354,29 @@ class Relays:
                 """
                 if is_valid:
                     valves = list(self.get_GPIO_map())
+                """
+                NOTE: CLARIFY WITH EXPLICIT 'is_valid' BOOLEAN AND 'message' STRING
+                """
+                # update_validity = self.check_safe_update()
+                # print("Validity: ", update_validity[0])
+                is_valid, message = self.check_safe_update()
+                print("Validity: ", is_valid)
+                """
+                NOTE: IMPLEMENT 'set_GPIO' LOGIC
+                """
+                if is_valid:
+                    valves = list(self.get_GPIO_map())
                     for idx, relay_state in enumerate(self._requested_state):
                         if relay_state == 1:
                             self.set_GPIO(GPIO, valves[idx], 'on')
                         else:
                             self.set_GPIO(GPIO, valves[idx], 'off')
+                            self.set_GPIO(GPIO, valves[idx], 'off')
                     self._state = self._requested_state.copy()
                     logging.info("SCR by '" + str(self._SCR_tag) + "' approved to " + str(self._state))
                 else:
                     self._requested_state = self._state.copy()
+                    logging.info("INVALID STATE REQUEST, ignoring request. " + message)
                     logging.info("INVALID STATE REQUEST, ignoring request. " + message)
             else:
                 print(self._requested_state)
@@ -350,8 +414,11 @@ class Relays:
         
         # Confirm that all valve pairs in mutual inclusions are in the same state as one another
         for mutex in prohibited_states["prohibited_states_mutual_inclusions"]:
+                return (False, f"Mutual exclusion violation for {mutex[0]} and {mutex[1]}.")
+        
+        # Confirm that all valve pairs in mutual inclusions are in the same state as one another
+        for mutex in prohibited_states["prohibited_states_mutual_inclusions"]:
             if (self._requested_state[relay_map[mutex[0]]]):
-                # if relay with mutual inclusion req requested open
                 if (self._requested_state[relay_map[mutex[0]]] != self._requested_state[relay_map[mutex[1]]]):
                   # mutual inclusion requirement not met
                     return (False, f"Mutual inclusion violation for {mutex[0]} and {mutex[1]}.")
