@@ -29,8 +29,12 @@ logging.basicConfig(level=logging.INFO)
 #     import RPi.GPIO as GPIO
 
 import fake_rpigpio.utils
-fake_rpgpio.utils.install()
-import Rpi.GPIO as GPIO 
+fake_rpigpio.utils.install()
+try:
+    import RPi.GPIO as GPIO
+except (RuntimeError, ModuleNotFoundError):
+    print("Using mock GPIO for testing.")
+    import GPIO as GPIO
 
 class Controller:
 
@@ -39,32 +43,34 @@ class Controller:
         GPIO.setmode(GPIO.BCM)
 
         # Initalize the relays using the GPIO instance
-        self.relays = Relays(GPIO)
+        # self.relays = Relays(GPIO)
         self.redlines_armed = False
         self.lastPing = time.time()
         self.og_time = 0.0
         self.first_time = True
         
         #  # Load GSE_master.json file
-        # with open("/home/pi/controller/GSE_master.json") as gse_master_f:
-        #     gse_master = json.load(gse_master_f)
+        with open('/Users/arjun/Documents/GSE/launch_controller/gse_master.json', 'r') as f:
+            gse_master = json.load(f)
 
-        gse_master = Utils.load_config("/home/pi/controller/GSE_master.json")
+        
+
+        # gse_master = Utils.load_config("/Users/arjun/Documents/GSE/launch_controller/gse_master.json")
 
         # gse_master will be either "fill" or "prop" to note what pi we are using
-        # self._control = gse_master_f['control_key'] 
+        # self._control = f['control_key'] 
         self. _control= gse_master['control_key']
-        assert self._control == "prop" or "fill" #TEST
+        assert self._control in ["prop", "fill"] #TEST
         
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
-            assert "max_p" is in pt_scaling and "min_v" is in pt_scaling and "max_v" is in pt_scaling
+            assert "max_p" in pt_scaling and "min_v" in pt_scaling and "max_v" in pt_scaling
             #assert pt_scaling == {"max_p" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 5000],"max_v" : 4.5,"min_v" : 0.5}
             self.sensors = FillSensors(pt_scaling["max_p"])
         else:
             pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
-            assert "max_p" is in pt_scaling and "max_v" is in pt_scaling and "min_v" is in pt_scaling
+            assert "max_p" in pt_scaling and "max_v" in pt_scaling and "min_v" in pt_scaling
             # assert pt_scaling == {"max_p" : [0, 0, 0, 0, 0, 0, 0, 0],"max_v" : 5,"min_v" : 0.5}
             self.sensors = PropSensors(pt_scaling["max_p"])
 
@@ -72,24 +78,25 @@ class Controller:
         # Extract the "addresses" section from GSE_master.json
         addresses = gse_master["addresses"]
         #TEST
-        assert "TLM_SERVER_ADDR_IP" is in addresses and "TLM_SERVER_ADDR_PORT" is in addresses and "CMD_RECEIVER_ADDR_IP" is in addresses
-        assert addresses == {     
-        "TLM_SERVER_ADDR_IP": "",
-        "TLM_SERVER_ADDR_PORT": 31000,
-        "CMD_RECEIVER_ADDR_IP": "",
-        "CMD_RECEIVER_ADDR_PORT": 31002,
-        "GC_ADDR_IP": "10.0.0.100",
-        "GC_ADDR_PORT": 31000
+        assert all(key in addresses for key in ["TLM_SERVER_ADDR_IP", "TLM_SERVER_ADDR_PORT", "CMD_RECEIVER_ADDR_IP"])
+        expected_addresses = {
+            "TLM_SERVER_ADDR_IP": "",
+            "TLM_SERVER_ADDR_PORT": 31000,
+            "CMD_RECEIVER_ADDR_IP": "",
+            "CMD_RECEIVER_ADDR_PORT": 31002,
+            "GC_ADDR_IP": "10.0.0.100",
+            "GC_ADDR_PORT": 31000
         }
+        assert all(key in addresses and addresses[key] == expected_addresses[key] for key in expected_addresses)
 
         # Initialize the telemtry server for sending data
-        self.gc_address = addresses["addresses"]["GC_ADDR_IP"] 
-        self.tlmServer = SendNode((addresses["addresses"]["TLM_SERVER_ADDR_IP"], addresses["addresses"]["TLM_SERVER_ADDR_PORT"]),
-                                  (addresses["addresses"]["GC_ADDR_IP"], addresses["addresses"]["GC_ADDR_PORT"]),
+        self.gc_address = addresses["GC_ADDR_IP"] 
+        self.tlmServer = SendNode((addresses["TLM_SERVER_ADDR_IP"], addresses["TLM_SERVER_ADDR_PORT"]),
+                                  (addresses["GC_ADDR_IP"], addresses["GC_ADDR_PORT"]),
                                   TelemCodec())
 
         # initialize command receiver to receive commands from ground control
-        self.cmdReceiver = ReceiveNode((addresses["addresses"]["CMD_RECEIVER_ADDR_IP"], addresses["addresses"]["CMD_RECEIVER_ADDR_PORT"]),
+        self.cmdReceiver = ReceiveNode((addresses["CMD_RECEIVER_ADDR_IP"], addresses["CMD_RECEIVER_ADDR_PORT"]),
                                        CommandCodec())
 
         # set up loggers for telemtry and control logs

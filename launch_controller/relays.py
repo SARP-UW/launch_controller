@@ -18,7 +18,7 @@ class Relays:
     # GPIO pins mapped to relay positions
     GPIO_MAPPING = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
 
-    def __init__(self, GPIO, config_path="/home/pi/controller/GSE_master.json"):
+    def __init__(self, GPIO, config_path="/Users/arjun/Documents/GSE/launch_controller/command_codec.py"):
         # Load the configuration file 
         self.config = self.load_config(config_path)
 

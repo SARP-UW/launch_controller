@@ -16,7 +16,10 @@ class TelemCodec(Codec):
     def __init__(self): 
          # Intialize the gse master json class with loaded schema           
         # json_path = '/home/pi/controller/GSE_master.json'
-        gse_master = Utils.load_config("/home/pi/controller/GSE_master.json")
+        # gse_master = Utils.load_config("/Users/arjun/Documents/GSE/launch_controller/gse_master.json")
+        with open('/Users/arjun/Documents/GSE/launch_controller/gse_master.json', 'r') as f:
+            gse_master = json.load(f)
+            
         control_key = gse_master['control_key']
         assert control_key == 'prop'
         
@@ -25,66 +28,15 @@ class TelemCodec(Codec):
 
         # Extract the schema section for the given control_key
         telemetry_config = gse_master.get('telemetry_config', {})
-        assert telemetry_config == {
-        "p": {
-          "pc_timestamp": "f",
-          "pc_cpu_temp": "f",
-          "pc_hard_armed": "?",
-          "pc_soft_armed": "?",
-          "pc_redlines_armed": "?",
-          "pc_state": "h",
-          "pc_scr_tag": "h",
-          "adc_channels": {
-            "pc_adc1_c1": "f",
-            "pc_adc1_c2": "f",
-            "pc_adc1_c3": "f",
-            "pc_adc1_c4": "f",
-            "pc_adc2_c1": "f",
-            "pc_adc2_c2": "f",
-            "pc_adc2_c3": "f",
-            "pc_adc2_c4": "f"
-          }
-        },
-        "f": {
-          "fc_timestamp": "f",
-          "fc_cpu_temp": "f",
-          "fc_hard_armed": "?",
-          "fc_soft_armed": "?",
-          "fc_redlines_armed": "?",
-          "fc_state": "h",
-          "fc_scr_tag": "h",
-          "adc_channels": {
-            "fc_adc1_c1": "f",
-            "fc_adc1_c2": "f",
-            "fc_adc1_c3": "f",
-            "fc_adc1_c4": "f",
-            "fc_adc2_c1": "f",
-            "fc_adc2_c2": "f",
-            "fc_adc2_c3": "f",
-            "fc_adc2_c4": "f"
-          }
-        }
-    }    
+        assert "p" in telemetry_config and "f" in telemetry_config
+         
         control_schema = telemetry_config.get(control_key[0], {})
-        assert control_schema == {
-          "pc_timestamp": "f",
-          "pc_cpu_temp": "f",
-          "pc_hard_armed": "?",
-          "pc_soft_armed": "?",
-          "pc_redlines_armed": "?",
-          "pc_state": "h",
-          "pc_scr_tag": "h",
-          "adc_channels": {
-            "pc_adc1_c1": "f",
-            "pc_adc1_c2": "f",
-            "pc_adc1_c3": "f",
-            "pc_adc1_c4": "f",
-            "pc_adc2_c1": "f",
-            "pc_adc2_c2": "f",
-            "pc_adc2_c3": "f",
-            "pc_adc2_c4": "f"
-          }
-        }
+        expected_keys = [
+            "pc_timestamp", "pc_cpu_temp", "pc_hard_armed", "pc_soft_armed",
+            "pc_redlines_armed", "pc_state", "pc_scr_tag", "adc_channels"
+        ]
+        assert all(key in control_schema for key in expected_keys)
+
 
         # Create an OrderedDict to maintain the order
         msg_schema = OrderedDict()

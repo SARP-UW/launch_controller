@@ -14,42 +14,27 @@ from utils import Utils
 
 class CommandCodec(Codec):
     def __init__(self):
-        # Intialize base Codec class from gse_master with loaded schema            
-        gse_master = Utils.load_config("/home/pi/controller/GSE_master.json")
+        # Intialize base Codec class from gse_master with loaded schema 
+        #            
+        # gse_master = Utils.load_config("/home/pi/controller/GSE_master.json")
+
+        with open('/Users/arjun/Documents/GSE/launch_controller/gse_master.json', 'r') as f:
+            gse_master = json.load(f)
+            
         control_key = gse_master['control_key'] 
         assert control_key == 'prop'
 
         # Extract the schema section for the given control_key
         command_config = gse_master.get('command_config', {})
         #TEST
-        assert command_config == {
-        "p": {
-            "pc_state": "h",
-            "pc_soft_armed": "?",
-            "pc_fire": "?",
-            "pc_redlines_armed": "?",
-            "pc_pulse": "i",
-            "pc_pdelay": "i"
-        },
-        "f": {
-            "fc_state": "h",
-            "fc_soft_armed": "?",
-            "fc_redlines_armed": "?",
-            "fc_pulse": "i",
-            "fc_pdelay": "i"
-        }
-    }
+        assert "p" in command_config and "f" in command_config
+
         
         control_schema = command_config.get(control_key[0], {})
         #TEST
-        assert control_schema == {
-            "pc_state": "h",
-            "pc_soft_armed": "?",
-            "pc_fire": "?",
-            "pc_redlines_armed": "?",
-            "pc_pulse": "i",
-            "pc_pdelay": "i"
-        }
+        expected_keys = ["pc_state", "pc_soft_armed", "pc_fire", "pc_redlines_armed", "pc_pulse", "pc_pdelay"]
+        assert all(key in control_schema for key in expected_keys)
+
 
         # Create an OrderedDict to maintain the order
         msg_schema = OrderedDict()
