@@ -1,13 +1,22 @@
 import struct
+from collections import OrderedDict
 
 class Codec(object):
     """
     Base class for SARP message encoding/decoding
     """
     def __init__(self, msg_schema):
-        self.msg_schema = msg_schema
-        fmt_str = '!' + ''.join([self.msg_schema[k] for k in self.msg_schema])
+        self.formatted_schema = self.prepare_schema(msg_schema)
+        fmt_str = '!' + ''.join([self.formatted_schema[k] for k in self.formatted_schema])
         self.struct = struct.Struct(fmt_str)
+
+
+    def prepare_schema(self, input_schema):
+        formatted_schema = OrderedDict()
+        for key, value in input_schema:
+            formatted_schema[key] = value
+
+
 
     def encode(self, msg):
         """

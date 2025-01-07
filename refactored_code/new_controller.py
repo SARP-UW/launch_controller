@@ -9,6 +9,7 @@ import logging
 from relays import Relays
 from prop_sensors import PropSensors
 from fill_sensors import FillSensors
+from codec import Codec
 from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode, Network
@@ -23,6 +24,7 @@ class Controller:
         self.__initializeRelays()
         self.__extractKeyValues()
         self.__initialize_telemetry()
+        self.__initialize_logger()
         
     def __initializeRelays(self):
         GPIO.setmode(GPIO.BCM)
@@ -73,5 +75,12 @@ class Controller:
         logger.setLevel(logging.INFO)
         logger.addHandler(handler)
         return logger
-        
     
+    def __construct_codecs(self):
+        self.telem_codec = Codec("load in telem schema")
+        self.command_codec = Codec("load in command schema")
+    
+    def processRequest(self):
+        command, addr = self.command_receiver.receive()
+        if command is not None:
+            self.control_logger.info(command)        
