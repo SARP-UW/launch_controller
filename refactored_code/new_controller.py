@@ -23,8 +23,8 @@ class Controller:
         self.__initializeGPIO()
         self.__initializeRelays()
         self.__extractKeyValues()
-        self.__initialize_telemetry()
-        self.__initialize_logger()
+        self.__initializeTelemetry()
+        self.__initializeLogger()
         
     def __initializeRelays(self):
         GPIO.setmode(GPIO.BCM)
@@ -56,19 +56,19 @@ class Controller:
         
         self.addresses = self.config["addresses"]
 
-    def __initialize_telemetry(self):
+    def __initializeTelemetry(self):
         self.ground_countrol_address = self.addresses["addresses"]["GC_ADDR_IP"]
         self.telem_server = Network(((self.addresses["addresses"]["TLM_SERVER_ADDR_IP"], self.addresses["addresses"]["TLM_SERVER_ADDR_PORT"]),
                                   (self.addresses["addresses"]["GC_ADDR_IP"], self.addresses["addresses"]["GC_ADDR_PORT"])))
                   
         self.command_receiver = Network(self.addresses["addresses"]["CMD_RECEIVER_ADDR_IP"], self.addresses["addresses"]["CMD_RECEIVER_ADDR_PORT"])
 
-    def __initialize_logger(self):
+    def __initializeLogger(self):
         self.soft_arm = False
-        self.telem_logger = self.__set_logger('telem', 'placeholder file name')
-        self.control_logger = self.__set_logger('control', 'placeholder file name')
+        self.telem_logger = self.__setLogger('telem', 'placeholder file name')
+        self.control_logger = self.__setLogger('control', 'placeholder file name')
 
-    def __set_logger(self, name, filename):
+    def __setLogger(self, name, filename):
         handler = logging.FileHandler(filename)
         handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
         logger = logging.getLogger(name)
@@ -76,7 +76,7 @@ class Controller:
         logger.addHandler(handler)
         return logger
     
-    def __construct_codecs(self):
+    def __constructCodecs(self):
         self.telem_codec = Codec("load in telem schema")
         self.command_codec = Codec("load in command schema")
     
