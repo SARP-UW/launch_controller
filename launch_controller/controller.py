@@ -41,7 +41,7 @@ class Controller:
         self.first_time = True
         
          # Load GSE_master.json file
-        with open("/home/pi/controller/GSE_master.json") as gse_master_f:
+        with open("/home/pi/controller/gse_master.json") as gse_master_f:
             gse_master = json.load(gse_master_f)
 
         # gse_master will be either "fill" or "prop" to note what pi we are using
@@ -179,6 +179,7 @@ class Controller:
                 self.telem_logger.info(fullTelem)
             await asyncio.sleep(.5)  # Pause for 500ms before the next telemetry cycle
 
+    
     async def checkNetwork(self):
         """
         Periodically checks network connection by pinging the ground control server.
