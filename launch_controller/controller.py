@@ -13,6 +13,7 @@ from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
 from bitfield_utils import Utils
+from util import config_util
 
 # Configure logging to output information to console
 logging.basicConfig(level=logging.INFO)
@@ -44,20 +45,23 @@ class Controller:
         with open("/home/pi/controller/gse_master.json") as gse_master_f:
             gse_master = json.load(gse_master_f)
 
+         # Extract master json schema  
+        self.config = config_util.load_config("/home/pi/controller/GSE_master.json")
+
         # gse_master will be either "fill" or "prop" to note what pi we are using
-        self._control = gse_master_f['control_key'] 
+        control_key = self.config['control_key'] 
         
-        # Extract the pt_scale based on self._control from the loaded master file
-        if self._control == "fill":
-            pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
+        # Extract the pt_scale based on control_key from the loaded master file
+        if control_key == "fill":
+            pt_scaling = self.config["pt_scales"]["fill_pt_scale"]
             self.sensors = FillSensors(pt_scaling["max_p"])
         else:
-            pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
+            pt_scaling = self.config["pt_scales"]["prop_pt_scale"]
             self.sensors = PropSensors(pt_scaling["max_p"])
 
         addresses= {}   
         # Extract the "addresses" section from GSE_master.json
-        addresses = gse_master["addresses"]
+        addresses = self.config["addresses"]
 
         # Initialize the telemtry server for sending data
         self.gc_address = addresses["addresses"]["GC_ADDR_IP"]
@@ -92,17 +96,17 @@ class Controller:
             self.cntrl_logger.info(command)
 
             # Check if the system is controlling propellant ("prop" mode) and initiate fire sequence
-            if self._control[0] == 'p':
+            if control_key[0] == 'p':
                 if command['pc_fire']:
                     self.relays.INITIATE_FIRE_SEQUENCE(GPIO)
 
             # Pulse a valve if a pulse command was received
-            pulse_valve = command[f"{self._control[0]}c_pulse"]
+            pulse_valve = command[f"{control_key[0]}c_pulse"]
             if pulse_valve >= 0:
-                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{self._control[0]}c_pdelay"])
+                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{control_key[0]}c_pdelay"])
 
             # Arm or disarm the software-controlled relays based on the command
-            if command[f"{self._control[0]}c_soft_armed"]:
+            if command[f"{control_key[0]}c_soft_armed"]:
                 self.soft_arm = True
                 self.relays.arm(GPIO)
             else:
@@ -110,13 +114,13 @@ class Controller:
                 self.relays.disarm(GPIO)
 
             # Arm redlines if requested
-            if command[f"{self._control[0]}c_redlines_armed"]:
+            if command[f"{control_key[0]}c_redlines_armed"]:
                 self.redlines_armed = True
             else:
                 self.ignore_redlines = True
 
             # Process the relay state from the command
-            stateRequest = Utils.bitfield(command[f"{self._control[0]}c_state"])
+            stateRequest = Utils.bitfield(command[f"{control_key[0]}c_state"])
             if len(stateRequest) > 10:
                 # do special command stuff
                 # ???????????
@@ -160,10 +164,10 @@ class Controller:
             if self.first_time:
                 self.og_time = time.time()
                 self.first_time = False
-            fullTelem[f"{self._control[0]}c_timestamp"] = time.time() - self.og_time
+            fullTelem[f"{control_key[0]}c_timestamp"] = time.time() - self.og_time
 
             # Add the redlines_armed status to the telemetry
-            fullTelem[f"{self._control[0]}c_redlines_armed"] = self.redlines_armed
+            fullTelem[f"{control_key[0]}c_redlines_armed"] = self.redlines_armed
 
             # Merge sensor and relay telemetry into the full telemetry package
             fullTelem.update(sensorTelem)
