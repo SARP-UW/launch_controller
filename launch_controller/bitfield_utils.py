@@ -1,4 +1,4 @@
-# from bitarray import bitarray
+from bitarray import bitarray
 # import bitarray
 
 class Utils:

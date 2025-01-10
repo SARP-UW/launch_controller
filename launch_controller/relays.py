@@ -96,6 +96,9 @@ class Relays:
     def get_state(self):
         # Get the current state of relays
         return self._state
+    
+    def get_closed_state(self):
+        return CLOSED_STATE
 
     def get_telemetry(self):
         # Generate a telemetry report with relay state and tags

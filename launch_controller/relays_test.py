@@ -1,3 +1,9 @@
+import sys
+import os
+# Included for pytest compatibility
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from proposed_utils import get_config_path
+
 import logging
 import unittest
 from unittest.mock import Mock, patch, MagicMock, call
@@ -37,7 +43,7 @@ class TestRelays(unittest.TestCase):
         self.mock_os = MagicMock()
         self.GPIO_MAPPING = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
 
-        self.relays = Relays(GPIO)
+        self.relays = Relays(GPIO, get_config_path())
         self.relays.sensors = self.mock_sensors
         
 
@@ -86,7 +92,7 @@ class TestRelays(unittest.TestCase):
         print(f"UPDATES LIST {updates}") 
 
     def test_arm(self):
-        self.relays.arm()
+        self.relays.arm(GPIO)
         self.assertEqual(self.relays._armed, True, "relays should be armed")
 
     def test_is_armed(self):
