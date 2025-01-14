@@ -1,14 +1,15 @@
 import sys, os
-sys.path.append(os.path.dirname(os.getcwd()) + '/launch_controller')
+sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
 from relays import Relays
+from proposed_utils import get_config_path
 from unittest.mock import MagicMock
 
-class TestSensors:
+class TestRelays:
 	def setup_method(self, method):
 		print(f"Setting up {method}")
         
 		gpio = MagicMock()
-		self.relays = Relays(gpio, os.path.dirname(os.getcwd()) + '/launch_controller/gse_master.json')
+		self.relays = Relays(gpio, get_config_path())
 
 	def teardown_method(self, method):
 		print(f"Tearing down {method}")
