@@ -1,10 +1,9 @@
 """
 The template codec format for telemetry.
 """
-import json
 from codec import Codec 
 from collections import OrderedDict
-from utils import Utils
+from proposed_utils import load_config
 
 # Map of all channel names to data types. For more info see:
 # https://docs.python.org/3/library/struct.html#struct-format-strings
@@ -15,10 +14,7 @@ from utils import Utils
 class TelemCodec(Codec):
     def __init__(self): 
          # Intialize the gse master json class with loaded schema           
-        # json_path = '/home/pi/controller/GSE_master.json'
-        # gse_master = Utils.load_config("/Users/arjun/Documents/GSE/launch_controller/gse_master.json")
-        with open('/Users/arjun/Documents/GSE/launch_controller/gse_master.json', 'r') as f:
-            gse_master = json.load(f)
+        gse_master = load_config()
             
         control_key = gse_master['control_key']
         assert control_key == 'prop'

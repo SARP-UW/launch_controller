@@ -1,8 +1,6 @@
-import json
 import asyncio
 import os
 import time
-import pdb
 import logging
 
 # Custom Modules
@@ -13,7 +11,8 @@ from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
 from bitfield_utils import Utils #TODO: Change the name of either one of the utils functions.
-from utils import Utils 
+from utils import Utils
+from proposed_utils import load_config
 
 # Configure logging to output information to console
 logging.basicConfig(level=logging.INFO)
@@ -49,13 +48,8 @@ class Controller:
         self.og_time = 0.0
         self.first_time = True
         
-        #  # Load GSE_master.json file
-        with open('/Users/arjun/Documents/GSE/launch_controller/gse_master.json', 'r') as f:
-            gse_master = json.load(f)
-
-        
-
-        # gse_master = Utils.load_config("/Users/arjun/Documents/GSE/launch_controller/gse_master.json")
+        # Load GSE_master.json file
+        gse_master = load_config()
 
         # gse_master will be either "fill" or "prop" to note what pi we are using
         # self._control = f['control_key'] 
