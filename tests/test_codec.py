@@ -1,3 +1,5 @@
+import sys, os
+sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
 from codec import Codec
 import unittest
 
