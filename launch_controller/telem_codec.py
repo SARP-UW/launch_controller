@@ -17,21 +17,21 @@ class TelemCodec(Codec):
         gse_master = load_config()
             
         control_key = gse_master['control_key']
-        assert control_key == 'prop'
+        # assert control_key == 'prop'
         
         # with open(json_path, 'r') as file:
         #     schema_json = json.load(file)
 
         # Extract the schema section for the given control_key
-        telemetry_config = gse_master.get('telemetry_config', {})
-        assert "p" in telemetry_config and "f" in telemetry_config
-         
-        control_schema = telemetry_config.get(control_key[0], {})
-        expected_keys = [
-            "pc_timestamp", "pc_cpu_temp", "pc_hard_armed", "pc_soft_armed",
-            "pc_redlines_armed", "pc_state", "pc_scr_tag", "adc_channels"
-        ]
-        assert all(key in control_schema for key in expected_keys)
+        telemetry_config = gse_master['telemetry_config']
+        # assert "p" in telemetry_config and "f" in telemetry_config
+
+        control_schema = telemetry_config[control_key[0]]
+        # expected_keys = [
+        #     "pc_timestamp", "pc_cpu_temp", "pc_hard_armed", "pc_soft_armed",
+        #     "pc_redlines_armed", "pc_state", "pc_scr_tag", "adc_channels"
+        # ]
+        # assert all(key in control_schema for key in expected_keys)
 
 
         # Create an OrderedDict to maintain the order

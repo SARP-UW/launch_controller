@@ -1,23 +1,22 @@
+import sys, os
+sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
 import unittest
 from unittest.mock import patch, mock_open
 import json
 from telem_codec import TelemCodec  
 
 
-"""
-AS OF RIGHT NOW NOT WORKING PROPERLY 
-
-"""
 class TestTelemCodec(unittest.TestCase):
 
     def setUp(self):
         # Sample control data to mock
-        self.control_data = 'A'  # Mocked control key
+        # self.control_data = 'p'  # Mocked control key
         
         # Sample telemetry schema for mocking
         self.telemetry_schema = {
-            "telemetry": {
-                "A": {
+            "control_key": "prop",
+            "telemetry_config": {
+                "p": {
                     "temperature": "f",
                     "humidity": "h",
                     "adc_channels": {
@@ -29,18 +28,19 @@ class TestTelemCodec(unittest.TestCase):
         }
 
         # Use mock_open to simulate file reading
-        self.patcher_control = patch("builtins.open", mock_open(read_data=self.control_data))
+        # self.patcher_control = patch("builtins.open", mock_open(read_data=self.control_data))
         self.patcher_schema = patch("builtins.open", mock_open(read_data=json.dumps(self.telemetry_schema)))
 
-        self.mock_control_file = self.patcher_control.start()
+        # self.mock_control_file = self.patcher_control.start()
         self.mock_schema_file = self.patcher_schema.start()
 
         # Create an instance of TelemCodec
         self.codec = TelemCodec()
 
+
     def tearDown(self):
         # Stop patching
-        self.patcher_control.stop()
+        # self.patcher_control.stop()
         self.patcher_schema.stop()
 
     def test_initialization(self):
