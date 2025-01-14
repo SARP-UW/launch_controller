@@ -1,10 +1,9 @@
 """
 The template codec format for command.
 """
-import json
 from codec import Codec
 from collections import OrderedDict
-from utils import Utils
+from proposed_utils import load_config
 
 # Map of all channel names to data types. For more info see:
 # https://docs.python.org/3/library/struct.html#struct-format-strings
@@ -15,12 +14,8 @@ from utils import Utils
 class CommandCodec(Codec):
     def __init__(self):
         # Intialize base Codec class from gse_master with loaded schema 
-        #            
-        # gse_master = Utils.load_config("/home/pi/controller/GSE_master.json")
+        gse_master = load_config()
 
-        with open('/Users/arjun/Documents/GSE/launch_controller/gse_master.json', 'r') as f:
-            gse_master = json.load(f)
-            
         control_key = gse_master['control_key'] 
         assert control_key == 'prop'
 
