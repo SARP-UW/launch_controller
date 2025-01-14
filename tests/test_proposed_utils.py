@@ -1,7 +1,7 @@
 import sys, os
 # Looks rough, but adds launch_controller to PATH from within any directory
 sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
-import proposed_utils as utils
+import utils
 
 class TestUtils:
 # TESTING GET_ROOT_PATH()

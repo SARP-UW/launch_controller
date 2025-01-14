@@ -3,7 +3,7 @@ The template codec format for telemetry.
 """
 from codec import Codec 
 from collections import OrderedDict
-from proposed_utils import load_config
+from utils import load_config
 
 # Map of all channel names to data types. For more info see:
 # https://docs.python.org/3/library/struct.html#struct-format-strings

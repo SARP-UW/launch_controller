@@ -1,7 +1,7 @@
 import sys, os
 sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
 from relays import Relays
-from proposed_utils import get_config_path
+from utils import get_config_path
 from unittest.mock import MagicMock
 
 class TestRelays:

@@ -2,14 +2,12 @@ import sys
 import os
 # Included for pytest compatibility
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from proposed_utils import get_config_path
+from proposed_utils import get_config_path, num
 
 import logging
 import unittest
 from unittest.mock import Mock, patch, MagicMock, call
 import fake_rpigpio.utils
-
-from bitfield_utils import Utils
 
 fake_rpigpio.utils.install()
 import RPi.GPIO as GPIO
@@ -124,7 +122,7 @@ class TestRelays(unittest.TestCase):
         self.relays.is_armed = lambda: True  # Mock is_armed method to always return True
         EXPECTED_STATE = [0, 0, 0, 0, 0, 1, 0, 1, 1, 0]
         self.relays._state = EXPECTED_STATE
-        states = Utils.num(EXPECTED_STATE)
+        states = num(EXPECTED_STATE)
         self.relays._SCR_tag = 3
 
         expected_telemObject = {

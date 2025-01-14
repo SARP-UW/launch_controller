@@ -2,8 +2,8 @@ import time
 import json
 import logging
 from pathlib import Path
-from bitfield_utils import Utils
 import pdb
+from utils import get_config_path, load_config, num
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -18,9 +18,9 @@ class Relays:
     # GPIO pins mapped to relay positions
     GPIO_MAPPING = [4, 17, 27, 22, 10, 9, 11, 5, 6, 13]
 
-    def __init__(self, GPIO, config_path="/Users/arjun/Documents/GSE/launch_controller/command_codec.py"):
+    def __init__(self, GPIO, config_path=get_config_path()):
         # Load the configuration file 
-        self.config = self.load_config(config_path)
+        self.config = load_config(config_path)
 
         # Retrieve control parameters directly from the master JSON
         self._control = self.config['control_key'] 
@@ -66,15 +66,6 @@ class Relays:
         """
         self._SCR_tag = 0
 
-    def load_config(self, config_path):
-        # Load configuration from a JSON file
-        try:
-            with open(config_path, 'r') as f:
-                return json.load(f)
-        except Exception as e:
-            logging.error(f"Error loading config file: {e}")
-            return None
-
     def arm(self, GPIO):
         # Arm the relay system, allowing state changes
         self._armed = True
@@ -102,7 +93,7 @@ class Relays:
 
     def get_telemetry(self):
         # Generate a telemetry report with relay state and tags
-        states = Utils.num(self._state)
+        states = num(self._state)
 
         telemObject = {
             self.config['telemetry_config'][self._control[0]][self._control[0] + 'c_soft_armed']: self.is_armed(),

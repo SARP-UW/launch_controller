@@ -10,9 +10,7 @@ from fill_sensors import FillSensors
 from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
-from bitfield_utils import Utils #TODO: Change the name of either one of the utils functions.
-from utils import Utils
-from proposed_utils import load_config
+from utils import load_config, bitfield
 
 # Configure logging to output information to console
 logging.basicConfig(level=logging.INFO)
@@ -140,7 +138,7 @@ class Controller:
                 self.ignore_redlines = True
 
             # Process the relay state from the command
-            stateRequest = Utils.bitfield(command[f"{self._control[0]}c_state"])
+            stateRequest = bitfield(command[f"{self._control[0]}c_state"])
             if len(stateRequest) > 10:
                 # do special command stuff
                 # ???????????

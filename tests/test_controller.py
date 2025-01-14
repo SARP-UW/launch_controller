@@ -6,7 +6,7 @@ class TestController:
 	def setup_method(self, method):
 		print(f"Setting up {method}")
         
-		self.relays = Controller()
+		self.controller = Controller()
 
 	def teardown_method(self, method):
 		print(f"Tearing down {method}")
