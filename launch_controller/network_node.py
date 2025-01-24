@@ -18,7 +18,8 @@ class SendNode:
         """
         Clean up socket resources.
         """
-        self.sock.shutdown()
+        # comment this out, since UDP doesn't neet shutdown()
+        # self.sock.shutdown()
         self.sock.close()
 
     def send(self, msg):
@@ -46,7 +47,8 @@ class ReceiveNode:
         """
         Clean up socket resources.
         """
-        self.sock.shutdown()
+        # comment this out, since UDP doesn't neet shutdown()
+        # self.sock.shutdown()
         self.sock.close()
 
     def receive(self):
