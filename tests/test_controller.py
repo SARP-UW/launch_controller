@@ -11,6 +11,9 @@ class TestController:
 	def teardown_method(self, method):
 		print(f"Tearing down {method}")
 
+		self.controller.tlmServer.shutdown()
+		self.controller.cmdReceiver.shutdown()
+
 
 # TESTING __INIT__()
 	def test_initialization(self):
