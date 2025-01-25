@@ -2,6 +2,8 @@ import asyncio
 import os
 import time
 import logging
+from pathlib import Path
+
 
 # Custom Modules
 from relays import Relays
@@ -35,12 +37,12 @@ except (RuntimeError, ModuleNotFoundError):
 
 class Controller:
 
-    def __init__(self):
+    def __init__(self, config_path="GSE/launch_controller/gse_master.json"):
         # Set GPIO mode to BCM (Broadcom pin-numbering scheme)
         GPIO.setmode(GPIO.BCM)
 
         # Initalize the relays using the GPIO instance
-        # self.relays = Relays(GPIO)
+        self.relays = Relays(GPIO)
         self.redlines_armed = False
         self.lastPing = time.time()
         self.og_time = 0.0
@@ -52,7 +54,7 @@ class Controller:
         # gse_master will be either "fill" or "prop" to note what pi we are using
         # self._control = f['control_key'] 
         self. _control= gse_master['control_key']
-        assert self._control in ["prop", "fill"] #TEST
+        #assert self._control in ["prop", "fill"] #TEST
         
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
@@ -110,6 +112,7 @@ class Controller:
         valid one.
         """
         command, addr = self.cmdReceiver.receive()
+        print(f"COMMAND {command}")
         if command is not None:
             self.cntrl_logger.info(command)
 
@@ -146,6 +149,11 @@ class Controller:
             # Request state change from relays
             self.relays.request_state(stateRequest, 0)
 
+    def actuator_checks(self):
+        self.checkRedlines()  # Ensure safety thresholds are checked
+        self.processRequest()  # Process any new commands
+        self.relays.update(GPIO)  # Update relays based on current state
+        
     def checkRedlines(self):
         """
         Check PT readings for thresholds to update valves in event of dangerous state realized from
@@ -157,58 +165,12 @@ class Controller:
         else:
             pass
 
-    async def updateActuators(self):
-        """
-        Periodically updates relays while checking for safety and processing commands.
-        """
-        while True:
-            self.checkRedlines()  # Ensure safety thresholds are checked
-            self.processRequest()  # Process any new commands
-            self.relays.update(GPIO)  # Update relays based on current state
-            await asyncio.sleep(.5)  # Pause for 500ms before the next update cycle
-
-
-    async def sendTelemetry(self):
-        """
-        Construct the codec for telemetry.
-        """
-        while True:
-            # Retrieve telemetry from sensors and relays
-            sensorTelem = self.sensors.get_telemetry()
-            relayTelem = self.relays.get_telemetry()
-
-            fullTelem = {}
-            # Add a timestamp to the telemetry data
-            if self.first_time:
-                self.og_time = time.time()
-                self.first_time = False
-            fullTelem[f"{self._control[0]}c_timestamp"] = time.time() - self.og_time
-
-            # Add the redlines_armed status to the telemetry
-            fullTelem[f"{self._control[0]}c_redlines_armed"] = self.redlines_armed
-
-            # Merge sensor and relay telemetry into the full telemetry package
-            fullTelem.update(sensorTelem)
-            fullTelem.update(relayTelem)
-            
-            # Try sending the telemetry, log errors if they occur
-            try:
-                self.tlmServer.send(fullTelem)
-            except Exception as e:
-                self.telem_logger.error('Network error:')
-            if self.soft_arm:
-                # Log telemetry if system is armed
-                self.telem_logger.info(fullTelem)
-            await asyncio.sleep(.5)  # Pause for 500ms before the next telemetry cycle
-
-    async def checkNetwork(self):
-        """
-        Periodically checks network connection by pinging the ground control server.
-        """
-        count = 0
-        while True:
-            # Ping the ground control address
-            response = os.system("ping -c 1 -w 10 " + str(self.gc_address))
+    def pingAddress(self):
+        return os.system("ping -c 1 -w 10 " + str(self.gc_address))
+        
+    def actualCheckNetwork(self, count):
+         # Ping the ground control address
+            response = self.pingAddress()
 
             # if valid ping
             if response == 0:
@@ -227,7 +189,63 @@ class Controller:
                     # Otherwise, set the system to a closed state
                     else:
                         self.relays.SET_CLOSED_STATE(GPIO, 3)
+            return count
+                     
+    def actualSendTelemetry(self):
+        # Retrieve telemetry from sensors and relays
+        sensorTelem = self.sensors.get_telemetry()
+        relayTelem = self.relays.get_telemetry()
 
+        fullTelem = {}
+        # Add a timestamp to the telemetry data
+        if self.first_time:
+            self.og_time = time.time()
+            self.first_time = False
+        fullTelem[f"{self._control[0]}c_timestamp"] = time.time() - self.og_time
+
+        # Add the redlines_armed status to the telemetry
+        fullTelem[f"{self._control[0]}c_redlines_armed"] = self.redlines_armed
+
+        # Merge sensor and relay telemetry into the full telemetry package
+        fullTelem.update(sensorTelem)
+        fullTelem.update(relayTelem)
+        
+        # Try sending the telemetry, log errors if they occur
+        try:
+            self.tlmServer.send(fullTelem)
+        except Exception as e:
+            self.telem_logger.error('Network error:')
+        if self.soft_arm:
+            # Log telemetry if system is armed
+            self.telem_logger.info(fullTelem)
+        
+           
+    async def updateActuators(self):
+        """
+        Periodically updates relays while checking for safety and processing commands.
+        """
+        while True:
+            self.actuator_checks()
+            await asyncio.sleep(.5)  # Pause for 500ms before the next update cycle
+
+
+
+    async def sendTelemetry(self):
+        """
+        Construct the codec for telemetry.
+        """
+        while True:
+            self.actualSendTelemetry()
+            await asyncio.sleep(.5)  # Pause for 500ms before the next telemetry cycle
+
+        
+    async def checkNetwork(self):
+        """
+        Periodically checks network connection by pinging the ground control server.
+        """
+        count = 0
+        while True:
+            count = self.actualCheckNetwork(count)
             await asyncio.sleep(10)  # Pause for 10 seconds before the next network check
 
 
