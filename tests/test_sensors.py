@@ -30,7 +30,10 @@ class TestSensors:
         fake_cpu_temp = MagicMock()
         fake_cpu_temp.temperature = 3
 
-        self.sensor = Sensors("Placeholder???", self.fake_adc_drivers, fake_cpu_temp)
+        self.sensor = Sensors(pt_scale=[0, 0, 0, 0, 0, 0, 0, 0], 
+                              is_prop=True, 
+                              test_adc_drivers=self.fake_adc_drivers, 
+                              test_cpu_temp=fake_cpu_temp)
 
     def teardown_method(self, method):
         print(f"Tearing down {method}")

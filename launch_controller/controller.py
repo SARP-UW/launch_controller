@@ -7,8 +7,9 @@ from pathlib import Path
 
 # Custom Modules
 from relays import Relays
-from prop_sensors import PropSensors
-from fill_sensors import FillSensors
+# from prop_sensors import PropSensors
+# from fill_sensors import FillSensors
+from sensors import Sensors
 from telem_codec import TelemCodec
 from command_codec import CommandCodec
 from network_node import SendNode, ReceiveNode
@@ -61,12 +62,12 @@ class Controller:
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
             assert "max_p" in pt_scaling and "min_v" in pt_scaling and "max_v" in pt_scaling
             #assert pt_scaling == {"max_p" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 5000],"max_v" : 4.5,"min_v" : 0.5}
-            self.sensors = FillSensors(pt_scaling["max_p"])
+            self.sensors = Sensors(pt_scaling["max_p"], is_prop=False)
         else:
             pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
             assert "max_p" in pt_scaling and "max_v" in pt_scaling and "min_v" in pt_scaling
             # assert pt_scaling == {"max_p" : [0, 0, 0, 0, 0, 0, 0, 0],"max_v" : 5,"min_v" : 0.5}
-            self.sensors = PropSensors(pt_scaling["max_p"])
+            self.sensors = Sensors(pt_scaling["max_p"], is_prop=True)
 
         addresses= {}   
         # Extract the "addresses" section from GSE_master.json

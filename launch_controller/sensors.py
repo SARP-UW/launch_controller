@@ -12,9 +12,9 @@ ADC_SAMPLE_RATE_PROP = 20 #same for both fill + prop, need separate?
 ADC_GAIN_FILL = 2/3
 
 class Sensors:
-    def __init__(self, pt_scale, test_adc_drivers=None, test_cpu_temp=None):
-        self.is_fill = True # setting initial state of this class to be Fill Sensor, need a way to change between
-        self.is_prop = False
+    def __init__(self, pt_scale, is_prop=None, test_adc_drivers=None, test_cpu_temp=None):
+        self.is_fill = not is_prop
+        self.is_prop = is_prop
         self.adc = []
         self.PT_scaling = pt_scale
         self.ontarget = True
