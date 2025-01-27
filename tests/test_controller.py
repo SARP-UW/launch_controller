@@ -275,7 +275,7 @@ class TestController(unittest.TestCase):
         assert self.mock_relays.SET_VENT_STATE(GPIO, 3) is not None, "SET_VENT_STATE was not called!"
 
         # Assert count is incremented after a failed ping
-        self.assertEquals(c, 2)
+        self.assertEqual(c, 2)
 
     @patch.object(Controller, 'pingAddress')
     def test_check_network_failure_closed(self, mock_ping):
@@ -294,7 +294,7 @@ class TestController(unittest.TestCase):
         assert self.mock_relays.SET_CLOSED_STATE(GPIO, 3) is not None, "SET_CLOSED_STATE was not called!"
 
         # Assert count is incremented after a failed ping
-        self.assertEquals(c, 2)
+        self.assertEqual(c, 2)
         
     def test_set_logger(self):
         logger = self.controller.set_logger(self.logger_name, self.log_file)
