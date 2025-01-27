@@ -2,11 +2,11 @@
 
 Software architecture for Launch Controller Ground System Operations.
 
-# Virtual Environment
+## Virtual Environment
 
 This virtual environment will ensure that this code runs with minimal issues on any system.
 
-## How to Use
+### How to Use
 
 The following script simplifies the setup/activation process. Navigate to this root folder in the terminal and execute the following:
 
@@ -19,11 +19,17 @@ This will do up to three things:
 2. The virtual environment will be activated.
 3. The dependencies needed for this code to execute properly will be installed.
 
-## Adding Dependencies
+### Adding Dependencies
 
-To add a dependency to this project, just add the name of the dependency to the `requirements.txt` file and run `source venv.sh` again to update the virtual environment.
+To add a dependency to this project, just add the name of the dependency to the `requirements.txt` file and run
 
-## Troubleshooting
+```bash
+source venv.sh
+``` 
+
+again to update the virtual environment.
+
+### Troubleshooting
 
 Make sure and execute this script from the root directory.
 
