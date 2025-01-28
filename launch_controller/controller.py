@@ -10,8 +10,9 @@ from relays import Relays
 # from prop_sensors import PropSensors
 # from fill_sensors import FillSensors
 from sensors import Sensors
-from telem_codec import TelemCodec
-from command_codec import CommandCodec
+# from telem_codec import TelemCodec
+# from command_codec import CommandCodec
+from data_codec import DataCodec
 from network_node import SendNode, ReceiveNode
 from utils import load_config, bitfield
 
@@ -88,11 +89,11 @@ class Controller:
         self.gc_address = addresses["GC_ADDR_IP"] 
         self.tlmServer = SendNode((addresses["TLM_SERVER_ADDR_IP"], addresses["TLM_SERVER_ADDR_PORT"]),
                                   (addresses["GC_ADDR_IP"], addresses["GC_ADDR_PORT"]),
-                                  TelemCodec())
+                                  DataCodec("telemetry"))
 
         # initialize command receiver to receive commands from ground control
         self.cmdReceiver = ReceiveNode((addresses["CMD_RECEIVER_ADDR_IP"], addresses["CMD_RECEIVER_ADDR_PORT"]),
-                                       CommandCodec())
+                                       DataCodec("command"))
 
         # set up loggers for telemtry and control logs
         self.soft_arm = False

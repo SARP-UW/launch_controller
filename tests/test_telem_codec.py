@@ -3,8 +3,8 @@ sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controlle
 import unittest
 from unittest.mock import patch, mock_open
 import json
-from telem_codec import TelemCodec  
-
+# from telem_codec import TelemCodec  
+from data_codec import DataCodec
 
 class TestTelemCodec(unittest.TestCase):
 
@@ -35,7 +35,7 @@ class TestTelemCodec(unittest.TestCase):
         self.mock_schema_file = self.patcher_schema.start()
 
         # Create an instance of TelemCodec
-        self.codec = TelemCodec()
+        self.codec = DataCodec("telemetry")
 
 
     def tearDown(self):

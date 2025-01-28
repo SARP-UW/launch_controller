@@ -1,12 +1,13 @@
 import sys, os
 sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
-from command_codec import CommandCodec
+# from command_codec import CommandCodec
+from data_codec import DataCodec
 
 class TestCommandCodec:
 	def setup_method(self, method):
 		print(f"Setting up {method}")
         
-		self.command_codec = CommandCodec()
+		self.command_codec = DataCodec('command')
 
 	def teardown_method(self, method):
 		print(f"Tearing down {method}")
