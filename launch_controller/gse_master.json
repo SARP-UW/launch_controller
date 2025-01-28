@@ -28,7 +28,7 @@
         }
     }, 
 
-    "prop_fill_prohibited_states": {
+    "prohibited_states": {
         "prop": {
             "mutual_exclusions": [
                 ["igniter", "injector"]

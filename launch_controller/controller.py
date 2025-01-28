@@ -53,6 +53,9 @@ class Controller:
         # Load GSE_master.json file
         gse_master = load_config()
 
+         # Extract master json schema  
+        self.config = config_util.load_config("/home/pi/controller/GSE_master.json")
+
         # gse_master will be either "fill" or "prop" to note what pi we are using
         # self._control = f['control_key'] 
         self. _control= gse_master['control_key']
@@ -119,17 +122,17 @@ class Controller:
             self.cntrl_logger.info(command)
 
             # Check if the system is controlling propellant ("prop" mode) and initiate fire sequence
-            if self._control[0] == 'p':
+            if control_key[0] == 'p':
                 if command['pc_fire']:
                     self.relays.INITIATE_FIRE_SEQUENCE(GPIO)
 
             # Pulse a valve if a pulse command was received
-            pulse_valve = command[f"{self._control[0]}c_pulse"]
+            pulse_valve = command[f"{control_key[0]}c_pulse"]
             if pulse_valve >= 0:
-                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{self._control[0]}c_pdelay"])
+                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{control_key[0]}c_pdelay"])
 
             # Arm or disarm the software-controlled relays based on the command
-            if command[f"{self._control[0]}c_soft_armed"]:
+            if command[f"{control_key[0]}c_soft_armed"]:
                 self.soft_arm = True
                 self.relays.arm(GPIO)
             else:
@@ -137,7 +140,7 @@ class Controller:
                 self.relays.disarm(GPIO)
 
             # Arm redlines if requested
-            if command[f"{self._control[0]}c_redlines_armed"]:
+            if command[f"{control_key[0]}c_redlines_armed"]:
                 self.redlines_armed = True
             else:
                 self.ignore_redlines = True

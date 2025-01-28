@@ -1,3 +1,4 @@
+import json
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -7,6 +8,19 @@ try:
 except:
     pass
 
+telemetry_handlers = {
+    "addresses" : handle_addresses,
+    "command_config" : handle_command_config,
+    "prop_fill_prohibited_states" : handle_prop_fill_prohibited_states,
+    "pt_scales" : handle_pt_scales,
+    "relay_maps" : handle_relay_maps,
+    "prohibited_states" : handle_prohibited_states,
+    "sensor_map" : handle_sensor_map,
+    "telemetry_config" : handle_telemetry_config
+}
+
+
+# add these to gse_master.json?
 ADC_GAIN_PROP = 4
 ADC_SAMPLE_RATE_PROP = 20 #same for both fill + prop, need separate?
 ADC_GAIN_FILL = 2/3
@@ -54,7 +68,7 @@ class Sensors:
                     # readings.append(self.PT_scaling[num*4 + channel])
                     readings.append(adc.read_pressure(channel, max_p=self.PT_scaling[num * 4 + channel]))
         else:
-            if self.is_prop:
+            if self.status == 'prop':
                 for adc in self.adc:
                     # figure out why this code in prop sensors was written this way, what is adc for?
                     for channel in range(0, 4):
@@ -77,7 +91,9 @@ class Sensors:
         if not read_channels and self.is_fill:
             readings = [0, 0, 0, 0, 0, 0, 0, 0]
         
-        if self.is_prop:
+        # need a function to parse gse_json for object instead of hard coding
+        if self.status == 'prop':
+            # convert from telemetry_config
             telemObject = {
                 "pc_cpu_temp": self.get_cpu_temp(),
                 "pc_adc1_c1" : readings[0],
