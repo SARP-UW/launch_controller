@@ -7,11 +7,7 @@ from pathlib import Path
 
 # Custom Modules
 from relays import Relays
-# from prop_sensors import PropSensors
-# from fill_sensors import FillSensors
 from sensors import Sensors
-# from telem_codec import TelemCodec
-# from command_codec import CommandCodec
 from data_codec import DataCodec
 from network_node import SendNode, ReceiveNode
 from utils import load_config, bitfield
@@ -53,40 +49,21 @@ class Controller:
         # Load GSE_master.json file
         gse_master = load_config()
 
-         # Extract master json schema  
-        self.config = config_util.load_config("/home/pi/controller/GSE_master.json")
-
         # gse_master will be either "fill" or "prop" to note what pi we are using
         # self._control = f['control_key'] 
         self. _control= gse_master['control_key']
-        #assert self._control in ["prop", "fill"] #TEST
         
         # Extract the pt_scale based on self._control from the loaded master file
         if self._control == "fill":
             pt_scaling = gse_master["pt_scales"]["fill_pt_scale"]
-            assert "max_p" in pt_scaling and "min_v" in pt_scaling and "max_v" in pt_scaling
-            #assert pt_scaling == {"max_p" : [1000, 1000, 1000, 1000, 1000, 1000, 1000, 5000],"max_v" : 4.5,"min_v" : 0.5}
             self.sensors = Sensors(pt_scaling["max_p"], is_prop=False)
         else:
             pt_scaling = gse_master["pt_scales"]["prop_pt_scale"]
-            assert "max_p" in pt_scaling and "max_v" in pt_scaling and "min_v" in pt_scaling
-            # assert pt_scaling == {"max_p" : [0, 0, 0, 0, 0, 0, 0, 0],"max_v" : 5,"min_v" : 0.5}
             self.sensors = Sensors(pt_scaling["max_p"], is_prop=True)
 
         addresses= {}   
         # Extract the "addresses" section from GSE_master.json
         addresses = gse_master["addresses"]
-        #TEST
-        assert all(key in addresses for key in ["TLM_SERVER_ADDR_IP", "TLM_SERVER_ADDR_PORT", "CMD_RECEIVER_ADDR_IP"])
-        expected_addresses = {
-            "TLM_SERVER_ADDR_IP": "",
-            "TLM_SERVER_ADDR_PORT": 31000,
-            "CMD_RECEIVER_ADDR_IP": "",
-            "CMD_RECEIVER_ADDR_PORT": 31002,
-            "GC_ADDR_IP": "10.0.0.100",
-            "GC_ADDR_PORT": 31000
-        }
-        assert all(key in addresses and addresses[key] == expected_addresses[key] for key in expected_addresses)
 
         # Initialize the telemtry server for sending data
         self.gc_address = addresses["GC_ADDR_IP"] 
@@ -122,17 +99,17 @@ class Controller:
             self.cntrl_logger.info(command)
 
             # Check if the system is controlling propellant ("prop" mode) and initiate fire sequence
-            if control_key[0] == 'p':
+            if self._control[0] == 'p':
                 if command['pc_fire']:
                     self.relays.INITIATE_FIRE_SEQUENCE(GPIO)
 
             # Pulse a valve if a pulse command was received
-            pulse_valve = command[f"{control_key[0]}c_pulse"]
+            pulse_valve = command[f"{self._control[0]}c_pulse"]
             if pulse_valve >= 0:
-                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{control_key[0]}c_pdelay"])
+                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{self._control[0]}c_pdelay"])
 
             # Arm or disarm the software-controlled relays based on the command
-            if command[f"{control_key[0]}c_soft_armed"]:
+            if command[f"{self._control[0]}c_soft_armed"]:
                 self.soft_arm = True
                 self.relays.arm(GPIO)
             else:
@@ -140,7 +117,7 @@ class Controller:
                 self.relays.disarm(GPIO)
 
             # Arm redlines if requested
-            if command[f"{control_key[0]}c_redlines_armed"]:
+            if command[f"{self._control[0]}c_redlines_armed"]:
                 self.redlines_armed = True
             else:
                 self.ignore_redlines = True

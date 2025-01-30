@@ -1,8 +1,7 @@
 import sys, os
 sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
 from network_node import SendNode, ReceiveNode
-from telem_codec import TelemCodec
-from command_codec import CommandCodec
+from data_codec import DataCodec
 
 TLM_SERVER_ADDR_IP = ""
 TLM_SERVER_ADDR_PORT = 31000
@@ -44,8 +43,8 @@ class TestNetworkNode:
 		# print(f"Setting up {method}")
 		print("Initializing send/receive nodes")
 
-		self.send_node = SendNode((TLM_SERVER_ADDR_IP, TLM_SERVER_ADDR_PORT), (GC_ADDR_IP, GC_ADDR_PORT), TelemCodec())
-		self.receive_node = ReceiveNode((CMD_RECEIVER_ADDR_IP, CMD_RECEIVER_ADDR_PORT), CommandCodec())
+		self.send_node = SendNode((TLM_SERVER_ADDR_IP, TLM_SERVER_ADDR_PORT), (GC_ADDR_IP, GC_ADDR_PORT), DataCodec("telemetry"))
+		self.receive_node = ReceiveNode((CMD_RECEIVER_ADDR_IP, CMD_RECEIVER_ADDR_PORT), DataCodec("command"))
 
 	def teardown_method(self):
 		# print(f"Tearing down {method}")
