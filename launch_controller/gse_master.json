@@ -1,6 +1,6 @@
 {
-    "control_key": "prop",
-
+    "control_key": "fill",
+    
     "addresses": {
         "TLM_SERVER_ADDR_IP": "",
         "TLM_SERVER_ADDR_PORT": 31000,

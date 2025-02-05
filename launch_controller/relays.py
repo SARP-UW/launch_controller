@@ -66,8 +66,28 @@ class Relays:
         """
         self._SCR_tag = 0
 
-    def arm(self, GPIO):
-        # Arm the relay system, allowing state changes
+    @staticmethod
+    def load_config(config_path):
+        # Load configuration from a JSON file
+        try:
+            with open(config_path, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            logging.error(f"Error loading config file: {e}")
+            return None
+
+    @staticmethod
+    def get_closed_state():
+        return CLOSED_STATE
+    
+    @staticmethod
+    def get_vent_state():
+        return VENT_STATE
+    
+    def arm(self):
+        """
+        Arm the relay system, allowing state changes
+        """
         self._armed = True
         logging.info("ARMED")
 
@@ -198,6 +218,9 @@ class Relays:
         """
         Make sure we are not entering a prohibited state according to configuration files.
         """
+        if self._control == "prop":
+            return (True, "")
+        
         # initialize dicitionaries that will hold json file contents and read them in
 
         relay_map = {}

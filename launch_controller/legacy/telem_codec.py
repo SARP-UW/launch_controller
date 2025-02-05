@@ -22,6 +22,8 @@ class TelemCodec(Codec):
         # with open(json_path, 'r') as file:
         #     schema_json = json.load(file)
 
+        #control_key = schema_json['control_key']
+
         # Extract the schema section for the given control_key
         telemetry_config = gse_master['telemetry_config']
         # assert "p" in telemetry_config and "f" in telemetry_config

@@ -2,86 +2,77 @@ import sys, os
 sys.path.append(os.getcwd()[0:os.getcwd().find('/GSE') + 4] + '/launch_controller')
 from network_node import SendNode, ReceiveNode
 from data_codec import DataCodec
+import unittest
+from unittest.mock import patch, MagicMock
+import socket
 
-TLM_SERVER_ADDR_IP = ""
-TLM_SERVER_ADDR_PORT = 31000
-CMD_RECEIVER_ADDR_IP = ""
-CMD_RECEIVER_ADDR_PORT = 31002
-GC_ADDR_IP = "10.0.0.100"
-GC_ADDR_PORT = 31000
+class TestSendNode(unittest.TestCase):
+  def setUp(self):
+    self.mock_socket = patch('socket.socket').start()
+    self.mock_sock_instance = self.mock_socket.return_value
+    bind_addr = ('localhost', 12345)
+    target_addr =  ('localhost', 54321)
+    self.send_node = SendNode(bind_addr, target_addr, DataCodec(datatype="telemetry"))
 
-TELEM_TEST_MSG = {
-	"pc_timestamp": 1.0,
-	"pc_cpu_temp": 1.0,
-	"pc_hard_armed": False,
-	"pc_soft_armed": False,
-	"pc_redlines_armed": False,
-	"pc_state": 1,
-	"pc_scr_tag": 1,
-	"pc_adc1_c1": 1.0,
-	"pc_adc1_c2": 1.0,
-	"pc_adc1_c3": 1.0,
-	"pc_adc1_c4": 1.0,
-	"pc_adc2_c1": 1.0,
-	"pc_adc2_c2": 1.0,
-	"pc_adc2_c3": 1.0,
-	"pc_adc2_c4": 1.0
-}
+  def tearDown(self):
+    patch.stopall()
 
-# NOTE: not yet used, but could be used for testing receive_node.receive()
-COMM_TEST_MSG = {
-	"pc_state": 1,
-	"pc_soft_armed": False,
-	"pc_fire": False,
-	"pc_redlines_armed": False,
-	"pc_pulse": 1,
-	"pc_pdelay": 1
-}
+  def test_send_node_initialization(self):
+    self.mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_DGRAM)
+    self.mock_sock_instance.bind.assert_called_once_with(('localhost', 12345))
 
-class TestNetworkNode:
-	def setup_method(self):
-		# print(f"Setting up {method}")
-		print("Initializing send/receive nodes")
+  def test_send_node_send(self):
+    mock_encode = MagicMock(return_value='encoded_data')
+    self.send_node.codec.encode = mock_encode
+    
+    msg = {"pc_timestamp": 1.0}
+    self.send_node.send(msg)
+    
+    mock_encode.assert_called_once_with(msg)
+    self.mock_sock_instance.sendto.assert_called_once_with('encoded_data', ('localhost', 54321))
 
-		self.send_node = SendNode((TLM_SERVER_ADDR_IP, TLM_SERVER_ADDR_PORT), (GC_ADDR_IP, GC_ADDR_PORT), DataCodec("telemetry"))
-		self.receive_node = ReceiveNode((CMD_RECEIVER_ADDR_IP, CMD_RECEIVER_ADDR_PORT), DataCodec("command"))
-
-	def teardown_method(self):
-		# print(f"Tearing down {method}")
-		print("Shutting down send/receive nodes")
-
-		self.send_node.shutdown()
-		self.receive_node.shutdown()
+  def test_send_node_shutdown(self):
+    self.send_node.shutdown()
+    self.mock_sock_instance.close.assert_called_once()
 
 
-# TESTING __INIT__()
-	def test_initialization(self):
-		assert True
+class TestReceiveNode(unittest.TestCase):
+  def setUp(self):
+    self.mock_socket = patch('socket.socket').start()
+    self.mock_sock_instance = self.mock_socket.return_value
+    bind_addr = ('localhost', 12346)
+    self.receive_node = ReceiveNode(bind_addr, DataCodec(datatype="command"))
 
-# TESTING SEND_NODE.SHUTDOWN()
-	def test_send_node_shutdown(self):
-		self.send_node.shutdown()
+  def tearDown(self):
+    patch.stopall()
 
-		assert True
+  def test_receive_node_initialization(self):
+    self.mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_DGRAM)
+    self.mock_sock_instance.bind.assert_called_once_with(('localhost', 12346))
+    self.mock_sock_instance.setblocking.assert_called_once_with(0)
+
+  def test_receive_node_receive_with_data(self):
+    mock_decode = MagicMock(return_value={"pc_state": "h"})
+    self.receive_node.codec.decode = mock_decode
+    self.mock_sock_instance.recvfrom.return_value = ('encoded_data', ('localhost', 54321))
+    
+    data, server = self.receive_node.receive()
+    
+    self.mock_sock_instance.recvfrom.assert_called_once_with(1024)
+    mock_decode.assert_called_once_with('encoded_data')
+    self.assertEqual(data, {"pc_state": "h"})
+    self.assertEqual(server, ('localhost', 54321))
+
+  def test_receive_node_receive_error(self):
+    self.mock_sock_instance.recvfrom.side_effect = socket.error
+    data, server = self.receive_node.receive()
+    self.assertIsNone(data)
+    self.assertIsNone(server)
+
+  def test_receive_node_shutdown(self):
+    self.receive_node.shutdown()
+    self.mock_sock_instance.close.assert_called_once()
 
 
-# TESTING SEND_NODE.SEND(MSG)
-	def test_send_node_send(self):
-		self.send_node.send(TELEM_TEST_MSG)
-				
-		assert True
-
-
-# TESTING RECEIVE_NODE.SHUTDOWN()
-	def test_receive_node_shutdown(self):
-		self.receive_node.shutdown()
-
-		assert True
-
-
-# TESTING RECEIVE_NODE.RECEIVE()
-	def test_receive_node_receive(self):
-		
-		# TODO: figure out how to mock data to receive
-
-		assert False
+if __name__ == '__main__':
+  unittest.main()

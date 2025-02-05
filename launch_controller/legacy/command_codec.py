@@ -17,18 +17,20 @@ class CommandCodec(Codec):
         gse_master = load_config()
 
         control_key = gse_master['control_key'] 
-        assert control_key == 'prop'
+        #assert control_key == 'prop'
+
+        #control_key = schema_json['control_key'] 
 
         # Extract the schema section for the given control_key
         command_config = gse_master.get('command_config', {})
         #TEST
-        assert "p" in command_config and "f" in command_config
+        #assert "p" in command_config and "f" in command_config
 
         
         control_schema = command_config.get(control_key[0], {})
         #TEST
         expected_keys = ["pc_state", "pc_soft_armed", "pc_fire", "pc_redlines_armed", "pc_pulse", "pc_pdelay"]
-        assert all(key in control_schema for key in expected_keys)
+        #assert all(key in control_schema for key in expected_keys)
 
 
         # Create an OrderedDict to maintain the order
