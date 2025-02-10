@@ -88,7 +88,7 @@ class TestRelays(unittest.TestCase):
         print(f"UPDATES LIST {updates}") 
 
     def test_arm(self):
-        self.relays.arm(GPIO)
+        self.relays.arm()
         self.assertEqual(self.relays._armed, True, "relays should be armed")
 
     def test_is_armed(self):
