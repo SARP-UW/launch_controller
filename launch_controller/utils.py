@@ -3,9 +3,15 @@ import json
 import logging
 from bitarray import bitarray
 
+"""
+The name of the root folder where the application is expected to operate. This is set to '/GSE'.
+"""
 ROOT_FOLDER = '/GSE'
 
 def get_root_path():
+	"""
+	Retrieves the absolute path to the root folder (/GSE) based on the current working directory.
+	"""
     # Get path to any current working directory
     path = os.getcwd()
     
@@ -19,12 +25,15 @@ def get_root_path():
 
 
 def get_config_path():
+	"""
+	Retrieves the absolute path to the root folder (/GSE) based on the current working directory.
+	"""
     return get_root_path() + '/launch_controller/gse_master.json'
 
 
 def load_config(config_path=get_config_path()):
     """
-    Load configuration from a JSON file.
+    Loads the configuration from a JSON file. If no path is provided, it defaults to the path returned by get_config_path().
     """
     try:
         with open(config_path, 'r') as f:
@@ -50,7 +59,7 @@ def bitfield(n):
 
 def num(b):
 	"""
-	Convert bitfield array to integer.
+	Converts an integer into a bit array. The function ensures that the resulting bit array is 10 bits long by padding with zeros if necessary.
 	"""
 	assert(len(b) == 10), "Invalid state array length."
 	c = b.copy()
