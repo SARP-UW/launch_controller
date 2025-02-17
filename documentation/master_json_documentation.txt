@@ -1,0 +1,169 @@
+# Master JSON documentation
+
+---
+
+## Control Key
+
+**Key:** `control_key`
+
+**Type:** String
+
+**Description:** Defines the active system mode.
+
+**Location:** `telem_codec.py`, `relays.py`, `controller.py`, `command_codec.py`
+
+*Example values:*
+
+* `prop`: Propulsion mode.
+
+* `fill`: Fill mode.
+
+---
+
+## Addresses
+
+**Key:** `addresses`
+
+**Type:** Object
+
+**Description:** Network configuration for telemetry and command servers.
+
+**Location:** `controller.py`
+
+* `TLM_SERVER_ADDR_IP`: String. IP address for the telemetry server.
+
+* `TLM_SERVER_ADDR_PORT`: Number. Port for the telemetry server.
+
+* `CMD_RECEIVER_ADDR_IP`: String. IP address for the command receiver.
+
+* `CMD_RECEIVER_ADDR_PORT`: Number. Port for the command receiver.
+
+* `GC_ADDR_IP`: String. Ground control IP address.
+
+* `GC_ADDR_PORT`: Number. Ground control port.
+
+---
+
+## Command Configuration
+
+**Key:** `command_config`
+
+**Type:** Object
+
+**Description:** Command configuration for propulsion (p) and fill (f) modes.
+
+**Location:** `command_codec.py`
+
+* `pc_state / fc_state`: String. Indicates the state of the system (e.g., h for hold).
+
+* `pc_soft_armed / fc_soft_armed`: String. Soft armed state.
+
+* `pc_fire`: String. Indicates if the system is ready to fire.
+
+* `pc_redlines_armed / fc_redlines_armed`: String. Checks if a pressure transducer reading is above the safe range.
+
+* `pc_pulse / fc_pulse`: String. Pulse command type.
+
+* `pc_pdelay / fc_pdelay`: String. Pulse delay configuration.
+
+---
+
+## Prohibited States
+
+**Key:** `prohibited_states`
+
+**Type:** Object
+
+**Description:** Rules for prohibited combinations of states in propulsion (prop) and fill (fill) modes.
+
+**Location:** `relays.py`
+
+* `mutual_exclusions`: List. Each pair defines states that cannot coexist.
+
+* `mutual_inclusions`: List. Each pair defines states that cannot coexist.
+
+---
+
+## Pressure Transducer Scales
+
+**Key:** `pt_scales`
+
+**Type:** Object
+
+**Description:** Defines scaling values for pressure transducers in propulsion (prop_pt_scale) and fill (fill_pt_scale) modes.
+
+**Location:** `controller.py`
+
+* `max_p`: List. Maximum pressure valve
+
+* `max_v`: Number. Maximum voltage
+
+* `min_v`: Number. Minimum voltage
+
+---
+
+## Relay Maps
+
+**Key:** `relay_maps`
+
+**Type:** Object
+
+**Description:** Relay maps for propulsion (prop) and fill (fill) modes.
+
+**Location:** `relays.py`
+
+* `BV-01`: Number. Ball valve
+
+* `igniter`: Number.
+
+* `injector`: Number.
+
+* `SV-02`: Number. Servo valve
+
+* `power`: Number.
+
+---
+
+## Sensor Map
+
+**Key:** `sensor_map`
+
+**Type:** Object
+
+**Description:** Sensor map. Sensors under map are adc channels.
+
+**Location**: Not used.
+
+* `fc_adc1_c1` = number. analog to digital converter (adc), channel 1
+
+
+---
+
+## Telemetry Configuration
+
+**Key:** `telemetry_config`
+
+**Type:** Object
+
+**Description:** Configuration for telemetry data in propulsion(p) and fill (f) modes.
+
+**Location:** `telem_codec.py`, `relays.py`
+
+* `pc_timestamp / fc_timestamp`: String.
+
+* `pc_cpu_temp / fc__cpu_temp`: String. temperature of the raspberry pi
+
+* `pc_hard_armed / fc_hard_armed`: String. Hard armed state.
+
+* `pc_soft_armed / fc_soft_armed`: String. Soft armed state.
+
+* `pc_redlines_armed / fc_redlines_armed`: String. Checks if a pressure transducer reading is above the safe range.
+
+* `pc_state / fc_state`: String. Indicates the state of the system (e.g., h for hold).
+
+* `pc_scr_tag / fc_scr_tag`: String. Represents the current script or operational tag for the propulsion (p) and fill (f) control systems.
+
+* `adc_channels`: Object. analog to digital converter channels
+
+
+---
