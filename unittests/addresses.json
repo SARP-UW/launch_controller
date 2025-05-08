@@ -1,0 +1,11 @@
+{
+    "addresses" :
+        {
+            "TLM_SERVER_ADDR_IP" : "",
+            "TLM_SERVER_ADDR_PORT" : 30000,
+            "CMD_RECEIVER_ADDR_IP" : "",
+            "CMD_RECEIVER_ADDR_PORT" : 30001,
+            "GC_ADDR_IP" : "192.168.1.101",
+            "GC_ADDR_PORT" : 30000
+        }
+}
