@@ -124,12 +124,18 @@ class Relays:
 
     def PULSE_VALVE(self, GPIO, valve, delay):
         # flip requested valve
+        print(f"[PULSE_VALVE] pulsing valve {valve} for {delay} ms")
         self._requested_state[valve] = 0 if self._requested_state[valve] == 1 else 1
+        
+        print(f"[PULSE_VALVE] set valve {valve} to {self._requested_state[valve]}")
         self.update(GPIO)
+        
         # valve delay
         time.sleep(delay/1000)
+
         # flip to previous state
         self._requested_state[valve] = 0 if self._requested_state[valve] == 1 else 1
+        print(f"[PULSE_VALVE] set valve {valve} to {self._requested_state[valve]} (restored)")
         self.update(GPIO)
 
     def SET_VENT_STATE(self, GPIO, tag):

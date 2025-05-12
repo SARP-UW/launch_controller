@@ -92,7 +92,9 @@ class Controller:
             # pulse valve
             pulse_valve = command[f"{self._control[0]}c_pulse"]
             if pulse_valve >= 0:
-                self.relays.PULSE_VALVE(GPIO, pulse_valve, command[f"{self._control[0]}c_pdelay"])
+                pulse_delay = command[f"{self._control[0]}c_pdelay"]
+                print(f"Pulsing valve {pulse_valve}")
+                self.relays.PULSE_VALVE(GPIO, pulse_valve, pulse_delay)
 
             # check if software is armed
             if command[f"{self._control[0]}c_soft_armed"]:
