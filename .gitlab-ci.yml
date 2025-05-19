@@ -1,0 +1,29 @@
+# Commands that run before any other job. Runs once.
+before_script:
+  - python -V  # Print out python version for debugging
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install sarp-utils bitarray pytest fake-rpigpio
+
+# Stages can have multiple jobs
+stages:
+  - compile
+  - test
+
+# Job called 'compile'
+compile:
+  stage: compile  # allocate job to 'compile' stage
+  tags: [production]  # used to select which runner, RPi has production tag
+  script:  # script contains commands to be run in the shell
+    - pwd
+    - echo "Compiling"
+    - python relays.py
+
+test:
+  stage: test  # allocate job to 'test' stage
+  tags: [production, fillcontrol]  # select RPi
+  script:
+    - pwd  # sanity check
+    - ls
+    - echo "Testing"
+    - python -m pytest -v --ignore=unittests/test_template.py # verbose, ignore template

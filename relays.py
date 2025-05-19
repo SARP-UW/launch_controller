@@ -33,12 +33,12 @@ class Relays:
         # for default state, fill is set to venting state
         if self._control == "fill":
             VENT_STATE = [0, 0, 0, 0, 0, 1, 0, 1, 1, 0]
-            CLOSED_STATE = [0, 0, 0, 0, 1, 0, 1, 0, 0, 0]
+            CLOSED_STATE = [1, 1, 1, 1, 1, 0, 1, 0, 0, 0]
             self._state = VENT_STATE
             request = CLOSED_STATE
         else:
-            VENT_STATE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            CLOSED_STATE = [0, 0, 1, 0, 1, 0, 0, 0, 0, 0]
+            VENT_STATE = [0, 0, 1, 0, 1, 0, 0, 0, 0, 0]
+            CLOSED_STATE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             self._state = VENT_STATE
             request = CLOSED_STATE
 
@@ -95,6 +95,63 @@ class Relays:
         self._SCR_tag = tag
 
     def INITIATE_FIRE_SEQUENCE(self, GPIO):
+            # Oxygen Main Valve (OMV): 5
+            # Fuel Main Valve (FMV): 6
+            # Oxygen Purge Valve (OPV): 7
+            # Helium Bottle Valve (HBV: 8
+            prop = self.GPIO_MAPPING
+
+            if self._inj:
+                GPIO.output(prop[5], GPIO.LOW)
+                time.sleep(0.02)
+                GPIO.output(prop[6], GPIO.LOW)
+                self._inj = False
+                return
+
+            if not self._armed:
+                return
+
+            # Step 1: Fire button clicked- Power ignitor
+            GPIO.output(prop["igniter"], GPIO.HIGH)
+            time.sleep(3.5)
+
+            # Step 2: Open OMV (Ox Main Valve)
+            GPIO.output(prop[5], GPIO.HIGH)
+
+            # Step 3: Delay 65 ms
+            time.sleep(0.065)
+
+            # Step 4: Open FMV (Fuel Main Valve)
+            GPIO.output(prop[6], GPIO.HIGH)
+
+            # Step 5: Delay 14.5 s (combustion duration)
+            time.sleep(14.5)
+
+            # Step 6: Open OPV (Ox Purge Valve)
+            GPIO.output(prop[7], GPIO.HIGH)
+
+            # Step 7: Delay 30 s (purge time)
+            time.sleep(30)
+
+            # Step 8: Close OPV
+            GPIO.output(prop[7], GPIO.LOW)
+
+            # Step 9: Close HBV (Helium Blowdown Valve)
+            GPIO.output(prop[8], GPIO.LOW)
+
+            # Step 10: Delay 30 s
+            time.sleep(30)
+
+            # Step 11: Close OMV
+            GPIO.output(prop[5], GPIO.LOW)
+
+            # Step 12: Close FMV
+            GPIO.output(prop[6], GPIO.LOW)
+
+            # Final: Power off ignitor
+            GPIO.output(prop["igniter"], GPIO.LOW)
+        
+    def INITIATE_FIRE_SEQUENCE_OLD(self, GPIO):
         if (self._inj):
             GPIO.output(self.GPIO_MAPPING[5], GPIO.LOW)
             time.sleep(0.02)
@@ -124,18 +181,12 @@ class Relays:
 
     def PULSE_VALVE(self, GPIO, valve, delay):
         # flip requested valve
-        print(f"[PULSE_VALVE] pulsing valve {valve} for {delay} ms")
         self._requested_state[valve] = 0 if self._requested_state[valve] == 1 else 1
-        
-        print(f"[PULSE_VALVE] set valve {valve} to {self._requested_state[valve]}")
         self.update(GPIO)
-        
         # valve delay
         time.sleep(delay/1000)
-
         # flip to previous state
         self._requested_state[valve] = 0 if self._requested_state[valve] == 1 else 1
-        print(f"[PULSE_VALVE] set valve {valve} to {self._requested_state[valve]} (restored)")
         self.update(GPIO)
 
     def SET_VENT_STATE(self, GPIO, tag):
