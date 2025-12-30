@@ -1,0 +1,3 @@
+RPi.GPIO
+adafruit-blinka
+adafruit-circuitpython-ads1x15

@@ -1,0 +1,25 @@
+{
+    "valve_config":
+    [
+        {
+            "id": 1,
+            "name": "Main Valve",
+            "default_state": "closed"
+        }
+    ],
+    "pressure_sensor_config":
+    [
+        {
+            "id": 1,
+            "name": "Main Pressure Sensor",
+            "voltage_range": {
+                "min": 0,
+                "max": 5
+            },
+            "pressure_range": {
+                "min": 0,
+                "max": 1000
+            }
+        }
+    ]
+}
