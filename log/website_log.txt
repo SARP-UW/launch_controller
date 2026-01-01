@@ -1,0 +1,179 @@
+timestamp, user, type, status
+2026-01-01T13:45:01.137857, system, status, Server started
+2026-01-01T13:45:01.138427, system, info, Website id: 1573117402080
+2026-01-01T13:45:01.139014, system, info, Controller id: 1573117401072
+2026-01-01T13:45:01.139308, system, info, Website port: 8080
+2026-01-01T13:45:01.139501, system, info, Polling rate: 20.0Hz
+2026-01-01T13:45:01.139840, system, info, Heartbeat timeout: 5.0s
+2026-01-01T13:45:01.140241, system, info, Safe state timeout: 300.0s
+2026-01-01T13:45:01.140477, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T13:45:01.141037, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T13:45:01.141312, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T13:45:47.351284, 127.0.0.1, status, User connected
+2026-01-01T13:45:47.614551, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:47.943150, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:48.758655, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:49.438550, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:50.262840, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:50.882203, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:51.691967, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:52.508569, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:52.952698, 127.0.0.1, status, User disconnected
+2026-01-01T13:45:53.254160, 127.0.0.1, status, User connected
+2026-01-01T13:45:53.324566, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:54.028978, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:54.853073, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:55.676906, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:56.456683, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:58.123451, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:45:58.289108, 127.0.0.1, status, User disconnected
+2026-01-01T13:45:59.119463, 127.0.0.1, status, User connected
+2026-01-01T13:45:59.120922, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:00.132879, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:01.129735, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:02.123723, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:03.118864, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:04.131240, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:04.135471, 127.0.0.1, status, User disconnected
+2026-01-01T13:46:04.821758, 127.0.0.1, status, User connected
+2026-01-01T13:46:05.126694, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:06.123902, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:07.122142, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:08.131314, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:09.125653, 127.0.0.1, error, Failed to get valve info: Object of type ValveState is not JSON serializable
+2026-01-01T13:46:09.579074, system, status, Server shutting down
+2026-01-01T13:53:24.255021, system, status, Server started
+2026-01-01T13:53:24.256057, system, info, Website id: 2295739948000
+2026-01-01T13:53:24.256643, system, info, Controller id: 2295739946992
+2026-01-01T13:53:24.257229, system, info, Website port: 8080
+2026-01-01T13:53:24.258370, system, info, Polling rate: 20.0Hz
+2026-01-01T13:53:24.258690, system, info, Heartbeat timeout: 5.0s
+2026-01-01T13:53:24.259018, system, info, Safe state timeout: 300.0s
+2026-01-01T13:53:24.259295, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T13:53:24.259708, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T13:53:24.260114, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T13:53:24.424396, 127.0.0.1, status, User connected
+2026-01-01T13:53:33.371447, 127.0.0.1, status, User disconnected
+2026-01-01T13:53:33.635946, 127.0.0.1, status, User connected
+2026-01-01T13:53:38.663728, 127.0.0.1, status, User disconnected
+2026-01-01T13:53:38.748492, 127.0.0.1, status, User connected
+2026-01-01T13:53:43.751436, 127.0.0.1, status, User disconnected
+2026-01-01T13:53:43.960878, 127.0.0.1, status, User connected
+2026-01-01T13:53:53.979815, 127.0.0.1, status, User disconnected
+2026-01-01T13:53:54.044463, 127.0.0.1, status, User connected
+2026-01-01T13:53:59.070767, 127.0.0.1, status, User disconnected
+2026-01-01T13:53:59.808873, 127.0.0.1, status, User connected
+2026-01-01T13:54:04.817664, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:05.134011, 127.0.0.1, status, User connected
+2026-01-01T13:54:10.158345, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:11.133126, 127.0.0.1, status, User connected
+2026-01-01T13:54:16.150484, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:16.157137, 127.0.0.1, status, User connected
+2026-01-01T13:54:21.186412, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:21.339938, 127.0.0.1, status, User connected
+2026-01-01T13:54:26.373224, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:26.609203, 127.0.0.1, status, User connected
+2026-01-01T13:54:31.616330, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:31.920808, 127.0.0.1, status, User connected
+2026-01-01T13:54:36.961949, 127.0.0.1, status, User disconnected
+2026-01-01T13:54:37.241771, 127.0.0.1, status, User connected
+2026-01-01T13:54:42.104198, system, status, Server shutting down
+2026-01-01T13:57:32.709958, system, status, Server started
+2026-01-01T13:57:32.710827, system, info, Website id: 2276050246624
+2026-01-01T13:57:32.711760, system, info, Controller id: 2276050245616
+2026-01-01T13:57:32.712245, system, info, Website port: 8080
+2026-01-01T13:57:32.712677, system, info, Polling rate: 20.0Hz
+2026-01-01T13:57:32.712916, system, info, Heartbeat timeout: 5.0s
+2026-01-01T13:57:32.713077, system, info, Safe state timeout: 300.0s
+2026-01-01T13:57:32.713989, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T13:57:32.714199, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T13:57:32.714362, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T13:57:32.910153, 127.0.0.1, status, User connected
+2026-01-01T13:58:04.657123, system, status, Server shutting down
+2026-01-01T14:02:22.333985, system, status, Server started
+2026-01-01T14:02:22.334384, system, info, Website id: 1500566690784
+2026-01-01T14:02:22.334676, system, info, Controller id: 1500566689776
+2026-01-01T14:02:22.334979, system, info, Website port: 8080
+2026-01-01T14:02:22.335165, system, info, Polling rate: 20.0Hz
+2026-01-01T14:02:22.335496, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:02:22.335948, system, info, Safe state timeout: 300.0s
+2026-01-01T14:02:22.336350, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:02:22.336554, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:02:22.336916, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:02:22.814716, 127.0.0.1, status, User connected
+2026-01-01T14:02:34.026479, system, status, Server shutting down
+2026-01-01T14:04:59.051436, system, status, Server started
+2026-01-01T14:04:59.051898, system, info, Website id: 2117437397984
+2026-01-01T14:04:59.052387, system, info, Controller id: 2117437396976
+2026-01-01T14:04:59.053001, system, info, Website port: 8080
+2026-01-01T14:04:59.053516, system, info, Polling rate: 20.0Hz
+2026-01-01T14:04:59.054072, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:04:59.054220, system, info, Safe state timeout: 300.0s
+2026-01-01T14:04:59.054668, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:04:59.054848, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:04:59.055567, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:04:59.093330, 127.0.0.1, status, User connected
+2026-01-01T14:06:02.743078, system, status, Server shutting down
+2026-01-01T14:17:41.917133, system, status, Server started
+2026-01-01T14:17:41.917594, system, info, Website id: 2372126940128
+2026-01-01T14:17:41.917890, system, info, Controller id: 2372126939120
+2026-01-01T14:17:41.918433, system, info, Website port: 8080
+2026-01-01T14:17:41.918616, system, info, Polling rate: 20.0Hz
+2026-01-01T14:17:41.919069, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:17:41.919478, system, info, Safe state timeout: 300.0s
+2026-01-01T14:17:41.919919, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:17:41.920111, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:17:41.920380, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:17:44.020412, 127.0.0.1, status, User connected
+2026-01-01T14:18:46.111249, system, status, Server shutting down
+2026-01-01T14:18:47.618988, system, status, Server started
+2026-01-01T14:18:47.619397, system, info, Website id: 1211545787360
+2026-01-01T14:18:47.619633, system, info, Controller id: 1211545786352
+2026-01-01T14:18:47.619975, system, info, Website port: 8080
+2026-01-01T14:18:47.620204, system, info, Polling rate: 20.0Hz
+2026-01-01T14:18:47.620745, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:18:47.621168, system, info, Safe state timeout: 300.0s
+2026-01-01T14:18:47.621354, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:18:47.621482, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:18:47.621782, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:18:49.404077, 127.0.0.1, status, User connected
+2026-01-01T14:19:21.116797, system, status, Server shutting down
+2026-01-01T14:19:21.127689, 127.0.0.1, error, Attempted to get safe mode while website shut down.
+2026-01-01T14:19:21.128204, 127.0.0.1, error, Attempted to send heartbeat while website shut down.
+2026-01-01T14:19:21.128323, 127.0.0.1, error, Attempted to get sensor info while website shut down.
+2026-01-01T14:19:45.873128, system, status, Server started
+2026-01-01T14:19:45.873571, system, info, Website id: 1809354300384
+2026-01-01T14:19:45.874267, system, info, Controller id: 1809354299376
+2026-01-01T14:19:45.874610, system, info, Website port: 8080
+2026-01-01T14:19:45.875237, system, info, Polling rate: 20.0Hz
+2026-01-01T14:19:45.875581, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:19:45.875858, system, info, Safe state timeout: 300.0s
+2026-01-01T14:19:45.875997, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:19:45.876630, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:19:45.876819, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:19:47.903075, 127.0.0.1, status, User connected
+2026-01-01T14:20:41.899499, system, status, Server shutting down
+2026-01-01T14:20:57.452931, system, status, Server started
+2026-01-01T14:20:57.453350, system, info, Website id: 2076646153184
+2026-01-01T14:20:57.453723, system, info, Controller id: 2076646152176
+2026-01-01T14:20:57.454242, system, info, Website port: 8080
+2026-01-01T14:20:57.454451, system, info, Polling rate: 20.0Hz
+2026-01-01T14:20:57.455134, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:20:57.455770, system, info, Safe state timeout: 300.0s
+2026-01-01T14:20:57.456214, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:20:57.456695, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:20:57.456886, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:20:59.485782, 127.0.0.1, status, User connected
+2026-01-01T14:21:17.156126, system, status, Server shutting down
+2026-01-01T14:21:28.661184, system, status, Server started
+2026-01-01T14:21:28.661699, system, info, Website id: 3051681061856
+2026-01-01T14:21:28.662700, system, info, Controller id: 3051681060848
+2026-01-01T14:21:28.663274, system, info, Website port: 8080
+2026-01-01T14:21:28.663714, system, info, Polling rate: 20.0Hz
+2026-01-01T14:21:28.663909, system, info, Heartbeat timeout: 5.0s
+2026-01-01T14:21:28.664045, system, info, Safe state timeout: 300.0s
+2026-01-01T14:21:28.664250, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T14:21:28.664737, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T14:21:28.664928, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T14:21:28.890197, 127.0.0.1, status, User connected
+2026-01-01T14:24:30.497664, system, status, Server shutting down

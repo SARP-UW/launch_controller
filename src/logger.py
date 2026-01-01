@@ -1,3 +1,4 @@
+from typing import List
 from datetime import datetime
 
 class Logger:
@@ -5,18 +6,34 @@ class Logger:
     Class for logging data to a file with timestamps.
     """
     
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, col: List[str]) -> None:
         """
         Initializes a Logger object with the given parameters.
         
         Args:
             path: The path of the file where data will be logged.
+            col: List of column names for the logged data.
         """
+        if len(col) == 0:
+            raise ValueError("Logger must have at least one column")
         self._path = path
-        self._file = open(path, 'a')
-       
-    def __del__(self) -> None:
-        self._file.close()
+        self._col = col
+        try:
+            with open(self._path, 'r') as file:
+                first_line = file.readline().strip()
+                expected_header = "timestamp, " + ", ".join(col)
+                if first_line != expected_header:
+                    with open(self._path, 'a') as file:
+                        file.write(expected_header + "\n")
+        except FileNotFoundError:
+            with open(self._path, 'w') as file:
+                file.write("timestamp, " + ", ".join(col) + "\n")
+        
+    def __str__(self) -> str:
+        """
+        Gets string representation of Logger.
+        """
+        return f"Logger(path = {self._path}, col = {self._col})"
         
     @property
     def path(self) -> str:
@@ -25,14 +42,23 @@ class Logger:
         """
         return self._path
         
-    def log_data(self, data: str) -> None:
+    @property
+    def col(self) -> List[str]:
+        """
+        List of column names for the logged data.
+        """
+        return list(self._col)
+        
+    def log_data(self, data: List[str]) -> None:
         """
         Logs the provided data to the Logger's file with an added timestamp using 
         the format: "YYYY-MM-DDTHH:MM:SS.ssssss, data".
         
         Args:
-            data: The data to be logged.
+            data: List of data to be logged
         """
+        if len(data) != len(self._col):
+            raise ValueError(f"Number of data points: {len(data)} does not match number of columns: {len(self._col)}")
         timestamp = datetime.now().isoformat()
-        self._file.write(f"{timestamp}, {data}\n")
-        self._file.flush()
+        with open(self._path, 'a') as file:
+            file.write(f"{timestamp}, {', '.join(data)}\n")

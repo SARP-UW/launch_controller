@@ -1,0 +1,100 @@
+{
+    "website_config": {
+        "website_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\website_log.txt",
+        "port": 8080,
+        "polling_rate": 20.0,
+        "heartbeat_timeout": 5.0,
+        "safe_state_timeout": 300.0
+    },
+    "invalid_valve_states": [
+        {
+            "open": [1, 2, 3],
+            "closed": [4, 5, 6]
+        }
+    ],
+    "valve_safe_config": 
+    [
+        {
+            "id": 1,
+            "state": "closed"
+        },
+        {
+            "id": 2,
+            "state": "open"
+        }
+    ],
+    "procedures": [
+        {
+            "name": "Startup Sequence",
+            "steps": [
+                {
+                    "name": "Initialize System",
+                    "requirements": [
+                        {
+                            "type": "pressure_below",
+                            "sensor_id": 1,
+                            "threshold": 50.0
+                        },
+                        {
+                            "type": "valve_state",
+                            "valve_id": 1,
+                            "state": "closed"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "wait",
+                            "duration": 5
+                        },
+                        {
+                            "type": "user_confirm",
+                            "message": "Please confirm the system is initialized."
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 2,
+                            "state": "closed"
+                        }
+                    ]
+                },
+                {
+                    "name": "Shutdown System",
+                    "requirements": [
+                        {
+                            "type": "pressure_above",
+                            "sensor_id": 1,
+                            "threshold": 50.0
+                        },
+                        {
+                            "type": "pressure_between",
+                            "sensor_id": 2,
+                            "min_threshold": 20.0,
+                            "max_threshold": 80.0
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "wait",
+                            "duration": 5
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "open"
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 2,
+                            "state": "closed"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

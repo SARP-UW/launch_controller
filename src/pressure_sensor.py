@@ -1,8 +1,15 @@
+import math
+import random
+import time
 from typing import List, Dict
-import board
-from busio import I2C
-from adafruit_ads1x15.ads1115 import ADS1115
-from adafruit_ads1x15.analog_in import AnalogIn
+import settings
+
+# Only import hardware libraries if not in mock mode
+if not settings.MOCK_MODE:
+    import board
+    from busio import I2C
+    from adafruit_ads1x15.ads1115 import ADS1115
+    from adafruit_ads1x15.analog_in import AnalogIn
 
 # Number of supported pressure sensors
 PS_COUNT = 8
@@ -19,38 +26,40 @@ PS_MIN_PRESSURE = 0.0
 # Maximum possible pressure for pressure sensors (in PSI)
 PS_MAX_PRESSURE = 10000.0
 
-# Global I2C bus for pressure sensor ADCs
-PS_ADC_I2C_BUS = I2C(board.SCL1, board.SDA1)
+if not settings.MOCK_MODE:
+    
+    # Global I2C bus for pressure sensor ADCs
+    PS_ADC_I2C_BUS = I2C(board.SCL1, board.SDA1)
 
-# List of ADCs used to read pressure sensors
-PS_ADC_LIST: List[ADS1115] = [
-    ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x48),
-    ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x49)
-]
+    # List of ADCs used to read pressure sensors
+    PS_ADC_LIST: List[ADS1115] = [
+        ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x48),
+        ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x49)
+    ]
 
-# Mapping of pressure sensor IDs to their corresponding ADCs
-PS_ADC_MAP: Dict[int, ADS1115] = {
-    1: PS_ADC_LIST[0],
-    2: PS_ADC_LIST[0],
-    3: PS_ADC_LIST[0],
-    4: PS_ADC_LIST[0],
-    5: PS_ADC_LIST[1],
-    6: PS_ADC_LIST[1],
-    7: PS_ADC_LIST[1],
-    8: PS_ADC_LIST[1]
-}
+    # Mapping of pressure sensor IDs to their corresponding ADCs
+    PS_ADC_MAP: Dict[int, ADS1115] = {
+        1: PS_ADC_LIST[0],
+        2: PS_ADC_LIST[0],
+        3: PS_ADC_LIST[0],
+        4: PS_ADC_LIST[0],
+        5: PS_ADC_LIST[1],
+        6: PS_ADC_LIST[1],
+        7: PS_ADC_LIST[1],
+        8: PS_ADC_LIST[1]
+    }
 
-# Mapping of pressure sensor IDs to their corresponding ADC channels
-PS_CHANNEL_MAP: Dict[int, int] = {
-    1: 0,
-    2: 1,
-    3: 2,
-    4: 3,
-    5: 0,
-    6: 1,
-    7: 2,
-    8: 3
-}
+    # Mapping of pressure sensor IDs to their corresponding ADC channels
+    PS_CHANNEL_MAP: Dict[int, int] = {
+        1: 0,
+        2: 1,
+        3: 2,
+        4: 3,
+        5: 0,
+        6: 1,
+        7: 2,
+        8: 3
+    }
 
 class PressureSensor:
     """
@@ -92,8 +101,13 @@ class PressureSensor:
         self._max_voltage = max_voltage
         self._min_pressure = min_pressure
         self._max_pressure = max_pressure
-        self._adc = PS_ADC_MAP[id]
-        self._channel = PS_CHANNEL_MAP[id]
+        
+        if settings.MOCK_MODE:
+            self._base_pressure = (min_pressure + max_pressure) / 2
+            self._start_time = time.time()
+        else:
+            self._adc = PS_ADC_MAP[id]
+            self._channel = PS_CHANNEL_MAP[id]
 
     @classmethod
     def from_config(cls, config: Dict) -> "PressureSensor":
@@ -103,15 +117,52 @@ class PressureSensor:
         Args:
             config: The target configuration dict.
         """
+        if 'id' not in config:
+            raise KeyError(f"Pressure sensor config missing key: 'id'")
+        if 'name' not in config:
+            raise KeyError(f"Pressure sensor config missing key: 'name'")
+        if 'voltage_range' not in config:
+            raise KeyError(f"Pressure sensor config missing key: 'voltage_range'")
+        if 'pressure_range' not in config:
+            raise KeyError(f"Pressure sensor config missing key: 'pressure_range'")
+        
+        if 'min' not in config['voltage_range']:
+            raise KeyError(f"Pressure sensor config missing key: 'voltage_range.min'")
+        if 'max' not in config['voltage_range']:
+            raise KeyError(f"Pressure sensor config missing key: 'voltage_range.max'")
+        if 'min' not in config['pressure_range']:
+            raise KeyError(f"Pressure sensor config missing key: 'pressure_range.min'")
+        if 'max' not in config['pressure_range']:
+            raise KeyError(f"Pressure sensor config missing key: 'pressure_range.max'")
+        
         try:
-            id = config['id']
-            name = config['name']
-            min_voltage = config['voltage_range']['min']
-            max_voltage = config['voltage_range']['max']
-            min_pressure = config['pressure_range']['min']
-            max_pressure = config['pressure_range']['max']
-        except KeyError as e:
-            raise ValueError(f"Pressure sensor config missing key: {e}")
+            id = int(config['id'])
+        except (ValueError, TypeError):
+            raise ValueError(f"Pressure sensor config 'id' must be an integer, got: {type(config['id']).__name__}")
+        
+        name = config['name']
+        if not isinstance(name, str):
+            raise ValueError(f"Pressure sensor config 'name' must be a string, got: {type(name).__name__}")
+        
+        try:
+            min_voltage = float(config['voltage_range']['min'])
+        except (ValueError, TypeError):
+            raise ValueError(f"Pressure sensor config 'voltage_range.min' must be a number, got: {type(config['voltage_range']['min']).__name__}")
+        
+        try:
+            max_voltage = float(config['voltage_range']['max'])
+        except (ValueError, TypeError):
+            raise ValueError(f"Pressure sensor config 'voltage_range.max' must be a number, got: {type(config['voltage_range']['max']).__name__}")
+        
+        try:
+            min_pressure = float(config['pressure_range']['min'])
+        except (ValueError, TypeError):
+            raise ValueError(f"Pressure sensor config 'pressure_range.min' must be a number, got: {type(config['pressure_range']['min']).__name__}")
+        
+        try:
+            max_pressure = float(config['pressure_range']['max'])
+        except (ValueError, TypeError):
+            raise ValueError(f"Pressure sensor config 'pressure_range.max' must be a number, got: {type(config['pressure_range']['max']).__name__}")
                  
         return cls(
             id = id,
@@ -121,6 +172,12 @@ class PressureSensor:
             min_pressure = min_pressure,
             max_pressure = max_pressure
         )
+
+    def __str__(self) -> str:
+        """
+        Gets string representation of PressureSensor.
+        """
+        return f"PressureSensor(id = {self._id}, name = {self.name}, min_voltage = {self._min_voltage}, max_voltage = {self._max_voltage}, min_pressure = {self._min_pressure}, max_pressure = {self._max_pressure})"
 
     @property
     def id(self) -> int:
@@ -162,7 +219,19 @@ class PressureSensor:
         """
         Current pressure read by sensor.
         """
-        voltage = AnalogIn(self._adc, self._channel).voltage
-        voltage_scale = self._max_voltage - self._min_voltage
-        pressure_scale = self._max_pressure - self._min_pressure
-        return ((voltage - self._min_voltage) * (pressure_scale / voltage_scale)) + self._min_pressure
+        result: float = 0.0
+        if settings.MOCK_MODE:
+            elapsed = time.time() - self._start_time
+            variation = math.sin(elapsed * 0.5) * (self._max_pressure - self._min_pressure) * 0.1
+            noise_amplitude = (self._max_pressure - self._min_pressure) * 0.02
+            noise = random.uniform(-noise_amplitude, noise_amplitude)
+            pressure = self._base_pressure + variation + noise
+            result = max(self._min_pressure, min(self._max_pressure, pressure))
+        else:
+            voltage = AnalogIn(self._adc, self._channel).voltage
+            voltage_scale = self._max_voltage - self._min_voltage
+            pressure_scale = self._max_pressure - self._min_pressure
+            result = ((voltage - self._min_voltage) * (pressure_scale / voltage_scale)) + self._min_pressure
+        if settings.PRINT_PRESSURE_SENSOR_READINGS:
+            print(f"PRESSURE SENSOR READING: {self._id} = {result} PSI")
+        return result
