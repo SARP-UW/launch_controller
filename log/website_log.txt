@@ -177,3 +177,342 @@ timestamp, user, type, status
 2026-01-01T14:21:28.664928, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
 2026-01-01T14:21:28.890197, 127.0.0.1, status, User connected
 2026-01-01T14:24:30.497664, system, status, Server shutting down
+2026-01-01T15:40:20.388450, system, status, Server started
+2026-01-01T15:40:20.389150, system, info, Website id: 2800436812768
+2026-01-01T15:40:20.389732, system, info, Controller id: 2800436811760
+2026-01-01T15:40:20.390511, system, info, Website port: 8080
+2026-01-01T15:40:20.391594, system, info, Polling rate: 20.0Hz
+2026-01-01T15:40:20.392711, system, info, Heartbeat timeout: 5.0s
+2026-01-01T15:40:20.393622, system, info, Safe state timeout: 300.0s
+2026-01-01T15:40:20.393959, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T15:40:20.394340, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T15:40:20.395550, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T15:40:20.630057, 127.0.0.1, status, User connected
+2026-01-01T15:55:59.210328, 127.0.0.1, status, User disconnected
+2026-01-01T15:56:00.833722, 127.0.0.1, status, User connected
+2026-01-01T16:00:04.092717, system, status, Server shutting down
+2026-01-01T20:39:00.901904, system, status, Server started
+2026-01-01T20:39:00.902289, system, info, Website id: 1684138925696
+2026-01-01T20:39:00.902419, system, info, Controller id: 1684138924688
+2026-01-01T20:39:00.902524, system, info, Website port: 8080
+2026-01-01T20:39:00.903118, system, info, Polling rate: 20.0Hz
+2026-01-01T20:39:00.903539, system, info, Heartbeat timeout: 5.0s
+2026-01-01T20:39:00.903732, system, info, Safe state timeout: 300.0s
+2026-01-01T20:39:00.904020, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T20:39:00.904167, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T20:39:00.904368, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T20:39:04.618547, 127.0.0.1, status, User connected
+2026-01-01T20:39:44.791853, system, status, Server shutting down
+2026-01-01T20:40:58.096976, system, status, Server started
+2026-01-01T20:40:58.097761, system, info, Website id: 2331254791808
+2026-01-01T20:40:58.098216, system, info, Controller id: 2331254790800
+2026-01-01T20:40:58.098477, system, info, Website port: 8080
+2026-01-01T20:40:58.098719, system, info, Polling rate: 20.0Hz
+2026-01-01T20:40:58.099205, system, info, Heartbeat timeout: 5.0s
+2026-01-01T20:40:58.099566, system, info, Safe state timeout: 300.0s
+2026-01-01T20:40:58.099939, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T20:40:58.100404, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T20:40:58.100660, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T20:40:58.134421, 127.0.0.1, status, User connected
+2026-01-01T20:41:08.796472, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:41:11.364796, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:41:13.429651, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:41:15.283341, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:41:17.344096, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:41:19.683788, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:41:22.084529, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:41:24.347465, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:41:26.583008, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:41:28.838758, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:41:30.855029, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:41:32.924372, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:41:52.843497, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:42:01.126136, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:42:06.003728, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:42:07.974904, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:44:30.655535, system, status, Server shutting down
+2026-01-01T20:45:26.992400, system, status, Server started
+2026-01-01T20:45:26.992779, system, info, Website id: 1934812339840
+2026-01-01T20:45:26.992909, system, info, Controller id: 1934812338832
+2026-01-01T20:45:26.993102, system, info, Website port: 8080
+2026-01-01T20:45:26.993233, system, info, Polling rate: 20.0Hz
+2026-01-01T20:45:26.993338, system, info, Heartbeat timeout: 5.0s
+2026-01-01T20:45:26.993437, system, info, Safe state timeout: 300.0s
+2026-01-01T20:45:26.993678, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T20:45:26.993807, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T20:45:26.993963, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T20:45:29.149162, 127.0.0.1, status, User connected
+2026-01-01T20:45:34.007461, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:45:36.254451, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:45:40.680126, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:45:55.757489, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:47:06.735934, system, status, Server shutting down
+2026-01-01T20:47:42.313629, system, status, Server started
+2026-01-01T20:47:42.314014, system, info, Website id: 2151989730944
+2026-01-01T20:47:42.314182, system, info, Controller id: 2151989729936
+2026-01-01T20:47:42.314303, system, info, Website port: 8080
+2026-01-01T20:47:42.314413, system, info, Polling rate: 20.0Hz
+2026-01-01T20:47:42.314512, system, info, Heartbeat timeout: 5.0s
+2026-01-01T20:47:42.314601, system, info, Safe state timeout: 300.0s
+2026-01-01T20:47:42.314870, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T20:47:42.315131, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T20:47:42.315310, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T20:47:43.932818, 127.0.0.1, status, User connected
+2026-01-01T20:47:45.270336, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:47:47.118244, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:47:55.062785, 127.0.0.1, status, User disconnected
+2026-01-01T20:49:23.176287, system, status, Server shutting down
+2026-01-01T20:49:26.049707, system, status, Server started
+2026-01-01T20:49:26.050090, system, info, Website id: 1667375111808
+2026-01-01T20:49:26.050249, system, info, Controller id: 1667375110800
+2026-01-01T20:49:26.050421, system, info, Website port: 8080
+2026-01-01T20:49:26.050601, system, info, Polling rate: 20.0Hz
+2026-01-01T20:49:26.050710, system, info, Heartbeat timeout: 5.0s
+2026-01-01T20:49:26.051254, system, info, Safe state timeout: 300.0s
+2026-01-01T20:49:26.051479, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T20:49:26.051603, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T20:49:26.051705, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T20:49:28.102727, 127.0.0.1, status, User connected
+2026-01-01T20:49:30.291817, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T20:49:32.315157, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T20:52:26.282606, system, status, Server shutting down
+2026-01-01T21:00:28.859996, system, status, Server started
+2026-01-01T21:00:28.860456, system, info, Website id: 1608278023808
+2026-01-01T21:00:28.860597, system, info, Controller id: 1608278022800
+2026-01-01T21:00:28.860742, system, info, Website port: 8080
+2026-01-01T21:00:28.860904, system, info, Polling rate: 20.0Hz
+2026-01-01T21:00:28.861021, system, info, Heartbeat timeout: 5.0s
+2026-01-01T21:00:28.861172, system, info, Safe state timeout: 300.0s
+2026-01-01T21:00:28.861608, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T21:00:28.861991, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T21:00:28.862218, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T21:00:30.867768, 127.0.0.1, status, User connected
+2026-01-01T21:01:20.925172, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:01:23.797942, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:01:26.620320, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:01:29.527655, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:01:31.590683, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:01:33.791495, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:01:35.974483, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:01:38.059430, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:01:40.495865, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:01:44.581061, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:01:47.248152, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:03:54.003958, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:08:30.061006, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:33:28.134920, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:33:34.727171, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:33:37.388802, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:33:39.840686, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:33:54.825844, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:33:56.986286, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:33:59.258120, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:34:24.715672, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:36:20.608982, system, status, Server shutting down
+2026-01-01T21:39:56.689929, system, status, Server started
+2026-01-01T21:39:56.690339, system, info, Website id: 2093201907328
+2026-01-01T21:39:56.690487, system, info, Controller id: 2093201906320
+2026-01-01T21:39:56.690641, system, info, Website port: 8080
+2026-01-01T21:39:56.691010, system, info, Polling rate: 20.0Hz
+2026-01-01T21:39:56.691516, system, info, Heartbeat timeout: 5.0s
+2026-01-01T21:39:56.691708, system, info, Safe state timeout: 300.0s
+2026-01-01T21:39:56.691817, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T21:39:56.691934, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T21:39:56.692211, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T21:39:58.705272, 127.0.0.1, status, User connected
+2026-01-01T21:40:52.684058, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:40:55.301237, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:40:57.563943, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:41:00.405336, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:41:02.617769, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:41:04.599611, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:57:20.983849, system, status, Server shutting down
+2026-01-01T21:57:22.576416, system, status, Server started
+2026-01-01T21:57:22.576775, system, info, Website id: 2068034248320
+2026-01-01T21:57:22.577020, system, info, Controller id: 2068034247312
+2026-01-01T21:57:22.577180, system, info, Website port: 8080
+2026-01-01T21:57:22.577627, system, info, Polling rate: 20.0Hz
+2026-01-01T21:57:22.577816, system, info, Heartbeat timeout: 5.0s
+2026-01-01T21:57:22.577934, system, info, Safe state timeout: 300.0s
+2026-01-01T21:57:22.578095, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T21:57:22.578497, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T21:57:22.578842, system, info, Invalid valve states: [{'open': [1, 2, 3], 'closed': [4, 5, 6]}]
+2026-01-01T21:57:22.832397, 127.0.0.1, status, User connected
+2026-01-01T21:57:30.995806, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:57:33.435279, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:57:35.683444, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:57:38.166439, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:57:40.351347, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:57:45.243219, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:57:47.175204, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:57:55.683651, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:57:56.767318, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:57:57.896226, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:57:59.224151, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:58:00.357029, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:58:01.709635, 127.0.0.1, action, Pulsed valve 1 for 0.1s
+2026-01-01T21:58:05.708376, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:07.867324, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:10.066429, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:12.216413, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:14.725928, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:17.468002, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:19.945349, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:22.285399, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:24.657045, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:27.133485, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:29.600045, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:31.786884, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:33.913028, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:36.081330, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:38.232427, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:40.344673, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:42.254636, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:44.642779, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:46.818602, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:49.167197, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:58:51.538363, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:57.668207, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:58:59.716528, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:59:01.673257, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:59:03.624871, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:59:05.527428, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:59:07.664695, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T21:59:10.077098, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T21:59:12.344084, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:08:23.338958, system, status, Server shutting down
+2026-01-01T22:11:43.528412, system, status, Server started
+2026-01-01T22:11:43.528782, system, info, Website id: 1442333793920
+2026-01-01T22:11:43.529061, system, info, Controller id: 1442333792912
+2026-01-01T22:11:43.529681, system, info, Website port: 8080
+2026-01-01T22:11:43.530021, system, info, Polling rate: 20.0Hz
+2026-01-01T22:11:43.530163, system, info, Heartbeat timeout: 5.0s
+2026-01-01T22:11:43.530273, system, info, Safe state timeout: 300.0s
+2026-01-01T22:11:43.530375, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T22:11:43.530481, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T22:11:43.530585, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T22:11:43.816219, 127.0.0.1, status, User connected
+2026-01-01T22:12:21.406987, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:24.046892, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:26.281404, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:28.429117, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:30.665972, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:33.806634, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:36.490825, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:38.474416, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:40.382104, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:42.477895, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:45.818928, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:50.426608, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:12:52.581938, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:12:54.835716, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:12:57.023600, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:12:59.026847, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:13:01.310031, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:13:21.861830, system, status, Server shutting down
+2026-01-01T22:19:04.756367, system, status, Server started
+2026-01-01T22:19:04.756857, system, info, Website id: 1776401194624
+2026-01-01T22:19:04.757014, system, info, Controller id: 1776401193616
+2026-01-01T22:19:04.757120, system, info, Website port: 8080
+2026-01-01T22:19:04.757390, system, info, Polling rate: 20.0Hz
+2026-01-01T22:19:04.757580, system, info, Heartbeat timeout: 5.0s
+2026-01-01T22:19:04.757692, system, info, Safe state timeout: 300.0s
+2026-01-01T22:19:04.757971, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T22:19:04.758220, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T22:19:04.758384, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T22:19:05.154323, 127.0.0.1, status, User connected
+2026-01-01T22:23:24.651091, system, status, Server shutting down
+2026-01-01T22:25:50.565242, system, status, Server started
+2026-01-01T22:25:50.565719, system, info, Website id: 2581274304128
+2026-01-01T22:25:50.565871, system, info, Controller id: 2581274303120
+2026-01-01T22:25:50.565986, system, info, Website port: 8080
+2026-01-01T22:25:50.566203, system, info, Polling rate: 20.0Hz
+2026-01-01T22:25:50.566750, system, info, Heartbeat timeout: 5.0s
+2026-01-01T22:25:50.567142, system, info, Safe state timeout: 300.0s
+2026-01-01T22:25:50.567620, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T22:25:50.567951, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T22:25:50.568940, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T22:25:52.721170, 127.0.0.1, status, User connected
+2026-01-01T22:33:39.851375, system, status, Server shutting down
+2026-01-01T22:36:11.150765, system, status, Server started
+2026-01-01T22:36:11.151202, system, info, Website id: 1408180493952
+2026-01-01T22:36:11.151447, system, info, Controller id: 1408180492944
+2026-01-01T22:36:11.151662, system, info, Website port: 8080
+2026-01-01T22:36:11.151822, system, info, Polling rate: 20.0Hz
+2026-01-01T22:36:11.151940, system, info, Heartbeat timeout: 5.0s
+2026-01-01T22:36:11.152452, system, info, Safe state timeout: 300.0s
+2026-01-01T22:36:11.153078, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T22:36:11.153469, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T22:36:11.153703, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T22:36:12.992020, 127.0.0.1, status, User connected
+2026-01-01T22:43:26.535968, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:43:29.534702, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:43:31.822015, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:43:34.645289, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:43:37.254460, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:43:39.873575, 127.0.0.1, action, Pulsed valve 1 for 1.0s
+2026-01-01T22:43:42.478985, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:43:45.156710, 127.0.0.1, action, Pulsed valve 2 for 1.0s
+2026-01-01T22:53:18.819662, system, status, Server shutting down
+2026-01-01T22:56:21.455687, system, status, Server started
+2026-01-01T22:56:21.456152, system, info, Website id: 2421247401600
+2026-01-01T22:56:21.456314, system, info, Controller id: 2421247400592
+2026-01-01T22:56:21.456464, system, info, Website port: 8080
+2026-01-01T22:56:21.456596, system, info, Polling rate: 20.0Hz
+2026-01-01T22:56:21.457035, system, info, Heartbeat timeout: 5.0s
+2026-01-01T22:56:21.457328, system, info, Safe state timeout: 300.0s
+2026-01-01T22:56:21.457509, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T22:56:21.457694, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T22:56:21.458000, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T22:56:26.714206, 127.0.0.1, status, User connected
+2026-01-01T23:15:17.856960, system, status, Server shutting down
+2026-01-01T23:15:25.041204, system, status, Server started
+2026-01-01T23:15:25.041647, system, info, Website id: 2570883636864
+2026-01-01T23:15:25.041833, system, info, Controller id: 2570883635856
+2026-01-01T23:15:25.042003, system, info, Website port: 8080
+2026-01-01T23:15:25.042196, system, info, Polling rate: 20.0Hz
+2026-01-01T23:15:25.042333, system, info, Heartbeat timeout: 5.0s
+2026-01-01T23:15:25.042538, system, info, Safe state timeout: 300.0s
+2026-01-01T23:15:25.042699, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T23:15:25.042815, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T23:15:25.042933, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T23:15:27.304588, 127.0.0.1, status, User connected
+2026-01-01T23:20:54.391935, system, status, Safing system
+2026-01-01T23:24:52.563148, system, status, Server shutting down
+2026-01-01T23:24:53.851145, system, status, Server started
+2026-01-01T23:24:53.851523, system, info, Website id: 2162273394304
+2026-01-01T23:24:53.851653, system, info, Controller id: 2162273393296
+2026-01-01T23:24:53.851752, system, info, Website title: Ground Control
+2026-01-01T23:24:53.851913, system, info, Website port: 8080
+2026-01-01T23:24:53.852190, system, info, Polling rate: 20.0Hz
+2026-01-01T23:24:53.852602, system, info, Heartbeat timeout: 5.0s
+2026-01-01T23:24:53.852738, system, info, Safe state timeout: 300.0s
+2026-01-01T23:24:53.852876, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T23:24:53.852973, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T23:24:53.853075, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T23:25:53.377403, system, status, Server started
+2026-01-01T23:25:53.377896, system, info, Website id: 2604364553856
+2026-01-01T23:25:53.378085, system, info, Controller id: 2604364552848
+2026-01-01T23:25:53.378245, system, info, Website title: Ground Control
+2026-01-01T23:25:53.378352, system, info, Website port: 8080
+2026-01-01T23:25:53.378613, system, info, Polling rate: 20.0Hz
+2026-01-01T23:25:53.378851, system, info, Heartbeat timeout: 5.0s
+2026-01-01T23:25:53.379029, system, info, Safe state timeout: 300.0s
+2026-01-01T23:25:53.379277, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T23:25:53.379415, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T23:25:53.379521, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T23:25:53.394112, 127.0.0.1, status, User connected
+2026-01-01T23:28:55.236987, system, status, Server shutting down
+2026-01-01T23:31:36.253023, system, status, Server started
+2026-01-01T23:31:36.253462, system, info, Website id: 1596273467008
+2026-01-01T23:31:36.253661, system, info, Controller id: 1596273466000
+2026-01-01T23:31:36.253905, system, info, Website title: Ground Control
+2026-01-01T23:31:36.254432, system, info, Website port: 8080
+2026-01-01T23:31:36.254958, system, info, Polling rate: 20.0Hz
+2026-01-01T23:31:36.255134, system, info, Heartbeat timeout: 5.0s
+2026-01-01T23:31:36.255325, system, info, Safe state timeout: 300.0s
+2026-01-01T23:31:36.255489, system, info, Website logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\website_log.txt, col = ['user', 'type', 'status'])
+2026-01-01T23:31:36.255679, system, info, Valve safe config: [{'id': 1, 'state': 'closed'}, {'id': 2, 'state': 'open'}]
+2026-01-01T23:31:36.255794, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-01-01T23:31:36.324836, 127.0.0.1, status, User connected
+2026-01-01T23:35:27.080522, system, status, Server shutting down

@@ -73,7 +73,7 @@ def main():
         website_config = load_config(args.website_config)
         website = ControllerWebsite.from_config(controller = controller, config = website_config)        
         print(f"SYSTEM STATUS: System running!")
-        print(f"SYSTEM STATUS: Website at: http://localhost:{website_config['website_config']['port']}")
+        print(f"SYSTEM STATUS: Website at: http://localhost:{website_config['general_config']['port']}")
     
         while True:
             time.sleep(1)

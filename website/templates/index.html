@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ground Control System</title>
+    <title>{{ website_title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -21,17 +21,16 @@
 
     <header class="header">
         <div class="header-left">
-            <h1>Ground Control</h1>
+            <h1>{{ website_title }}</h1>
+        </div>
+        <div class="header-right">
+            <button id="safe-mode-btn" class="safe-mode-btn" onclick="toggleSafeMode()">
+                <span class="safe-mode-text">Safe Mode: OFF</span>
+            </button>
             <div id="connection-status" class="status-indicator disconnected">
                 <span class="status-dot"></span>
                 <span class="status-text">Disconnected</span>
             </div>
-        </div>
-        <div class="header-right">
-            <button id="safe-mode-btn" class="safe-mode-btn" onclick="toggleSafeMode()">
-                <span class="safe-mode-icon">🛡️</span>
-                <span class="safe-mode-text">Safe Mode: OFF</span>
-            </button>
         </div>
     </header>
 
@@ -50,13 +49,24 @@
 
         <aside class="procedures-panel">
             <h2>Procedures</h2>
-            <div class="procedure-selector">
-                <label for="procedure-select">Select Procedure:</label>
-                <select id="procedure-select" onchange="selectProcedure()"></select>
+            <div class="procedure-header">
+                <div class="procedure-selector" id="procedure-selector">
+                    <button class="procedure-dropdown-btn" id="procedure-dropdown-btn" type="button">
+                        Select Procedure
+                    </button>
+                    <div class="procedure-dropdown-menu" id="procedure-dropdown-menu"></div>
+                </div>
+                <button class="procedure-reset-btn" onclick="resetProcedure()" title="Reset all steps">Reset</button>
             </div>
-            <div id="procedure-steps" class="procedure-steps"></div>
+            <div class="procedure-steps-container">
+                <div id="procedure-steps" class="procedure-steps"></div>
+            </div>
         </aside>
     </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Student Association of Rocketry and Propulsion (SARP)</p>
+    </footer>
 
     <script>
         const CONFIG = {

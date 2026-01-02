@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 import settings
 from valve import Valve, ValveState
 from pressure_sensor import PressureSensor
@@ -19,8 +19,10 @@ class Controller:
         Background thread method to continuously read pressure sensors.
         """
         interval = 1.0 / self._sensor_data_rate
-        while not self._shutdown_flag:
-            with self._read_sensor_lock:
+        while True:
+            with self._thread_lock:
+                if self._shutdown_flag:
+                    break
                 for i, sensor in enumerate(self._pressure_sensor_list):
                     try:
                         self._current_pressure_list[i] = sensor.pressure
@@ -34,6 +36,8 @@ class Controller:
                     if settings.PRINT_CONTROLLER_ERRORS:
                         print(f"CONTROLLER ERROR: Failed to log sensor data: {e}")
                     self._controller_logger.log_data(["error", f"Failed to log sensor data: {e}"])
+            if settings.PRINT_PRESSURE_SENSOR_READINGS:
+                print(f"PRESSURE SENSOR READINGS: {[f"{sensor.name} ({sensor.id}) = {self._current_pressure_list[i]}" for i, sensor in enumerate(self._pressure_sensor_list)]}")
             time.sleep(interval)
     
     def __init__(self, valve_list: List[Valve], pressure_sensor_list: List[PressureSensor], sensor_data_rate: float, 
@@ -74,7 +78,8 @@ class Controller:
         self._sensor_data_rate = sensor_data_rate
         self._current_pressure_list = [0.0 for _ in _pressure_sensor_list]
         self._shutdown_flag = False
-        self._read_sensor_lock = threading.Lock()
+        self._thread_lock = threading.Lock()
+        self._pulsing_valves: set[int] = set()
         
         if len(_pressure_sensor_list) > 0:
             self._sensor_data_logger = Logger(
@@ -96,13 +101,7 @@ class Controller:
             path = controller_log_path,
             col = ["type", "message"]
         )
-        
-        if len(_pressure_sensor_list) > 0:
-            self._read_sensors_thread = threading.Thread(target = self._read_sensors)
-            self._read_sensors_thread.start()
-        else:
-            self._read_sensors_thread = None
-            
+                    
         if settings.PRINT_CONTROLLER_STATUS:
             print("CONTROLLER STATUS: Controller started")
             print(f"CONTROLLER INFO: Controller id: {id(self)}")
@@ -122,6 +121,10 @@ class Controller:
         self._controller_logger.log_data(["info", f"Valve data logger: {str(self._valve_data_logger)}"])
         self._controller_logger.log_data(["info", f"Controller logger: {str(self._controller_logger)}"])
         
+        if len(_pressure_sensor_list) > 0:
+            thread = threading.Thread(target = self._read_sensors, daemon = True)
+            thread.start()
+        
     @classmethod
     def from_config(cls, config: dict) -> "Controller":
         """
@@ -134,17 +137,17 @@ class Controller:
             raise KeyError(f"Controller config missing key: 'valve_config'")
         if 'pressure_sensor_config' not in config:
             raise KeyError(f"Controller config missing key: 'pressure_sensor_config'")
-        if 'system_config' not in config:
-            raise KeyError(f"Controller config missing key: 'system_config'")
+        if 'general_config' not in config:
+            raise KeyError(f"Controller config missing key: 'general_config'")
         
-        if 'pressure_sensor_data_rate' not in config['system_config']:
-            raise KeyError(f"Controller config missing key: 'system_config.pressure_sensor_data_rate'")
-        if 'pressure_sensor_data_log_path' not in config['system_config']:
-            raise KeyError(f"Controller config missing key: 'system_config.pressure_sensor_data_log_path'")
-        if 'valve_data_log_path' not in config['system_config']:
-            raise KeyError(f"Controller config missing key: 'system_config.valve_data_log_path'")
-        if 'controller_log_path' not in config['system_config']:
-            raise KeyError(f"Controller config missing key: 'system_config.controller_log_path'")
+        if 'pressure_sensor_data_rate' not in config['general_config']:
+            raise KeyError(f"Controller config missing key: 'general_config.pressure_sensor_data_rate'")
+        if 'pressure_sensor_data_log_path' not in config['general_config']:
+            raise KeyError(f"Controller config missing key: 'general_config.pressure_sensor_data_log_path'")
+        if 'valve_data_log_path' not in config['general_config']:
+            raise KeyError(f"Controller config missing key: 'general_config.valve_data_log_path'")
+        if 'controller_log_path' not in config['general_config']:
+            raise KeyError(f"Controller config missing key: 'general_config.controller_log_path'")
         
         if not isinstance(config['valve_config'], list):
             raise ValueError(f"Controller config 'valve_config' must be a list, got: {type(config['valve_config']).__name__}")
@@ -155,21 +158,21 @@ class Controller:
         pressure_sensor_list = [PressureSensor.from_config(ps_config) for ps_config in config['pressure_sensor_config']]
         
         try:
-            sensor_data_rate = float(config['system_config']['pressure_sensor_data_rate'])
+            sensor_data_rate = float(config['general_config']['pressure_sensor_data_rate'])
         except (ValueError, TypeError):
-            raise ValueError(f"Controller config 'system_config.pressure_sensor_data_rate' must be a number, got: {type(config['system_config']['pressure_sensor_data_rate']).__name__}")
+            raise ValueError(f"Controller config 'general_config.pressure_sensor_data_rate' must be a number, got: {type(config['general_config']['pressure_sensor_data_rate']).__name__}")
         
-        sensor_data_log_path = config['system_config']['pressure_sensor_data_log_path']
+        sensor_data_log_path = config['general_config']['pressure_sensor_data_log_path']
         if not isinstance(sensor_data_log_path, str):
-            raise ValueError(f"Controller config 'system_config.pressure_sensor_data_log_path' must be a string, got: {type(sensor_data_log_path).__name__}")
+            raise ValueError(f"Controller config 'general_config.pressure_sensor_data_log_path' must be a string, got: {type(sensor_data_log_path).__name__}")
         
-        valve_data_log_path = config['system_config']['valve_data_log_path']
+        valve_data_log_path = config['general_config']['valve_data_log_path']
         if not isinstance(valve_data_log_path, str):
-            raise ValueError(f"Controller config 'system_config.valve_data_log_path' must be a string, got: {type(valve_data_log_path).__name__}")
+            raise ValueError(f"Controller config 'general_config.valve_data_log_path' must be a string, got: {type(valve_data_log_path).__name__}")
         
-        controller_log_path = config['system_config']['controller_log_path']
+        controller_log_path = config['general_config']['controller_log_path']
         if not isinstance(controller_log_path, str):
-            raise ValueError(f"Controller config 'system_config.controller_log_path' must be a string, got: {type(controller_log_path).__name__}")
+            raise ValueError(f"Controller config 'general_config.controller_log_path' must be a string, got: {type(controller_log_path).__name__}")
    
         return cls(
             valve_list = valve_list,
@@ -190,7 +193,7 @@ class Controller:
         """
         if self._shutdown_flag:
             raise RuntimeError("Controller has been shut down")
-        with self._read_sensor_lock:
+        with self._thread_lock:
             return [{"id": valve.id, "name": valve.name, "default_state": valve.default_state.value, "current_state": valve.state.value} for valve in self._valve_list]
 
     @property
@@ -200,7 +203,7 @@ class Controller:
         """
         if self._shutdown_flag:
             raise RuntimeError("Controller has been shut down")
-        with self._read_sensor_lock:
+        with self._thread_lock:
             return [{"id": sensor.id, "name": sensor.name, "current_pressure": self._current_pressure_list[i]} for i, sensor in enumerate(self._pressure_sensor_list)]
     
     def set_valve(self, id: int, state: ValveState) -> None:
@@ -213,27 +216,90 @@ class Controller:
         """
         if self._shutdown_flag:
             raise RuntimeError("Controller has been shut down")
-        with self._read_sensor_lock:
+        with self._thread_lock:
             for i, valve in enumerate(self._valve_list):
                 if valve.id == id:
                     valve.state = state
+                    if settings.PRINT_VALVE_STATES:
+                        print(f"VALVE STATE: {valve.name} ({valve.id}) = {valve.state.value}")
                     self._valve_data_logger.log_data([str(valve.state.name) for valve in self._valve_list])
                     return
         raise ValueError(f"Controller has no valve with ID: {id}")
+        
+    def pulse_valve(self, id: int, duration: float) -> None:
+        """
+        Toggles a valve state, waits for the duration, then toggles it back.
+        
+        Args:
+            id: The unique ID of the valve to pulse.
+            duration: The duration in seconds before toggling back.
+        """
+        if self._shutdown_flag:
+            raise RuntimeError("Controller has been shut down")
+        if duration <= 0:
+            raise ValueError(f"Pulse duration must be positive: {duration}")
+        
+        with self._thread_lock:
+            valve = None
+            for v in self._valve_list:
+                if v.id == id:
+                    valve = v
+                    break
+            if valve is None:
+                raise ValueError(f"Controller has no valve with ID: {id}")
+            if id in self._pulsing_valves:
+                raise RuntimeError(f"Valve {id} is already being pulsed")
+            self._pulsing_valves.add(id)
+        
+        def do_pulse():
+            """
+            Executes the valve pulsing operation (runs in a separate thread).
+            """
+            try:
+                with self._thread_lock:
+                    if not self._shutdown_flag:
+                        new_state = ValveState.OPEN if valve.state == ValveState.CLOSED else ValveState.CLOSED
+                        valve.state = new_state
+                        if settings.PRINT_VALVE_STATES:
+                            print(f"VALVE STATE: {valve.name} ({valve.id}) = {valve.state.value}")
+                        self._valve_data_logger.log_data([str(v.state.name) for v in self._valve_list])
+                
+                time.sleep(duration)
+            
+                with self._thread_lock:
+                    if not self._shutdown_flag:
+                        new_state = ValveState.OPEN if valve.state == ValveState.CLOSED else ValveState.CLOSED
+                        valve.state = new_state
+                        if settings.PRINT_VALVE_STATES:
+                            print(f"VALVE STATE: {valve.name} ({valve.id}) = {valve.state.value}")
+                        self._valve_data_logger.log_data([str(v.state.name) for v in self._valve_list])
+                    
+            except Exception as e:
+                with self._thread_lock:
+                    if not self._shutdown_flag:
+                        if settings.PRINT_CONTROLLER_ERRORS:
+                            print(f"CONTROLLER ERROR: Failed to pulse valve {id}: {e}")
+                        self._controller_logger.log_data(["error", f"Failed to pulse valve {id}: {e}"])
+                
+            finally:
+                with self._thread_lock:
+                    if not self._shutdown_flag:
+                        self._pulsing_valves.discard(id)
+        
+        thread = threading.Thread(target = do_pulse, daemon = True)
+        thread.start()
         
     def shutdown(self) -> None:
         """
         Shuts down controller. After this function is called, calls to other methods will raise an exception.
         """
-        with self._read_sensor_lock:
+        with self._thread_lock:
             if self._shutdown_flag:
                 return
-            self._shutdown_flag = True
-        if self._read_sensors_thread and self._read_sensors_thread.is_alive():
-            self._read_sensors_thread.join(timeout = settings.THREAD_JOIN_TIMEOUT)
-        if settings.PRINT_CONTROLLER_STATUS:
-            print("CONTROLLER STATUS: Controller shutdown")
-        self._controller_logger.log_data(["status", "Controller shutdown"])
+            self._shutdown_flag = True                    
+            if settings.PRINT_CONTROLLER_STATUS:
+                print("CONTROLLER STATUS: Controller shutdown")
+            self._controller_logger.log_data(["status", "Controller shutdown"])
         
 
         

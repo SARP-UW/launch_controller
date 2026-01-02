@@ -1,5 +1,6 @@
 {
-    "website_config": {
+    "general_config": {
+        "website_title": "Ground Control",
         "website_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\website_log.txt",
         "port": 8080,
         "polling_rate": 20.0,
@@ -8,8 +9,7 @@
     },
     "invalid_valve_states": [
         {
-            "open": [1, 2, 3],
-            "closed": [4, 5, 6]
+            "open": [1, 2]
         }
     ],
     "valve_safe_config": 
@@ -91,6 +91,17 @@
                             "type": "set_valve",
                             "valve_id": 2,
                             "state": "closed"
+                        }
+                    ]
+                },
+                {
+                    "name": "Pulse stuff",
+                    "requirements": [],
+                    "actions": [
+                        {
+                            "type": "pulse_valve",
+                            "valve_id": 2,
+                            "duration": 0.5
                         }
                     ]
                 }

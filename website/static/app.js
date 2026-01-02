@@ -30,8 +30,10 @@ const State = {
     sensorHistory: {},
     sensorCharts: {},
     selectedProcedure: null,
+    selectedProcedureIndex: 0,
     completedSteps: new Set(),
-    currentRequirementsMet: {}
+    currentRequirementsMet: {},
+    pulsingValves: new Set() // Track which valves are currently pulsing
 };
 
 // Logging utilities
@@ -148,6 +150,13 @@ const API = {
             method: 'POST',
             body: JSON.stringify({ safe_mode: enabled })
         });
+    },
+
+    async pulseValves(pulses) {
+        return this.request('/api/pulse_valves', {
+            method: 'POST',
+            body: JSON.stringify(pulses)
+        });
     }
 };
 
@@ -192,6 +201,7 @@ async function heartbeatLoop() {
  */
 function createValveCard(valve) {
     const isOpen = valve.current_state === 'open';
+    const isPulsing = State.pulsingValves.has(valve.id);
     return `
         <div class="valve-card" data-valve-id="${valve.id}">
             <div class="valve-header">
@@ -204,6 +214,22 @@ function createValveCard(valve) {
                 <button class="valve-btn close-btn ${!isOpen ? 'active' : ''}" 
                         onclick="setValveState(${valve.id}, 'closed')">Closed</button>
             </div>
+            <button class="valve-btn pulse-btn ${isPulsing ? 'pulsing' : ''}" 
+                    onclick="pulseValve(${valve.id})"
+                    ${isPulsing ? 'disabled' : ''}>
+                <div class="pulse-progress" data-valve-id="${valve.id}"></div>
+                <span class="pulse-label">Pulse</span>
+                <input type="number" 
+                       class="pulse-duration-input" 
+                       data-valve-id="${valve.id}"
+                       placeholder="1.0" 
+                       min="0.1" 
+                       step="0.1" 
+                       value="1.0"
+                       ${isPulsing ? 'disabled' : ''}
+                       onclick="event.stopPropagation()"
+                       onmousedown="event.stopPropagation()">
+            </button>
         </div>
     `;
 }
@@ -299,12 +325,11 @@ async function setValveState(valveId, state) {
     
     if (violations.length > 0) {
         const valve = State.valves.find(v => v.id === valveId);
-        const valveName = valve ? valve.name : `Valve ${valveId}`;
+        const valveName = valve ? `${valve.name} (${valveId})` : `Valve ${valveId}`;
         
         Modal.warning(
             'Invalid Valve Configuration',
-            `<p>Setting <strong>${valveName}</strong> to <strong>${state}</strong> would result in an invalid configuration:</p>
-            <ul>${violations.map(v => `<li>${v}</li>`).join('')}</ul>`,
+            `<p>Setting <strong>${valveName}</strong> to <strong>${state}</strong> will result in an invalid configuration.</p>`,
             () => executeValveChange(valveId, state)
         );
         return;
@@ -326,6 +351,114 @@ async function executeValveChange(valveId, state) {
         Modal.show('Error', `<p>Failed to set valve state: ${error.message}</p>`, [
             { label: 'OK', type: 'primary' }
         ]);
+    }
+}
+
+/**
+ * Pulses a valve for the specified duration
+ */
+async function pulseValve(valveId) {
+    // Prevent multiple pulses on the same valve
+    if (State.pulsingValves.has(valveId)) {
+        logError(`Valve ${valveId} is already pulsing`);
+        return;
+    }
+
+    const input = document.querySelector(`.pulse-duration-input[data-valve-id="${valveId}"]`);
+    const duration = parseFloat(input?.value) || 1.0;
+
+    if (duration <= 0) {
+        Modal.show('Invalid Duration', '<p>Pulse duration must be greater than 0.</p>', [
+            { label: 'OK', type: 'primary' }
+        ]);
+        return;
+    }
+
+    // Check for invalid state warnings (similar to setValveState)
+    const valve = State.valves.find(v => v.id === valveId);
+    const newState = valve?.current_state === 'open' ? 'closed' : 'open';
+    const violations = checkInvalidValveState(valveId, newState);
+
+    if (violations.length > 0) {
+        const valveName = valve ? valve.name : `Valve ${valveId}`;
+        Modal.warning(
+            'Invalid Valve Configuration',
+            `<p>Pulsing <strong>${valveName}</strong> would result in an invalid configuration:</p>
+            <ul>${violations.map(v => `<li>${v}</li>`).join('')}</ul>`,
+            () => executePulse(valveId, duration)
+        );
+        return;
+    }
+
+    executePulse(valveId, duration);
+}
+
+/**
+ * Executes the pulse operation with visual feedback
+ */
+async function executePulse(valveId, duration) {
+    // Mark valve as pulsing
+    State.pulsingValves.add(valveId);
+    updatePulseUI(valveId, true, duration);
+
+    try {
+        // Start the pulse on the server
+        const response = await API.pulseValves({ [valveId]: duration });
+        
+        if (response.status === 'error' && response.failed_valves) {
+            throw new Error(response.failed_valves[valveId] || 'Unknown error');
+        }
+
+        logStatus(`Valve ${valveId} pulse started for ${duration}s`);
+
+        // Wait for pulse duration (progress animation runs independently)
+        await new Promise(resolve => setTimeout(resolve, duration * 1000));
+
+        logStatus(`Valve ${valveId} pulse completed`);
+    } catch (error) {
+        logError(`Failed to pulse valve ${valveId}`, error);
+        Modal.show('Pulse Failed', `<p>Failed to pulse valve: ${error.message}</p>`, [
+            { label: 'OK', type: 'primary' }
+        ]);
+    } finally {
+        // Mark valve as no longer pulsing
+        State.pulsingValves.delete(valveId);
+        updatePulseUI(valveId, false, 0);
+        await pollValves(); // Refresh valve state
+    }
+}
+
+/**
+ * Updates the pulse UI elements for a valve
+ */
+function updatePulseUI(valveId, isPulsing, duration) {
+    const card = document.querySelector(`.valve-card[data-valve-id="${valveId}"]`);
+    if (!card) return;
+
+    const input = card.querySelector('.pulse-duration-input');
+    const button = card.querySelector('.pulse-btn');
+    const progress = card.querySelector('.pulse-progress');
+
+    if (isPulsing) {
+        input.disabled = true;
+        button.classList.add('pulsing');
+        button.disabled = true;
+
+        // Start progress animation
+        progress.style.transition = 'none';
+        progress.style.width = '100%';
+        // Force reflow
+        progress.offsetHeight;
+        progress.style.transition = `width ${duration}s linear`;
+        progress.style.width = '0%';
+    } else {
+        input.disabled = false;
+        button.classList.remove('pulsing');
+        button.disabled = false;
+
+        // Reset progress bar
+        progress.style.transition = 'none';
+        progress.style.width = '0%';
     }
 }
 
@@ -368,9 +501,20 @@ function createSensorCard(sensor, index) {
                 <span class="sensor-name">${sensor.name}</span>
                 <span class="sensor-id">ID: ${sensor.id}</span>
             </div>
-            <div class="sensor-value" id="sensor-value-${sensor.id}">-- PSI</div>
-            <div class="sensor-chart-container">
-                <canvas id="sensor-chart-${sensor.id}"></canvas>
+            <div class="sensor-data-row">
+                <div class="sensor-data-panel">
+                    <div class="sensor-data-label">Pressure</div>
+                    <div class="sensor-data-value" id="sensor-value-${sensor.id}">-- PSI</div>
+                </div>
+                <div class="sensor-data-panel">
+                    <div class="sensor-data-label">Rate</div>
+                    <div class="sensor-data-value sensor-rate" id="sensor-rate-${sensor.id}">-- PSI/s</div>
+                </div>
+            </div>
+            <div class="sensor-chart-panel">
+                <div class="sensor-chart-container">
+                    <canvas id="sensor-chart-${sensor.id}"></canvas>
+                </div>
             </div>
         </div>
     `;
@@ -463,6 +607,22 @@ function updateSensorDisplay(sensorId, pressure) {
     
     const history = State.sensorHistory[sensorId];
     if (history) {
+        // Calculate rate of change using average over last several readings
+        const rateEl = document.getElementById(`sensor-rate-${sensorId}`);
+        if (rateEl && history.length >= 10) {
+            // Use readings from 10 samples ago for more stable rate calculation
+            const sampleWindow = 10;
+            const oldPressure = history[history.length - sampleWindow];
+            const timeDelta = (sampleWindow * SENSOR_POLL_INTERVAL) / 1000; // Convert to seconds
+            const rate = (pressure - oldPressure) / timeDelta;
+            const rateStr = rate >= 0 ? `+${rate.toFixed(1)}` : rate.toFixed(1);
+            rateEl.textContent = `${rateStr} PSI/s`;
+            rateEl.classList.toggle('positive', rate > 0.5);
+            rateEl.classList.toggle('negative', rate < -0.5);
+        } else if (rateEl) {
+            rateEl.textContent = '-- PSI/s';
+        }
+        
         history.push(pressure);
         if (history.length > CHART_MAX_POINTS) {
             history.shift();
@@ -567,52 +727,121 @@ async function safeModePollingLoop() {
  * Populates procedure selector dropdown
  */
 function initProcedures() {
-    const select = document.getElementById('procedure-select');
+    const selector = document.getElementById('procedure-selector');
+    const btn = document.getElementById('procedure-dropdown-btn');
+    const menu = document.getElementById('procedure-dropdown-menu');
     const procedures = CONFIG.procedures || [];
     
     if (procedures.length === 0) {
-        select.innerHTML = '<option value="">No procedures configured</option>';
+        btn.textContent = 'No procedures configured';
+        btn.disabled = true;
         return;
     }
     
-    select.innerHTML = procedures.map((proc, i) => 
-        `<option value="${i}">${proc.name}</option>`
+    // Populate dropdown menu
+    menu.innerHTML = procedures.map((proc, i) => 
+        `<div class="procedure-dropdown-item" data-index="${i}">${proc.name}</div>`
     ).join('');
     
-    selectProcedure();
+    // Set initial selection
+    btn.textContent = procedures[0].name;
+    menu.querySelector('.procedure-dropdown-item').classList.add('selected');
+    
+    // Toggle dropdown on button click
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selector.classList.toggle('open');
+    });
+    
+    // Handle item selection
+    menu.addEventListener('click', (e) => {
+        const item = e.target.closest('.procedure-dropdown-item');
+        if (item) {
+            const index = parseInt(item.dataset.index);
+            btn.textContent = item.textContent;
+            
+            // Update selected state
+            menu.querySelectorAll('.procedure-dropdown-item').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            
+            selector.classList.remove('open');
+            selectProcedure(index);
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!selector.contains(e.target)) {
+            selector.classList.remove('open');
+        }
+    });
+    
+    selectProcedure(0);
 }
 
 /**
  * Handles procedure selection change
  */
-function selectProcedure() {
-    const select = document.getElementById('procedure-select');
-    const index = parseInt(select.value);
-    
-    if (isNaN(index) || !CONFIG.procedures[index]) {
+function selectProcedure(index) {
+    if (typeof index !== 'number' || isNaN(index) || !CONFIG.procedures[index]) {
         State.selectedProcedure = null;
         document.getElementById('procedure-steps').innerHTML = '';
         return;
     }
     
     State.selectedProcedure = CONFIG.procedures[index];
+    State.selectedProcedureIndex = index;
     State.completedSteps.clear();
     renderProcedureSteps();
 }
 
 /**
- * Formats a requirement for display
+ * Gets sensor name with ID in parenthesis
+ */
+function getSensorLabel(sensorId) {
+    const sensor = State.sensors.find(s => s.id === sensorId);
+    return sensor ? `${sensor.name} (${sensorId})` : `Sensor ${sensorId}`;
+}
+
+/**
+ * Gets valve name with ID in parenthesis
+ */
+function getValveLabel(valveId) {
+    const valve = State.valves.find(v => v.id === valveId);
+    return valve ? `${valve.name} (${valveId})` : `Valve ${valveId}`;
+}
+
+/**
+ * Formats a requirement for display (met state - using "is")
  */
 function formatRequirement(req) {
     switch (req.type) {
         case 'pressure_below':
-            return `Sensor ${req.sensor_id} pressure below ${req.threshold} PSI`;
+            return `${getSensorLabel(req.sensor_id)} pressure is below ${req.threshold} PSI`;
         case 'pressure_above':
-            return `Sensor ${req.sensor_id} pressure above ${req.threshold} PSI`;
+            return `${getSensorLabel(req.sensor_id)} pressure is above ${req.threshold} PSI`;
         case 'pressure_between':
-            return `Sensor ${req.sensor_id} pressure between ${req.min_threshold} and ${req.max_threshold} PSI`;
+            return `${getSensorLabel(req.sensor_id)} pressure is between ${req.min_threshold} and ${req.max_threshold} PSI`;
         case 'valve_state':
-            return `Valve ${req.valve_id} is ${req.state}`;
+            return `${getValveLabel(req.valve_id)} is ${req.state}`;
+        default:
+            return JSON.stringify(req);
+    }
+}
+
+/**
+ * Formats a requirement for display when NOT met (using "is not")
+ */
+function formatRequirementUnmet(req) {
+    switch (req.type) {
+        case 'pressure_below':
+            return `${getSensorLabel(req.sensor_id)} pressure is not below ${req.threshold} PSI`;
+        case 'pressure_above':
+            return `${getSensorLabel(req.sensor_id)} pressure is not above ${req.threshold} PSI`;
+        case 'pressure_between':
+            return `${getSensorLabel(req.sensor_id)} pressure is not between ${req.min_threshold} and ${req.max_threshold} PSI`;
+        case 'valve_state':
+            return `${getValveLabel(req.valve_id)} is not ${req.state}`;
         default:
             return JSON.stringify(req);
     }
@@ -623,12 +852,16 @@ function formatRequirement(req) {
  */
 function formatAction(action) {
     switch (action.type) {
-        case 'set_valve':
-            return `Set valve ${action.valve_id} to ${action.state}`;
+        case 'set_valve': {
+            const stateWord = action.state === 'open' ? 'Open' : 'Close';
+            return `${stateWord} ${getValveLabel(action.valve_id)}`;
+        }
+        case 'pulse_valve':
+            return `Pulse ${getValveLabel(action.valve_id)} for ${action.duration}s`;
         case 'wait':
             return `Wait ${action.duration} seconds`;
         case 'user_confirm':
-            return `User confirmation: "${action.message}"`;
+            return `Await user confirmation: "${action.message}"`;
         default:
             return JSON.stringify(action);
     }
@@ -670,7 +903,7 @@ function checkStepRequirements(step) {
     
     requirements.forEach(req => {
         if (!checkRequirementMet(req)) {
-            unmet.push(formatRequirement(req));
+            unmet.push(formatRequirementUnmet(req));
         }
     });
     
@@ -743,15 +976,13 @@ function createStepCard(step, index) {
                 ${requirements.length > 0 ? `
                     <div class="step-section">
                         <div class="step-section-title">Requirements</div>
-                        <div class="step-section-content">
-                            <ul>
-                                ${requirements.map((req, reqIndex) => `
-                                    <li class="requirement-item" data-req-index="${reqIndex}">
-                                        <span class="requirement-status ${checkRequirementMet(req) ? 'met' : ''}"></span>
-                                        ${formatRequirement(req)}
-                                    </li>
-                                `).join('')}
-                            </ul>
+                        <div class="step-section-content requirements-list">
+                            ${requirements.map((req, reqIndex) => `
+                                <div class="requirement-item" data-req-index="${reqIndex}">
+                                    <span class="requirement-status ${checkRequirementMet(req) ? 'met' : ''}"></span>
+                                    <span class="requirement-text">${formatRequirement(req)}</span>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 ` : ''}
@@ -765,9 +996,14 @@ function createStepCard(step, index) {
                         </div>
                     </div>
                 ` : ''}
-                <button class="step-execute-btn" onclick="executeStep(${index}, event)">
-                    ${isCompleted ? 'Execute Again' : 'Execute Step'}
-                </button>
+                <div class="step-buttons">
+                    <button class="step-execute-btn" onclick="executeStep(${index}, event)">
+                        ${isCompleted ? 'Execute Again' : 'Execute Step'}
+                    </button>
+                    <button class="step-mark-btn ${isCompleted ? 'completed' : ''}" onclick="toggleStepComplete(${index}, event)">
+                        ✓
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -810,6 +1046,34 @@ function toggleStepExpand(index) {
 }
 
 /**
+ * Toggles a step's completion status without executing it
+ */
+function toggleStepComplete(index, event) {
+    if (event) event.stopPropagation();
+    
+    if (State.completedSteps.has(index)) {
+        State.completedSteps.delete(index);
+        logStatus(`Step ${index + 1} marked as incomplete`);
+    } else {
+        State.completedSteps.add(index);
+        logStatus(`Step ${index + 1} marked as complete`);
+    }
+    
+    renderProcedureSteps();
+}
+
+/**
+ * Resets all steps in the current procedure
+ */
+function resetProcedure() {
+    if (!State.selectedProcedure) return;
+    
+    State.completedSteps.clear();
+    renderProcedureSteps();
+    logStatus('Procedure reset - all steps marked as incomplete');
+}
+
+/**
  * Gets the expected next step index in sequence
  */
 function getExpectedNextStep() {
@@ -843,21 +1107,19 @@ async function executeStep(index, event) {
     }
     
     if (isOutOfOrder) {
-        warnings.push(`This step is out of order. Expected step ${expectedNext + 1} next.`);
+        warnings.push('This step is out of order.');
     }
     
     const reqResult = State.currentRequirementsMet[index] || checkStepRequirements(step);
     if (!reqResult.met) {
-        warnings.push('Requirements not met:');
-        reqResult.unmet.forEach(u => warnings.push(`• ${u}`));
+        reqResult.unmet.forEach(u => warnings.push(u));
     }
     
     if (warnings.length > 0) {
         Modal.warning(
             'Step Execution Warning',
             `<p>The following issues were detected:</p>
-            <ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul>
-            <p>Do you want to proceed anyway?</p>`,
+            <ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul>`,
             () => performStepExecution(index, step)
         );
     } else {
@@ -900,6 +1162,34 @@ async function executeAction(action) {
             await API.setValveStates({ [action.valve_id]: action.state });
             await pollValves();
             break;
+
+        case 'pulse_valve': {
+            const valveId = action.valve_id;
+            const duration = action.duration;
+
+            // Check if valve is already pulsing
+            if (State.pulsingValves.has(valveId)) {
+                throw new Error(`Valve ${valveId} is already pulsing`);
+            }
+
+            // Mark as pulsing and update UI
+            State.pulsingValves.add(valveId);
+            updatePulseUI(valveId, true, duration);
+
+            try {
+                const response = await API.pulseValves({ [valveId]: duration });
+                if (response.status === 'error' && response.failed_valves) {
+                    throw new Error(response.failed_valves[valveId] || 'Unknown error');
+                }
+                // Wait for pulse to complete
+                await new Promise(resolve => setTimeout(resolve, duration * 1000));
+            } finally {
+                State.pulsingValves.delete(valveId);
+                updatePulseUI(valveId, false, 0);
+                await pollValves();
+            }
+            break;
+        }
             
         case 'wait':
             await new Promise(resolve => setTimeout(resolve, action.duration * 1000));
@@ -949,6 +1239,21 @@ async function initialLoad() {
 }
 
 /**
+ * Updates the procedures panel max height to match the left panel
+ */
+function updateProceduresPanelHeight() {
+    const leftPanel = document.querySelector('.left-panel');
+    const proceduresPanel = document.querySelector('.procedures-panel');
+    
+    if (leftPanel && proceduresPanel) {
+        const leftPanelHeight = leftPanel.offsetHeight;
+        const minHeight = 300;
+        const maxHeight = Math.max(leftPanelHeight, minHeight);
+        proceduresPanel.style.maxHeight = `${maxHeight}px`;
+    }
+}
+
+/**
  * Application initialization
  */
 async function init() {
@@ -962,6 +1267,12 @@ async function init() {
     }
     
     await initialLoad();
+    
+    // Set procedures panel height after content loads
+    setTimeout(updateProceduresPanelHeight, 100);
+    
+    // Update on window resize
+    window.addEventListener('resize', updateProceduresPanelHeight);
     
     heartbeatLoop();
     valvePollingLoop();

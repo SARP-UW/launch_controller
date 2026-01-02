@@ -140,6 +140,4 @@ class Valve:
                     self._io.value = (new_state == ValveState.OPEN)
                 else:
                     self._io.value = (new_state == ValveState.CLOSED)
-            if settings.PRINT_VALVE_STATES:
-                print(f"VALVE STATE: {self.name} ({self._id}) = {self._state.value}")
             
