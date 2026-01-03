@@ -204,7 +204,13 @@ class Controller:
         if self._shutdown_flag:
             raise RuntimeError("Controller has been shut down")
         with self._thread_lock:
-            return [{"id": sensor.id, "name": sensor.name, "current_pressure": self._current_pressure_list[i]} for i, sensor in enumerate(self._pressure_sensor_list)]
+            return [{
+                "id": sensor.id, 
+                "name": sensor.name, 
+                "current_pressure": self._current_pressure_list[i],
+                "min_pressure": sensor.min_pressure,
+                "max_pressure": sensor.max_pressure
+            } for i, sensor in enumerate(self._pressure_sensor_list)]
     
     def set_valve(self, id: int, state: ValveState) -> None:
         """

@@ -20,8 +20,8 @@
     --border-color: #333;
     --border-radius: 12px;
     --border-radius-sm: 8px;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.6);
     --transition: all 0.2s ease;
 }
 
@@ -51,25 +51,38 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(20, 20, 20, 0.85) 100%);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, #141414 100%);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.header::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: transparent;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 99;
 }
 
 .footer {
     padding: 1rem 2rem;
-    background: linear-gradient(0deg, var(--bg-secondary) 0%, rgba(20, 20, 20, 0.85) 100%);
+    background: linear-gradient(315deg, var(--bg-secondary) 0%, #141414 100%);
     border-top: 1px solid var(--border-color);
     text-align: center;
     color: var(--text-muted);
     font-size: 0.85rem;
     flex-shrink: 0;
     margin-top: auto;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .footer p {
@@ -88,6 +101,13 @@ body {
     letter-spacing: -0.5px;
 }
 
+.header-time {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
 .header-right {
     display: flex;
     align-items: center;
@@ -99,12 +119,14 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 1rem;
-    border: 2px solid var(--border-color);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
     background-color: var(--bg-tertiary);
     font-size: 0.9rem;
     color: var(--text-primary);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+    box-sizing: border-box;
 }
 
 .status-dot {
@@ -134,16 +156,18 @@ body {
     padding: 0.6rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-tertiary);
     color: var(--text-secondary);
     cursor: pointer;
     transition: var(--transition);
     font-size: 0.9rem;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+    box-sizing: border-box;
 }
 
 .safe-mode-btn:hover {
-    background-color: var(--bg-hover);
+    background-color: var(--bg-hover-bright);
     border-color: var(--text-muted);
     color: var(--text-primary);
 }
@@ -156,7 +180,7 @@ body {
     background-color: var(--success);
     border-color: var(--success);
     color: white;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .safe-mode-btn.active:hover {
@@ -182,14 +206,17 @@ body {
     flex-direction: column;
     gap: 1.5rem;
     overflow-y: auto;
+    overflow-x: visible;
+    padding: 2rem;
+    margin: -2rem;
 }
 
 section {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.8) 100%);
+    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
     border-radius: var(--border-radius);
     padding: 1.25rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 section h2 {
@@ -213,7 +240,7 @@ section h2 {
     padding: 1rem;
     border: 1px solid var(--border-color);
     transition: var(--transition);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 .valve-header {
@@ -261,7 +288,7 @@ section h2 {
     transition: var(--transition);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .valve-btn.open-btn {
@@ -280,7 +307,7 @@ section h2 {
     background-color: var(--success);
     color: white;
     border-color: #16a34a;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .valve-btn.close-btn {
@@ -299,7 +326,7 @@ section h2 {
     background-color: var(--danger);
     color: white;
     border-color: #dc2626;
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.55), 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .valve-btn:active {
@@ -320,7 +347,7 @@ section h2 {
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
     overflow: hidden;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .pulse-btn:hover:not(:disabled):not(.pulsing):not(:has(.pulse-duration-input:focus)):not(:has(.pulse-duration-input:hover)) {
@@ -343,7 +370,7 @@ section h2 {
     border-color: #2563eb;
     color: white;
     cursor: not-allowed;
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.55), 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .pulse-btn.pulsing .pulse-progress {
@@ -421,7 +448,7 @@ section h2 {
     border-radius: var(--border-radius-sm);
     padding: 1rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
     min-width: 0;
     overflow: hidden;
 }
@@ -463,13 +490,13 @@ section h2 {
 }
 
 .sensor-data-panel {
-    flex: 1 1 auto;
-    min-width: 0;
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.75) 100%);
+    flex: 1 1 0;
+    min-width: 80px;
+    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
     border-radius: var(--border-radius-sm);
     padding: 0.75rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
     overflow: hidden;
 }
 
@@ -485,7 +512,8 @@ section h2 {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--accent-primary);
-    text-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.55);
+    font-variant-numeric: tabular-nums;
 }
 
 .sensor-data-value.sensor-rate {
@@ -499,15 +527,19 @@ section h2 {
 
 .sensor-data-value.sensor-rate.negative {
     color: var(--danger);
-    text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.55);
+}
+
+.sensor-rate-panel {
+    flex: 1.3 1 0;
 }
 
 .sensor-chart-panel {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.75) 100%);
+    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
     border-radius: var(--border-radius-sm);
     padding: 0.75rem;
     border: 1px solid var(--border-color);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
 }
 
 .sensor-chart-container {
@@ -516,7 +548,7 @@ section h2 {
 }
 
 .procedures-panel {
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.8) 100%);
+    background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
     border-radius: var(--border-radius);
     padding: 1.25rem;
     border: 1px solid var(--border-color);
@@ -524,7 +556,7 @@ section h2 {
     flex-direction: column;
     min-height: 300px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 .procedures-panel h2 {
@@ -559,7 +591,7 @@ section h2 {
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
     font-size: 0.9rem;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
     font-weight: 500;
     cursor: pointer;
     text-align: left;
@@ -679,7 +711,7 @@ section h2 {
     white-space: nowrap;
     display: flex;
     align-items: center;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .procedure-reset-btn:hover {
@@ -702,7 +734,7 @@ section h2 {
     min-height: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4),
                 inset 0 20px 25px -15px rgba(36, 36, 36, 0.95), 
                 inset 0 -20px 25px -15px rgba(36, 36, 36, 0.95);
 }
@@ -724,7 +756,7 @@ section h2 {
     border-left: 3px solid var(--danger);
     overflow: visible;
     transition: var(--transition);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
     position: relative;
 }
 
@@ -736,7 +768,7 @@ section h2 {
     bottom: 8px;
     width: 3px;
     background: transparent;
-    box-shadow: 0 0 6px 1px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 6px 1px rgba(239, 68, 68, 0.45);
     border-radius: 0;
     pointer-events: none;
 }
@@ -789,9 +821,9 @@ section h2 {
 }
 
 .step-card:not(.expanded) .step-header:hover {
-    box-shadow: inset 0 -0.5px 0 0 var(--text-muted), 
-                inset -0.5px 0 0 0 var(--text-muted), 
-                inset 0 0.5px 0 0 var(--text-muted);
+    box-shadow: inset 0 -1px 0 0 var(--text-muted), 
+                inset -1px 0 0 0 var(--text-muted), 
+                inset 0 1px 0 0 var(--text-muted);
 }
 
 .step-card.expanded .step-header {
@@ -799,9 +831,9 @@ section h2 {
 }
 
 .step-card.expanded .step-header:hover {
-    box-shadow: inset 0 0.5px 0 0 var(--text-muted), 
-                inset -0.5px 0 0 0 var(--text-muted),
-                inset 0 -0.5px 0 0 var(--text-muted);
+    box-shadow: inset 0 1px 0 0 var(--text-muted), 
+                inset -1px 0 0 0 var(--text-muted),
+                inset 0 -1px 0 0 var(--text-muted);
 }
 
 .step-info {
@@ -854,16 +886,14 @@ section h2 {
 .step-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: max-height var(--step-duration, 0.2s) cubic-bezier(.26,.79,.37,1), padding var(--step-duration, 0.2s) cubic-bezier(.26,.79,.37,1);
     padding: 0 1rem;
     border-top: none;
 }
 
 .step-card.expanded .step-details {
-    max-height: 500px;
     padding: 0 1rem 1rem;
     border-top: 1px solid var(--border-color);
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .step-buttons {
@@ -939,6 +969,11 @@ section h2 {
     box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
 }
 
+.requirement-status.neutral {
+    background-color: #6b7280;
+    box-shadow: none;
+}
+
 .step-execute-btn {
     flex: 1;
     padding: 0.6rem;
@@ -950,7 +985,7 @@ section h2 {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
     position: relative;
     overflow: hidden;
 }
@@ -1024,7 +1059,7 @@ section h2 {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
 }
 
 .step-mark-btn:hover {
@@ -1210,31 +1245,31 @@ section h2 {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .modal-btn:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .modal-btn.primary {
     background-color: var(--accent-primary);
     color: white;
     border-color: var(--accent-primary);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px 1px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 8px 1px rgba(59, 130, 246, 0.45);
 }
 
 .modal-btn.primary:hover {
     background-color: var(--accent-hover);
     border-color: var(--accent-hover);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 12px 2px rgba(59, 130, 246, 0.55);
 }
 
 .modal-btn.secondary {
     background-color: var(--bg-tertiary);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .modal-btn.secondary:hover {
@@ -1248,26 +1283,26 @@ section h2 {
     background-color: var(--danger);
     color: white;
     border-color: var(--danger);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px 1px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 8px 1px rgba(239, 68, 68, 0.45);
 }
 
 .modal-btn.danger:hover {
     background-color: var(--danger-hover);
     border-color: var(--danger-hover);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 12px 2px rgba(239, 68, 68, 0.55);
 }
 
 .modal-btn.warning {
     background-color: var(--warning);
     color: white;
     border-color: var(--warning);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px 1px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 8px 1px rgba(245, 158, 11, 0.3);
 }
 
 .modal-btn.warning:hover {
     background-color: var(--warning-hover);
     border-color: var(--warning-hover);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 12px 2px rgba(245, 158, 11, 0.4);
 }
 
 .empty-state {

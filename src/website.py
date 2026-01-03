@@ -637,6 +637,352 @@ class ControllerWebsite:
         if not isinstance(valve_safe_config, list):
             raise ValueError(f"Website config 'valve_safe_config' must be a list, got: {type(valve_safe_config).__name__}")
         
+        valid_valve_ids = {int(valve["id"]) for valve in controller.valve_info}
+        valid_sensor_ids = {int(sensor["id"]) for sensor in controller.pressure_sensor_info}
+        
+        sensor_pressure_ranges = {}
+        for sensor in controller.pressure_sensor_info:
+            sensor_id = int(sensor["id"])
+            if "min_pressure" in sensor and "max_pressure" in sensor:
+                sensor_pressure_ranges[sensor_id] = {
+                    "min": float(sensor["min_pressure"]),
+                    "max": float(sensor["max_pressure"])
+                }
+        
+        # Validate valve safe config
+        for i, state_config in enumerate(invalid_valve_states):
+            config_path = f"invalid_valve_states[{i}]"
+            
+            if not isinstance(state_config, dict):
+                raise ValueError(f"{config_path} must be a dict, got: {type(state_config).__name__}")
+            
+            if len(state_config) == 0:
+                raise ValueError(f"{config_path} must have at least one state key ('open' or 'closed')")
+            
+            for state_key, valve_ids in state_config.items():
+                if state_key not in ("open", "closed"):
+                    raise ValueError(f"{config_path} has invalid state key '{state_key}', must be 'open' or 'closed'")
+                
+                if not isinstance(valve_ids, list):
+                    raise ValueError(f"{config_path}['{state_key}'] must be a list, got: {type(valve_ids).__name__}")
+                
+                for j, valve_id in enumerate(valve_ids):
+                    try:
+                        valve_id_int = int(valve_id)
+                    except (ValueError, TypeError):
+                        raise ValueError(f"{config_path}['{state_key}'][{j}] must be an integer, got: {type(valve_id).__name__}")
+                    
+                    if valve_id_int not in valid_valve_ids:
+                        raise ValueError(f"{config_path}['{state_key}'][{j}] references unknown valve ID: {valve_id_int}")
+                
+                valve_id_ints = [int(v) for v in valve_ids]
+                if len(valve_id_ints) != len(set(valve_id_ints)):
+                    raise ValueError(f"{config_path}['{state_key}'] contains duplicate valve IDs")
+        
+        def validate_action(action: dict, action_path: str, in_grouped_action: bool = False) -> Optional[int]:
+            """
+            Helper function to validate a single action
+            """
+            if not isinstance(action, dict):
+                raise ValueError(f"{action_path} must be a dict, got: {type(action).__name__}")
+            
+            if "type" not in action:
+                raise KeyError(f"{action_path} missing required key: 'type'")
+            
+            action_type = action["type"]
+            if not isinstance(action_type, str):
+                raise ValueError(f"{action_path}['type'] must be a string, got: {type(action_type).__name__}")
+            
+            valid_action_types = ("set_valve", "pulse_valve", "wait")
+            if action_type not in valid_action_types:
+                raise ValueError(f"{action_path}['type'] has invalid value '{action_type}', must be one of: {valid_action_types}")
+            
+            if action_type == "set_valve":
+                if "valve_id" not in action:
+                    raise KeyError(f"{action_path} missing required key: 'valve_id'")
+                if "state" not in action:
+                    raise KeyError(f"{action_path} missing required key: 'state'")
+                
+                try:
+                    valve_id = int(action["valve_id"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{action_path}['valve_id'] must be an integer, got: {type(action['valve_id']).__name__}")
+                
+                if valve_id not in valid_valve_ids:
+                    raise ValueError(f"{action_path}['valve_id'] references unknown valve ID: {valve_id}")
+                
+                state = action["state"]
+                if not isinstance(state, str):
+                    raise ValueError(f"{action_path}['state'] must be a string, got: {type(state).__name__}")
+                if state.lower() not in ("open", "closed"):
+                    raise ValueError(f"{action_path}['state'] has invalid value '{state}', must be 'open' or 'closed'")
+                
+                return valve_id
+            
+            elif action_type == "pulse_valve":
+                if "valve_id" not in action:
+                    raise KeyError(f"{action_path} missing required key: 'valve_id'")
+                if "duration" not in action:
+                    raise KeyError(f"{action_path} missing required key: 'duration'")
+                
+                try:
+                    valve_id = int(action["valve_id"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{action_path}['valve_id'] must be an integer, got: {type(action['valve_id']).__name__}")
+                
+                if valve_id not in valid_valve_ids:
+                    raise ValueError(f"{action_path}['valve_id'] references unknown valve ID: {valve_id}")
+                
+                try:
+                    duration = float(action["duration"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{action_path}['duration'] must be a number, got: {type(action['duration']).__name__}")
+                
+                if duration <= 0:
+                    raise ValueError(f"{action_path}['duration'] must be positive, got: {duration}")
+                
+                return valve_id
+            
+            elif action_type == "wait":
+                if in_grouped_action:
+                    raise ValueError(f"{action_path} has type 'wait' which is not allowed in grouped actions")
+                
+                if "duration" not in action:
+                    raise KeyError(f"{action_path} missing required key: 'duration'")
+                
+                try:
+                    duration = float(action["duration"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{action_path}['duration'] must be a number, got: {type(action['duration']).__name__}")
+                
+                if duration <= 0:
+                    raise ValueError(f"{action_path}['duration'] must be positive, got: {duration}")
+                
+                return None
+            
+            return None
+        
+        def validate_requirement(requirement: dict, req_path: str) -> None:
+            """
+            Helper function to validate a single requirement
+            """
+            if not isinstance(requirement, dict):
+                raise ValueError(f"{req_path} must be a dict, got: {type(requirement).__name__}")
+            
+            if "type" not in requirement:
+                raise KeyError(f"{req_path} missing required key: 'type'")
+            
+            req_type = requirement["type"]
+            if not isinstance(req_type, str):
+                raise ValueError(f"{req_path}['type'] must be a string, got: {type(req_type).__name__}")
+            
+            valid_req_types = ("pressure_below", "pressure_above", "pressure_between", "valve_state", "custom_message")
+            if req_type not in valid_req_types:
+                raise ValueError(f"{req_path}['type'] has invalid value '{req_type}', must be one of: {valid_req_types}")
+            
+            if req_type == "pressure_below":
+                if "sensor_id" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'sensor_id'")
+                if "threshold" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'threshold'")
+                
+                try:
+                    sensor_id = int(requirement["sensor_id"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['sensor_id'] must be an integer, got: {type(requirement['sensor_id']).__name__}")
+                
+                if sensor_id not in valid_sensor_ids:
+                    raise ValueError(f"{req_path}['sensor_id'] references unknown sensor ID: {sensor_id}")
+                
+                try:
+                    threshold = float(requirement["threshold"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['threshold'] must be a number, got: {type(requirement['threshold']).__name__}")
+                
+                if sensor_id in sensor_pressure_ranges:
+                    pressure_range = sensor_pressure_ranges[sensor_id]
+                    if threshold < pressure_range["min"] or threshold > pressure_range["max"]:
+                        raise ValueError(f"{req_path}['threshold'] value {threshold} is outside sensor {sensor_id} range [{pressure_range['min']}, {pressure_range['max']}]")
+            
+            elif req_type == "pressure_above":
+                if "sensor_id" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'sensor_id'")
+                if "threshold" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'threshold'")
+                
+                try:
+                    sensor_id = int(requirement["sensor_id"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['sensor_id'] must be an integer, got: {type(requirement['sensor_id']).__name__}")
+                
+                if sensor_id not in valid_sensor_ids:
+                    raise ValueError(f"{req_path}['sensor_id'] references unknown sensor ID: {sensor_id}")
+                
+                try:
+                    threshold = float(requirement["threshold"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['threshold'] must be a number, got: {type(requirement['threshold']).__name__}")
+                
+                if sensor_id in sensor_pressure_ranges:
+                    pressure_range = sensor_pressure_ranges[sensor_id]
+                    if threshold < pressure_range["min"] or threshold > pressure_range["max"]:
+                        raise ValueError(f"{req_path}['threshold'] value {threshold} is outside sensor {sensor_id} range [{pressure_range['min']}, {pressure_range['max']}]")
+            
+            elif req_type == "pressure_between":
+                if "sensor_id" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'sensor_id'")
+                if "min_threshold" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'min_threshold'")
+                if "max_threshold" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'max_threshold'")
+                
+                try:
+                    sensor_id = int(requirement["sensor_id"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['sensor_id'] must be an integer, got: {type(requirement['sensor_id']).__name__}")
+                
+                if sensor_id not in valid_sensor_ids:
+                    raise ValueError(f"{req_path}['sensor_id'] references unknown sensor ID: {sensor_id}")
+                
+                try:
+                    min_threshold = float(requirement["min_threshold"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['min_threshold'] must be a number, got: {type(requirement['min_threshold']).__name__}")
+                
+                try:
+                    max_threshold = float(requirement["max_threshold"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['max_threshold'] must be a number, got: {type(requirement['max_threshold']).__name__}")
+                
+                if min_threshold >= max_threshold:
+                    raise ValueError(f"{req_path} has 'min_threshold' ({min_threshold}) >= 'max_threshold' ({max_threshold})")
+                
+                if sensor_id in sensor_pressure_ranges:
+                    pressure_range = sensor_pressure_ranges[sensor_id]
+                    if min_threshold < pressure_range["min"] or min_threshold > pressure_range["max"]:
+                        raise ValueError(f"{req_path}['min_threshold'] value {min_threshold} is outside sensor {sensor_id} range [{pressure_range['min']}, {pressure_range['max']}]")
+                    if max_threshold < pressure_range["min"] or max_threshold > pressure_range["max"]:
+                        raise ValueError(f"{req_path}['max_threshold'] value {max_threshold} is outside sensor {sensor_id} range [{pressure_range['min']}, {pressure_range['max']}]")
+            
+            elif req_type == "valve_state":
+                if "valve_id" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'valve_id'")
+                if "state" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'state'")
+                
+                try:
+                    valve_id = int(requirement["valve_id"])
+                except (ValueError, TypeError):
+                    raise ValueError(f"{req_path}['valve_id'] must be an integer, got: {type(requirement['valve_id']).__name__}")
+                
+                if valve_id not in valid_valve_ids:
+                    raise ValueError(f"{req_path}['valve_id'] references unknown valve ID: {valve_id}")
+                
+                state = requirement["state"]
+                if not isinstance(state, str):
+                    raise ValueError(f"{req_path}['state'] must be a string, got: {type(state).__name__}")
+                if state.lower() not in ("open", "closed"):
+                    raise ValueError(f"{req_path}['state'] has invalid value '{state}', must be 'open' or 'closed'")
+            
+            elif req_type == "custom_message":
+                if "message" not in requirement:
+                    raise KeyError(f"{req_path} missing required key: 'message'")
+                
+                message = requirement["message"]
+                if not isinstance(message, str):
+                    raise ValueError(f"{req_path}['message'] must be a string, got: {type(message).__name__}")
+                
+                if len(message.strip()) == 0:
+                    raise ValueError(f"{req_path}['message'] cannot be empty")
+            
+        # Validate procedures
+        procedure_names = set()
+        for i, procedure in enumerate(procedures):
+            proc_path = f"procedures[{i}]"
+            
+            if not isinstance(procedure, dict):
+                raise ValueError(f"{proc_path} must be a dict, got: {type(procedure).__name__}")
+            
+            if "name" not in procedure:
+                raise KeyError(f"{proc_path} missing required key: 'name'")
+            if "steps" not in procedure:
+                raise KeyError(f"{proc_path} missing required key: 'steps'")
+            
+            proc_name = procedure["name"]
+            if not isinstance(proc_name, str):
+                raise ValueError(f"{proc_path}['name'] must be a string, got: {type(proc_name).__name__}")
+            if len(proc_name.strip()) == 0:
+                raise ValueError(f"{proc_path}['name'] cannot be empty")
+            
+            if proc_name in procedure_names:
+                raise ValueError(f"{proc_path}['name'] is a duplicate: '{proc_name}'")
+            procedure_names.add(proc_name)
+            
+            steps = procedure["steps"]
+            if not isinstance(steps, list):
+                raise ValueError(f"{proc_path}['steps'] must be a list, got: {type(steps).__name__}")
+            
+            if len(steps) == 0:
+                raise ValueError(f"{proc_path}['steps'] cannot be empty")
+            
+            step_names = set()
+            
+            for j, step in enumerate(steps):
+                step_path = f"{proc_path}['steps'][{j}]"
+                
+                if not isinstance(step, dict):
+                    raise ValueError(f"{step_path} must be a dict, got: {type(step).__name__}")
+                
+                if "name" not in step:
+                    raise KeyError(f"{step_path} missing required key: 'name'")
+                if "actions" not in step:
+                    raise KeyError(f"{step_path} missing required key: 'actions'")
+                
+                step_name = step["name"]
+                if not isinstance(step_name, str):
+                    raise ValueError(f"{step_path}['name'] must be a string, got: {type(step_name).__name__}")
+                if len(step_name.strip()) == 0:
+                    raise ValueError(f"{step_path}['name'] cannot be empty")
+                
+                if step_name in step_names:
+                    raise ValueError(f"{step_path}['name'] is a duplicate within procedure '{proc_name}': '{step_name}'")
+                step_names.add(step_name)
+                
+                if "requirements" in step:
+                    requirements = step["requirements"]
+                    if not isinstance(requirements, list):
+                        raise ValueError(f"{step_path}['requirements'] must be a list, got: {type(requirements).__name__}")
+                    
+                    for k, requirement in enumerate(requirements):
+                        req_path = f"{step_path}['requirements'][{k}]"
+                        validate_requirement(requirement, req_path)
+                
+                actions = step["actions"]
+                if not isinstance(actions, list):
+                    raise ValueError(f"{step_path}['actions'] must be a list, got: {type(actions).__name__}")
+                
+                if len(actions) == 0:
+                    raise ValueError(f"{step_path}['actions'] cannot be empty")
+                
+                for k, action in enumerate(actions):
+                    action_path = f"{step_path}['actions'][{k}]"
+                    
+                    if isinstance(action, list):
+                        if len(action) == 0:
+                            raise ValueError(f"{action_path} grouped action cannot be empty")
+                        
+                        valve_ids_in_group = []
+                        for m, grouped_action in enumerate(action):
+                            grouped_path = f"{action_path}[{m}]"
+                            valve_id = validate_action(grouped_action, grouped_path, in_grouped_action=True)
+                            if valve_id is not None:
+                                valve_ids_in_group.append(valve_id)
+                        
+                        if len(valve_ids_in_group) != len(set(valve_ids_in_group)):
+                            raise ValueError(f"{action_path} grouped action contains multiple operations on the same valve")
+                    else:
+                        validate_action(action, action_path, in_grouped_action=False)
+        
         return cls(
             controller = controller,
             port = port,

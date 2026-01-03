@@ -49,16 +49,12 @@
                         },
                         {
                             "type": "wait",
-                            "duration": 5
-                        },
-                        {
-                            "type": "user_confirm",
-                            "message": "Please confirm the system is initialized."
+                            "duration": 2
                         },
                         {
                             "type": "set_valve",
                             "valve_id": 2,
-                            "state": "closed"
+                            "state": "open"
                         }
                     ]
                 },
@@ -122,6 +118,10 @@
                             "type": "valve_state",
                             "valve_id": 1,
                             "state": "closed"
+                        },
+                        {
+                            "type": "custom_message",
+                            "message": "Ensure x is met."
                         }
                     ],
                     "actions": [
@@ -133,10 +133,6 @@
                         {
                             "type": "wait",
                             "duration": 5
-                        },
-                        {
-                            "type": "user_confirm",
-                            "message": "Please confirm the system is initialized."
                         },
                         [
                             {

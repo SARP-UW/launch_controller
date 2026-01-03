@@ -382,7 +382,7 @@ async function executeValveChange(valveId, state) {
     } catch (error) {
         logError(`Failed to set valve ${valveId} to ${state}`, error);
         Modal.show('Error', `<p>Failed to set valve state: ${error.message}</p>`, [
-            { label: 'OK', type: 'primary' }
+            { label: 'OK', type: 'secondary' }
         ]);
     }
 }
@@ -539,7 +539,7 @@ function createSensorCard(sensor, index) {
                     <div class="sensor-data-label">Pressure</div>
                     <div class="sensor-data-value" id="sensor-value-${sensor.id}">-- PSI</div>
                 </div>
-                <div class="sensor-data-panel">
+                <div class="sensor-data-panel sensor-rate-panel">
                     <div class="sensor-data-label">Rate</div>
                     <div class="sensor-data-value sensor-rate" id="sensor-rate-${sensor.id}">-- PSI/s</div>
                 </div>
@@ -712,7 +712,7 @@ async function toggleSafeMode() {
     } catch (error) {
         logError('Failed to toggle safe mode', error);
         Modal.show('Error', `<p>Failed to toggle safe mode: ${error.message}</p>`, [
-            { label: 'OK', type: 'primary' }
+            { label: 'OK', type: 'secondary' }
         ]);
     }
 }
@@ -913,6 +913,8 @@ function formatRequirement(req) {
             return `${getSensorLabel(req.sensor_id)} pressure is between ${req.min_threshold} and ${req.max_threshold} PSI`;
         case 'valve_state':
             return `${getValveLabel(req.valve_id)} is ${req.state}`;
+        case 'custom_message':
+            return req.message;
         default:
             return JSON.stringify(req);
     }
@@ -931,6 +933,8 @@ function formatRequirementUnmet(req) {
             return `${getSensorLabel(req.sensor_id)} pressure is not between ${req.min_threshold} and ${req.max_threshold} PSI`;
         case 'valve_state':
             return `${getValveLabel(req.valve_id)} is not ${req.state}`;
+        case 'custom_message':
+            return req.message;
         default:
             return JSON.stringify(req);
     }
@@ -949,8 +953,6 @@ function formatSingleAction(action) {
             return `pulse ${getValveLabel(action.valve_id)} for ${action.duration}s`;
         case 'wait':
             return `wait ${action.duration} seconds`;
-        case 'user_confirm':
-            return `await user confirmation: "${action.message}"`;
         default:
             return JSON.stringify(action);
     }
@@ -1006,6 +1008,8 @@ function checkRequirementMet(req) {
             const valve = State.valves.find(v => v.id === req.valve_id);
             return valve && valve.current_state === req.state;
         }
+        case 'custom_message':
+            return null; // Neutral - not evaluated
         default:
             return false;
     }
@@ -1019,8 +1023,15 @@ function checkStepRequirements(step) {
     const requirements = step.requirements || [];
     const unmet = [];
     let metCount = 0;
+    let evaluatableCount = 0;
     
     requirements.forEach(req => {
+        // Skip custom_message requirements - they don't affect step status
+        if (req.type === 'custom_message') {
+            return;
+        }
+        
+        evaluatableCount++;
         if (checkRequirementMet(req)) {
             metCount++;
         } else {
@@ -1028,8 +1039,7 @@ function checkStepRequirements(step) {
         }
     });
     
-    const total = requirements.length;
-    const partial = total > 0 && metCount > total / 2 && metCount < total;
+    const partial = evaluatableCount > 0 && metCount > evaluatableCount / 2 && metCount < evaluatableCount;
     
     return {
         met: unmet.length === 0,
@@ -1063,6 +1073,10 @@ function updateAllStepRequirements() {
                 `.step-card[data-step-index="${index}"] .requirement-item[data-req-index="${reqIndex}"] .requirement-status`
             );
             if (reqStatus) {
+                // Skip custom_message - they always stay neutral
+                if (req.type === 'custom_message') {
+                    return;
+                }
                 if (checkRequirementMet(req)) {
                     reqStatus.classList.add('met');
                 } else {
@@ -1117,12 +1131,22 @@ function createStepCard(step, index) {
                     <div class="step-section">
                         <div class="step-section-title">Requirements</div>
                         <div class="step-section-content requirements-list">
-                            ${requirements.map((req, reqIndex) => `
+                            ${requirements.map((req, reqIndex) => {
+                                const isCustomMessage = req.type === 'custom_message';
+                                const reqMet = checkRequirementMet(req);
+                                let statusClass = '';
+                                if (isCustomMessage) {
+                                    statusClass = 'neutral';
+                                } else if (reqMet) {
+                                    statusClass = 'met';
+                                }
+                                return `
                                 <div class="requirement-item" data-req-index="${reqIndex}">
-                                    <span class="requirement-status ${checkRequirementMet(req) ? 'met' : ''}"></span>
+                                    <span class="requirement-status ${statusClass}"></span>
                                     <span class="requirement-text">${formatRequirement(req)}</span>
                                 </div>
-                            `).join('')}
+                            `;
+                            }).join('')}
                         </div>
                     </div>
                 ` : ''}
@@ -1176,17 +1200,47 @@ function renderProcedureSteps() {
 }
 
 /**
- * Toggles step card expansion
+ * Toggles step card expansion with dynamic animation duration
  */
 function toggleStepExpand(index) {
-    if (State.expandedSteps.has(index)) {
-        State.expandedSteps.delete(index);
-    } else {
-        State.expandedSteps.add(index);
-    }
     const card = document.querySelector(`.step-card[data-step-index="${index}"]`);
-    if (card) {
-        card.classList.toggle('expanded');
+    if (!card) return;
+    
+    const details = card.querySelector('.step-details');
+    const isExpanding = !State.expandedSteps.has(index);
+    
+    if (isExpanding) {
+        // Calculate content height and dynamic duration
+        details.style.maxHeight = 'none';
+        const contentHeight = details.scrollHeight;
+        details.style.maxHeight = '0';
+        
+        // Logarithmic scaling: fast for small, diminishing returns for large
+        // 160ms base + log scaling to accommodate easing
+        const duration = 160 + Math.log(1 + contentHeight / 50) * 35;
+        details.style.setProperty('--step-duration', `${Math.round(duration)}ms`);
+        
+        // Force reflow then expand - add buffer for padding
+        details.offsetHeight;
+        details.style.maxHeight = `${contentHeight + 20}px`;
+        
+        State.expandedSteps.add(index);
+        card.classList.add('expanded');
+    } else {
+        // Get current height for smooth collapse
+        const currentHeight = details.scrollHeight;
+        details.style.maxHeight = `${currentHeight}px`;
+        
+        // Logarithmic scaling for collapse (slightly faster)
+        const duration = 140 + Math.log(1 + currentHeight / 50) * 30;
+        details.style.setProperty('--step-duration', `${Math.round(duration)}ms`);
+        
+        // Force reflow then collapse
+        details.offsetHeight;
+        details.style.maxHeight = '0';
+        
+        State.expandedSteps.delete(index);
+        card.classList.remove('expanded');
     }
 }
 
@@ -1234,6 +1288,121 @@ function getExpectedNextStep() {
 }
 
 /**
+ * Checks if executing a step's actions would result in any invalid valve states
+ * Returns array of warning messages for invalid states that would occur
+ */
+function checkStepInvalidStates(step) {
+    const violations = [];
+    
+    // Create a copy of current valve states
+    const simulatedStates = {};
+    State.valves.forEach(v => {
+        simulatedStates[v.id] = v.current_state;
+    });
+    
+    // Helper function to check if current simulated state is invalid
+    const checkCurrentState = () => {
+        if (!CONFIG.invalidValveStates || !Array.isArray(CONFIG.invalidValveStates)) {
+            return null;
+        }
+        
+        for (const rule of CONFIG.invalidValveStates) {
+            const openValves = rule.open || [];
+            const closedValves = rule.closed || [];
+            
+            const openMatch = openValves.every(id => simulatedStates[id] === 'open');
+            const closedMatch = closedValves.every(id => simulatedStates[id] === 'closed');
+            
+            if (openMatch && closedMatch && (openValves.length > 0 || closedValves.length > 0)) {
+                // Build array of "Name (id) state" strings
+                const valveDescriptions = [];
+                openValves.forEach(id => {
+                    const v = State.valves.find(valve => valve.id === id);
+                    const name = v ? `${v.name} (${id})` : `Valve ${id}`;
+                    valveDescriptions.push(`${name} open`);
+                });
+                closedValves.forEach(id => {
+                    const v = State.valves.find(valve => valve.id === id);
+                    const name = v ? `${v.name} (${id})` : `Valve ${id}`;
+                    valveDescriptions.push(`${name} closed`);
+                });
+                
+                // Format with commas and "and" before last item
+                let desc = 'Invalid state would occur: ';
+                if (valveDescriptions.length === 1) {
+                    desc += valveDescriptions[0];
+                } else if (valveDescriptions.length === 2) {
+                    desc += `${valveDescriptions[0]} and ${valveDescriptions[1]}`;
+                } else {
+                    const lastItem = valveDescriptions.pop();
+                    desc += `${valveDescriptions.join(', ')}, and ${lastItem}`;
+                }
+                desc += '.';
+                return desc;
+            }
+        }
+        return null;
+    };
+    
+    // Simulate each action in the step
+    const actions = step.actions || [];
+    for (const action of actions) {
+        // Handle multi-actions (arrays)
+        if (Array.isArray(action)) {
+            for (const subAction of action) {
+                if (subAction.type === 'set_valve') {
+                    simulatedStates[subAction.valve_id] = subAction.state;
+                } else if (subAction.type === 'pulse_valve') {
+                    // Pulse temporarily changes state then returns
+                    // Check the pulsed state
+                    const originalState = simulatedStates[subAction.valve_id];
+                    const pulseState = originalState === 'open' ? 'closed' : 'open';
+                    simulatedStates[subAction.valve_id] = pulseState;
+                    
+                    const pulseViolation = checkCurrentState();
+                    if (pulseViolation && !violations.includes(pulseViolation)) {
+                        violations.push(pulseViolation);
+                    }
+                    
+                    // Return to original state after pulse
+                    simulatedStates[subAction.valve_id] = originalState;
+                }
+            }
+            // Check state after multi-action completes
+            const violation = checkCurrentState();
+            if (violation && !violations.includes(violation)) {
+                violations.push(violation);
+            }
+        } else {
+            // Single action
+            if (action.type === 'set_valve') {
+                simulatedStates[action.valve_id] = action.state;
+                const violation = checkCurrentState();
+                if (violation && !violations.includes(violation)) {
+                    violations.push(violation);
+                }
+            } else if (action.type === 'pulse_valve') {
+                // Pulse temporarily changes state then returns
+                const originalState = simulatedStates[action.valve_id];
+                const pulseState = originalState === 'open' ? 'closed' : 'open';
+                simulatedStates[action.valve_id] = pulseState;
+                
+                const pulseViolation = checkCurrentState();
+                if (pulseViolation && !violations.includes(pulseViolation)) {
+                    violations.push(pulseViolation);
+                }
+                
+                // Return to original state after pulse
+                simulatedStates[action.valve_id] = originalState;
+            }
+            // 'wait' actions don't change valve states
+        }
+    }
+    
+    return violations;
+}
+
+/**
  * Executes a procedure step with validation
  */
 async function executeStep(index, event) {
@@ -1270,6 +1439,10 @@ async function executeStep(index, event) {
     if (!reqResult.met) {
         reqResult.unmet.forEach(u => warnings.push(u));
     }
+    
+    // Check for invalid valve states that would occur during step execution
+    const invalidStateViolations = checkStepInvalidStates(step);
+    invalidStateViolations.forEach(v => warnings.push(v));
     
     if (warnings.length > 0) {
         Modal.warning(
@@ -1476,19 +1649,6 @@ async function executeAction(action) {
             await new Promise(resolve => setTimeout(resolve, action.duration * 1000));
             break;
             
-        case 'user_confirm':
-            await new Promise((resolve, reject) => {
-                Modal.show(
-                    'Confirmation Required',
-                    `<p>${action.message}</p>`,
-                    [
-                        { label: 'Cancel', type: 'secondary', callback: () => reject(new Error('User cancelled')) },
-                        { label: 'Confirm', type: 'primary', callback: resolve }
-                    ]
-                );
-            });
-            break;
-            
         default:
             logError(`Unknown action type: ${action.type}`);
     }
@@ -1551,10 +1711,31 @@ function updateProceduresPanelHeight() {
 }
 
 /**
+ * Updates the header time display
+ */
+function updateHeaderTime() {
+    const timeElement = document.getElementById('header-time');
+    if (timeElement) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit',
+            hour12: true 
+        });
+        timeElement.textContent = timeString;
+    }
+}
+
+/**
  * Application initialization
  */
 async function init() {
     logStatus('Ground Control System initializing...');
+    
+    // Start time display update
+    updateHeaderTime();
+    setInterval(updateHeaderTime, 1000);
     
     try {
         await API.sendHeartbeat();

@@ -654,3 +654,391 @@ timestamp, type, message
 2026-01-02T20:17:36.526674, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
 2026-01-02T20:17:36.526961, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
 2026-01-02T20:17:36.527094, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T20:20:43.364683, status, Controller shutdown
+2026-01-02T20:33:21.351646, status, Controller started
+2026-01-02T20:33:21.352486, info, Controller id: 1623664827024
+2026-01-02T20:33:21.352668, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T20:33:21.352828, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T20:33:21.352973, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T20:33:21.353316, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T20:33:21.353483, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T20:33:21.353589, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T20:47:27.347816, status, Controller shutdown
+2026-01-02T20:47:29.296568, status, Controller started
+2026-01-02T20:47:29.297140, info, Controller id: 2272868670096
+2026-01-02T20:47:29.297345, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T20:47:29.297727, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T20:47:29.297921, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T20:47:29.298143, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T20:47:29.298380, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T20:47:29.298547, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:13:41.132224, status, Controller shutdown
+2026-01-02T21:13:43.112503, status, Controller started
+2026-01-02T21:13:43.112939, info, Controller id: 2483309271696
+2026-01-02T21:13:43.113103, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:13:43.113284, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:13:43.113498, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:13:43.113634, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:13:43.113739, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:13:43.113840, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:14:32.962053, status, Controller shutdown
+2026-01-02T21:14:34.512447, status, Controller started
+2026-01-02T21:14:34.512866, info, Controller id: 2259654564496
+2026-01-02T21:14:34.513047, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:14:34.513368, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:14:34.513585, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:14:34.513843, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:14:34.514112, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:14:34.514346, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:16:50.811913, status, Controller shutdown
+2026-01-02T21:19:04.054022, status, Controller started
+2026-01-02T21:19:04.054642, info, Controller id: 2219726953104
+2026-01-02T21:19:04.054804, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:19:04.054937, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:19:04.055203, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:19:04.055357, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:19:04.055507, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:19:04.055634, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:20:56.445472, status, Controller shutdown
+2026-01-02T21:20:57.361927, status, Controller started
+2026-01-02T21:20:57.362399, info, Controller id: 2310613588624
+2026-01-02T21:20:57.362709, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:20:57.362870, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:20:57.363002, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:20:57.363282, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:20:57.363778, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:20:57.364020, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:23:04.034613, status, Controller shutdown
+2026-01-02T21:23:35.327055, status, Controller started
+2026-01-02T21:23:35.327611, info, Controller id: 2003975887504
+2026-01-02T21:23:35.327941, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:23:35.328191, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:23:35.328334, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:23:35.328498, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:23:35.328687, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:23:35.328808, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:25:28.695651, status, Controller shutdown
+2026-01-02T21:25:29.603920, status, Controller started
+2026-01-02T21:25:29.604354, info, Controller id: 1558796393104
+2026-01-02T21:25:29.604514, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:25:29.604636, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:25:29.605024, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:25:29.605592, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:25:29.605712, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:25:29.605845, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:35:01.349799, status, Controller shutdown
+2026-01-02T21:36:52.099560, status, Controller started
+2026-01-02T21:36:52.100154, info, Controller id: 1794996001424
+2026-01-02T21:36:52.100348, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:36:52.100510, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:36:52.100634, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:36:52.100735, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:36:52.100970, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:36:52.101206, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:47:19.723965, status, Controller shutdown
+2026-01-02T21:49:42.058060, status, Controller started
+2026-01-02T21:49:42.058500, info, Controller id: 3137812912784
+2026-01-02T21:49:42.058693, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:49:42.058932, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:49:42.059251, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:49:42.059423, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:49:42.059537, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:49:42.059639, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:52:33.530940, status, Controller shutdown
+2026-01-02T21:53:34.378376, status, Controller started
+2026-01-02T21:53:34.378911, info, Controller id: 3043803159184
+2026-01-02T21:53:34.379240, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T21:53:34.379462, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T21:53:34.379591, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T21:53:34.379713, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T21:53:34.379939, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T21:53:34.380192, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T21:56:27.569892, status, Controller shutdown
+2026-01-02T22:00:42.235454, status, Controller started
+2026-01-02T22:00:42.236028, info, Controller id: 2294225590928
+2026-01-02T22:00:42.236253, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:00:42.236574, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:00:42.236757, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:00:42.236940, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:00:42.237097, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:00:42.237237, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:01:22.499926, status, Controller shutdown
+2026-01-02T22:03:55.332843, status, Controller started
+2026-01-02T22:03:55.333307, info, Controller id: 2980493744784
+2026-01-02T22:03:55.333479, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:03:55.333964, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:03:55.334581, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:03:55.334924, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:03:55.335091, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:03:55.335202, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:04:55.905988, status, Controller shutdown
+2026-01-02T22:04:56.866963, status, Controller started
+2026-01-02T22:04:56.867442, info, Controller id: 1148155091600
+2026-01-02T22:04:56.867649, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:04:56.867904, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:04:56.868039, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:04:56.868306, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:04:56.868539, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:04:56.868724, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:08:59.543447, status, Controller shutdown
+2026-01-02T22:09:00.674834, status, Controller started
+2026-01-02T22:09:00.675603, info, Controller id: 2450607594128
+2026-01-02T22:09:00.675841, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:09:00.676104, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:09:00.676303, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:09:00.676572, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:09:00.676877, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:09:00.677043, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:12:00.540463, status, Controller shutdown
+2026-01-02T22:12:01.588014, status, Controller started
+2026-01-02T22:12:01.588423, info, Controller id: 2462980856464
+2026-01-02T22:12:01.588708, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:12:01.588995, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:12:01.589355, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:12:01.589902, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:12:01.590313, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:12:01.590635, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:12:39.004141, status, Controller shutdown
+2026-01-02T22:12:40.412670, status, Controller started
+2026-01-02T22:12:40.413041, info, Controller id: 2398299904656
+2026-01-02T22:12:40.413200, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:12:40.413327, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:12:40.414135, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:12:40.414548, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:12:40.414825, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:12:40.415059, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:17:53.241004, status, Controller shutdown
+2026-01-02T22:17:55.153622, status, Controller started
+2026-01-02T22:17:55.154130, info, Controller id: 1827965328016
+2026-01-02T22:17:55.154437, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:17:55.155084, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:17:55.155293, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:17:55.155497, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:17:55.155675, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:17:55.155825, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:20:18.177071, status, Controller shutdown
+2026-01-02T22:20:19.147024, status, Controller started
+2026-01-02T22:20:19.147502, info, Controller id: 1866451212944
+2026-01-02T22:20:19.147848, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:20:19.148386, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:20:19.148830, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:20:19.149166, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:20:19.149472, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:20:19.149773, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:20:44.805539, status, Controller shutdown
+2026-01-02T22:20:45.874784, status, Controller started
+2026-01-02T22:20:45.875329, info, Controller id: 1358793431696
+2026-01-02T22:20:45.875607, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:20:45.875831, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:20:45.875952, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:20:45.876057, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:20:45.876162, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:20:45.876320, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:21:49.254348, status, Controller shutdown
+2026-01-02T22:21:50.332615, status, Controller started
+2026-01-02T22:21:50.333034, info, Controller id: 2335861987984
+2026-01-02T22:21:50.333179, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:21:50.333506, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:21:50.333680, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:21:50.333799, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:21:50.334099, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:21:50.334273, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:22:00.480270, status, Controller shutdown
+2026-01-02T22:22:01.316863, status, Controller started
+2026-01-02T22:22:01.317359, info, Controller id: 2094047320720
+2026-01-02T22:22:01.317555, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:22:01.317870, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:22:01.318051, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:22:01.318336, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:22:01.318618, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:22:01.319039, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:22:11.236283, status, Controller shutdown
+2026-01-02T22:22:12.324957, status, Controller started
+2026-01-02T22:22:12.325695, info, Controller id: 2454036437648
+2026-01-02T22:22:12.325959, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:22:12.326112, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:22:12.326221, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:22:12.326392, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:22:12.326553, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:22:12.326667, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:25:11.014251, status, Controller shutdown
+2026-01-02T22:25:12.531094, status, Controller started
+2026-01-02T22:25:12.531538, info, Controller id: 1586426370704
+2026-01-02T22:25:12.531699, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:25:12.532025, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:25:12.532467, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:25:12.532667, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:25:12.532848, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:25:12.533108, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:26:17.555271, status, Controller shutdown
+2026-01-02T22:26:18.433789, status, Controller started
+2026-01-02T22:26:18.434211, info, Controller id: 3093843237520
+2026-01-02T22:26:18.434375, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:26:18.434576, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:26:18.434788, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:26:18.435015, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:26:18.435196, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:26:18.435313, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:27:20.827474, status, Controller shutdown
+2026-01-02T22:27:21.688251, status, Controller started
+2026-01-02T22:27:21.688981, info, Controller id: 2458116577936
+2026-01-02T22:27:21.689407, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:27:21.689644, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:27:21.689780, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:27:21.689929, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:27:21.690188, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:27:21.690381, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:27:44.057363, status, Controller shutdown
+2026-01-02T22:27:44.746043, status, Controller started
+2026-01-02T22:27:44.746720, info, Controller id: 2060688251536
+2026-01-02T22:27:44.747377, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:27:44.747795, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:27:44.748160, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:27:44.748409, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:27:44.748647, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:27:44.749029, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:31:34.447958, status, Controller shutdown
+2026-01-02T22:31:35.193108, status, Controller started
+2026-01-02T22:31:35.193648, info, Controller id: 2231498267280
+2026-01-02T22:31:35.193821, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:31:35.194002, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:31:35.194307, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:31:35.194590, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:31:35.194871, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:31:35.195192, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:32:05.546053, status, Controller shutdown
+2026-01-02T22:32:06.553049, status, Controller started
+2026-01-02T22:32:06.553520, info, Controller id: 2333711358608
+2026-01-02T22:32:06.553681, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:32:06.553809, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:32:06.554715, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:32:06.555170, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:32:06.555350, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:32:06.555595, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:32:54.095920, status, Controller shutdown
+2026-01-02T22:32:55.412540, status, Controller started
+2026-01-02T22:32:55.413022, info, Controller id: 2970699192976
+2026-01-02T22:32:55.413296, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:32:55.413508, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:32:55.413633, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:32:55.413802, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:32:55.414047, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:32:55.414421, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:33:54.758003, status, Controller shutdown
+2026-01-02T22:33:55.621392, status, Controller started
+2026-01-02T22:33:55.621849, info, Controller id: 1948411648656
+2026-01-02T22:33:55.622063, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:33:55.622626, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:33:55.622833, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:33:55.623031, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:33:55.623221, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:33:55.623526, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:34:19.860386, status, Controller shutdown
+2026-01-02T22:34:20.588094, status, Controller started
+2026-01-02T22:34:20.588629, info, Controller id: 1713434745488
+2026-01-02T22:34:20.588940, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:34:20.589225, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:34:20.589705, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:34:20.589910, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:34:20.590120, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:34:20.590312, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:35:15.556235, status, Controller shutdown
+2026-01-02T22:35:16.376140, status, Controller started
+2026-01-02T22:35:16.376546, info, Controller id: 2811774196368
+2026-01-02T22:35:16.376720, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:35:16.376980, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:35:16.377202, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:35:16.377338, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:35:16.377440, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:35:16.377576, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:35:33.084243, status, Controller shutdown
+2026-01-02T22:35:33.879237, status, Controller started
+2026-01-02T22:35:33.879991, info, Controller id: 1772744039056
+2026-01-02T22:35:33.880159, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:35:33.880307, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:35:33.880855, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:35:33.881643, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:35:33.882134, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:35:33.882315, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:39:26.679108, status, Controller shutdown
+2026-01-02T22:39:33.241735, status, Controller started
+2026-01-02T22:39:33.242214, info, Controller id: 2415835830928
+2026-01-02T22:39:33.242378, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:39:33.242508, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:39:33.243137, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:39:33.243454, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:39:33.243728, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:39:33.243944, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:39:59.732070, status, Controller shutdown
+2026-01-02T22:40:01.374327, status, Controller started
+2026-01-02T22:40:01.374813, info, Controller id: 2766321113744
+2026-01-02T22:40:01.375011, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:40:01.375369, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:40:01.375637, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:40:01.375930, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:40:01.376189, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:40:01.376413, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:40:27.486493, status, Controller shutdown
+2026-01-02T22:41:15.851150, status, Controller started
+2026-01-02T22:41:15.851599, info, Controller id: 2777619716752
+2026-01-02T22:41:15.851786, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:41:15.851975, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:41:15.852334, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:41:15.852749, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:41:15.852962, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:41:15.853180, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:42:41.554120, status, Controller shutdown
+2026-01-02T22:42:42.957610, status, Controller started
+2026-01-02T22:42:42.958071, info, Controller id: 2794934852240
+2026-01-02T22:42:42.958265, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:42:42.958425, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:42:42.958543, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:42:42.959203, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:42:42.959773, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:42:42.960080, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:45:39.170553, status, Controller shutdown
+2026-01-02T22:45:39.929115, status, Controller started
+2026-01-02T22:45:39.929529, info, Controller id: 2740182211216
+2026-01-02T22:45:39.929692, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:45:39.930180, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:45:39.931007, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:45:39.931397, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:45:39.931777, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:45:39.932054, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:47:06.277257, status, Controller shutdown
+2026-01-02T22:47:07.036548, status, Controller started
+2026-01-02T22:47:07.036950, info, Controller id: 2104303639184
+2026-01-02T22:47:07.037120, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:47:07.037266, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:47:07.037417, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:47:07.037581, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:47:07.037771, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:47:07.037912, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:48:16.519200, status, Controller shutdown
+2026-01-02T22:48:18.837802, status, Controller started
+2026-01-02T22:48:18.838268, info, Controller id: 3165886438032
+2026-01-02T22:48:18.838481, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:48:18.838613, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:48:18.838863, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:48:18.839158, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:48:18.839371, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:48:18.839551, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:49:16.829483, status, Controller shutdown
+2026-01-02T22:49:17.678561, status, Controller started
+2026-01-02T22:49:17.679044, info, Controller id: 2710263847568
+2026-01-02T22:49:17.679236, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:49:17.679847, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:49:17.680402, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:49:17.680680, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:49:17.681107, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:49:17.681558, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:50:29.207122, status, Controller shutdown
+2026-01-02T22:51:10.900394, status, Controller started
+2026-01-02T22:51:10.901050, info, Controller id: 2915921779344
+2026-01-02T22:51:10.901861, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-01-02T22:51:10.902430, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-01-02T22:51:10.902690, info, Sensor Data Rate: 10.0 Hz
+2026-01-02T22:51:10.902844, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-01-02T22:51:10.903036, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-01-02T22:51:10.903188, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-02T22:52:38.751945, status, Controller shutdown
