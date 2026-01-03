@@ -13,6 +13,7 @@ const HEARTBEAT_INTERVAL = 100;
 const VALVE_POLL_INTERVAL = 100;
 const SENSOR_POLL_INTERVAL = 100;
 const SAFE_MODE_POLL_INTERVAL = 100;
+const PROCEDURE_POLL_INTERVAL = 1000;
 
 // Chart configuration
 const CHART_MAX_POINTS = 100;
@@ -32,8 +33,10 @@ const State = {
     selectedProcedure: null,
     selectedProcedureIndex: 0,
     completedSteps: new Set(),
+    expandedSteps: new Set(),
     currentRequirementsMet: {},
-    pulsingValves: new Set() // Track which valves are currently pulsing
+    pulsingValves: new Set(), // Track which valves are currently pulsing
+    executingStepIndex: null // Track which step is currently executing
 };
 
 // Logging utilities
@@ -53,6 +56,9 @@ function logError(message, error = null) {
  */
 const Modal = {
     show(title, content, actions) {
+        const overlay = document.getElementById('modal-overlay');
+        const container = document.getElementById('modal-container');
+        
         document.getElementById('modal-title').textContent = title;
         document.getElementById('modal-content').innerHTML = content;
         
@@ -70,11 +76,26 @@ const Modal = {
             actionsContainer.appendChild(btn);
         });
         
-        document.getElementById('modal-overlay').classList.remove('hidden');
+        // Remove closing class and show
+        overlay.classList.remove('closing');
+        container.classList.remove('closing');
+        overlay.classList.remove('hidden');
     },
     
     close() {
-        document.getElementById('modal-overlay').classList.add('hidden');
+        const overlay = document.getElementById('modal-overlay');
+        const container = document.getElementById('modal-container');
+        
+        // Add closing animation classes
+        overlay.classList.add('closing');
+        container.classList.add('closing');
+        
+        // Wait for animation to complete, then hide
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('closing');
+            container.classList.remove('closing');
+        }, 200);
     },
     
     confirm(title, message, onConfirm, confirmLabel = 'Confirm', confirmType = 'primary') {
@@ -157,6 +178,18 @@ const API = {
             method: 'POST',
             body: JSON.stringify(pulses)
         });
+    },
+
+    async getProcedures() {
+        return this.request('/api/get_procedures');
+    },
+
+    async getInvalidValveStates() {
+        return this.request('/api/get_invalid_valve_states');
+    },
+
+    async getWebsiteTitle() {
+        return this.request('/api/get_website_title');
     }
 };
 
@@ -724,6 +757,48 @@ async function safeModePollingLoop() {
 }
 
 /**
+ * Polls procedures from server and updates if changed
+ */
+async function pollProcedures() {
+    try {
+        const procedures = await API.getProcedures();
+        
+        // Check if procedures have changed by comparing JSON
+        const currentJson = JSON.stringify(CONFIG.procedures);
+        const newJson = JSON.stringify(procedures);
+        
+        if (currentJson !== newJson) {
+            logStatus('Procedures updated from server');
+            CONFIG.procedures = procedures;
+            
+            // Reset procedure state
+            State.completedSteps.clear();
+            State.expandedSteps.clear();
+            State.selectedProcedure = null;
+            State.selectedProcedureIndex = 0;
+            
+            // Reinitialize procedures UI
+            initProcedures();
+        }
+    } catch (error) {
+        logError('Failed to poll procedures', error);
+    }
+}
+
+/**
+ * Procedure polling loop - only polls when not executing a step
+ */
+async function procedurePollingLoop() {
+    if (State.connected && State.executingStepIndex === null) {
+        await pollProcedures();
+    }
+    setTimeout(procedurePollingLoop, PROCEDURE_POLL_INTERVAL);
+}
+
+// Track if procedures have been initialized to avoid duplicate event listeners
+let proceduresInitialized = false;
+
+/**
  * Populates procedure selector dropdown
  */
 function initProcedures() {
@@ -735,8 +810,13 @@ function initProcedures() {
     if (procedures.length === 0) {
         btn.textContent = 'No procedures configured';
         btn.disabled = true;
+        menu.innerHTML = '';
+        document.getElementById('procedure-steps').innerHTML = '';
         return;
     }
+    
+    // Enable button in case it was disabled
+    btn.disabled = false;
     
     // Populate dropdown menu
     menu.innerHTML = procedures.map((proc, i) => 
@@ -745,36 +825,44 @@ function initProcedures() {
     
     // Set initial selection
     btn.textContent = procedures[0].name;
-    menu.querySelector('.procedure-dropdown-item').classList.add('selected');
+    const firstItem = menu.querySelector('.procedure-dropdown-item');
+    if (firstItem) {
+        firstItem.classList.add('selected');
+    }
     
-    // Toggle dropdown on button click
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selector.classList.toggle('open');
-    });
-    
-    // Handle item selection
-    menu.addEventListener('click', (e) => {
-        const item = e.target.closest('.procedure-dropdown-item');
-        if (item) {
-            const index = parseInt(item.dataset.index);
-            btn.textContent = item.textContent;
-            
-            // Update selected state
-            menu.querySelectorAll('.procedure-dropdown-item').forEach(el => el.classList.remove('selected'));
-            item.classList.add('selected');
-            
-            selector.classList.remove('open');
-            selectProcedure(index);
-        }
-    });
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!selector.contains(e.target)) {
-            selector.classList.remove('open');
-        }
-    });
+    // Only add event listeners once
+    if (!proceduresInitialized) {
+        proceduresInitialized = true;
+        
+        // Toggle dropdown on button click
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selector.classList.toggle('open');
+        });
+        
+        // Handle item selection
+        menu.addEventListener('click', (e) => {
+            const item = e.target.closest('.procedure-dropdown-item');
+            if (item) {
+                const index = parseInt(item.dataset.index);
+                btn.textContent = item.textContent;
+                
+                // Update selected state
+                menu.querySelectorAll('.procedure-dropdown-item').forEach(el => el.classList.remove('selected'));
+                item.classList.add('selected');
+                
+                selector.classList.remove('open');
+                selectProcedure(index);
+            }
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!selector.contains(e.target)) {
+                selector.classList.remove('open');
+            }
+        });
+    }
     
     selectProcedure(0);
 }
@@ -792,6 +880,7 @@ function selectProcedure(index) {
     State.selectedProcedure = CONFIG.procedures[index];
     State.selectedProcedureIndex = index;
     State.completedSteps.clear();
+    State.expandedSteps.clear(); // Clear expanded steps when changing procedures
     renderProcedureSteps();
 }
 
@@ -848,23 +937,52 @@ function formatRequirementUnmet(req) {
 }
 
 /**
- * Formats an action for display
+ * Formats a single action for display
  */
-function formatAction(action) {
+function formatSingleAction(action) {
     switch (action.type) {
         case 'set_valve': {
-            const stateWord = action.state === 'open' ? 'Open' : 'Close';
+            const stateWord = action.state === 'open' ? 'open' : 'close';
             return `${stateWord} ${getValveLabel(action.valve_id)}`;
         }
         case 'pulse_valve':
-            return `Pulse ${getValveLabel(action.valve_id)} for ${action.duration}s`;
+            return `pulse ${getValveLabel(action.valve_id)} for ${action.duration}s`;
         case 'wait':
-            return `Wait ${action.duration} seconds`;
+            return `wait ${action.duration} seconds`;
         case 'user_confirm':
-            return `Await user confirmation: "${action.message}"`;
+            return `await user confirmation: "${action.message}"`;
         default:
             return JSON.stringify(action);
     }
+}
+
+/**
+ * Formats an action or combined actions for display
+ */
+function formatAction(action) {
+    // Handle combined actions (array)
+    if (Array.isArray(action)) {
+        if (action.length === 0) return '';
+        if (action.length === 1) {
+            const text = formatSingleAction(action[0]);
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+        
+        // Format as "Action1, action2, and action3"
+        const formattedActions = action.map(a => formatSingleAction(a));
+        const lastAction = formattedActions.pop();
+        const firstAction = formattedActions.shift();
+        const capitalizedFirst = firstAction.charAt(0).toUpperCase() + firstAction.slice(1);
+        
+        if (formattedActions.length === 0) {
+            return `${capitalizedFirst} and ${lastAction}`;
+        }
+        return `${capitalizedFirst}, ${formattedActions.join(', ')}, and ${lastAction}`;
+    }
+    
+    // Handle single action
+    const text = formatSingleAction(action);
+    return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 /**
@@ -895,20 +1013,27 @@ function checkRequirementMet(req) {
 
 /**
  * Checks all requirements for a step
- * @returns Object with met (boolean) and unmet (array of unmet requirement descriptions)
+ * @returns Object with met (boolean), partial (boolean), and unmet (array of unmet requirement descriptions)
  */
 function checkStepRequirements(step) {
     const requirements = step.requirements || [];
     const unmet = [];
+    let metCount = 0;
     
     requirements.forEach(req => {
-        if (!checkRequirementMet(req)) {
+        if (checkRequirementMet(req)) {
+            metCount++;
+        } else {
             unmet.push(formatRequirementUnmet(req));
         }
     });
     
+    const total = requirements.length;
+    const partial = total > 0 && metCount > total / 2 && metCount < total;
+    
     return {
         met: unmet.length === 0,
+        partial,
         unmet
     };
 }
@@ -923,12 +1048,12 @@ function updateAllStepRequirements() {
         const result = checkStepRequirements(step);
         State.currentRequirementsMet[index] = result;
         
-        const indicator = document.querySelector(`.step-card[data-step-index="${index}"] .requirements-indicator`);
-        if (indicator) {
+        // Update step card left border color
+        const card = document.querySelector(`.step-card[data-step-index="${index}"]`);
+        if (card) {
+            card.classList.remove('requirements-met');
             if (result.met) {
-                indicator.classList.add('met');
-            } else {
-                indicator.classList.remove('met');
+                card.classList.add('requirements-met');
             }
         }
         
@@ -959,16 +1084,31 @@ function createStepCard(step, index) {
     
     State.currentRequirementsMet[index] = reqResult;
     
+    // Determine requirement class for left border indicator
+    let reqClass = '';
+    let indicatorTitle = 'Requirements not met';
+    if (reqResult.met) {
+        reqClass = 'requirements-met';
+        indicatorTitle = 'Requirements met';
+    }
+    
+    // Check if this step is currently executing
+    const isExecuting = State.executingStepIndex === index;
+    if (isExecuting) {
+        reqClass = 'executing';
+        indicatorTitle = 'Step executing';
+    }
+    
+    const isExpanded = State.expandedSteps.has(index);
+    
     return `
-        <div class="step-card ${isCompleted ? 'completed' : ''}" data-step-index="${index}">
+        <div class="step-card ${isCompleted ? 'completed' : ''} ${isExpanded ? 'expanded' : ''} ${reqClass}" data-step-index="${index}" title="${indicatorTitle}">
             <div class="step-header" onclick="toggleStepExpand(${index})">
                 <div class="step-info">
                     <span class="step-number">${isCompleted ? '✓' : index + 1}</span>
                     <span class="step-name">${step.name}</span>
                 </div>
                 <div class="step-status">
-                    <span class="requirements-indicator ${reqResult.met ? 'met' : ''}" 
-                          title="${reqResult.met ? 'Requirements met' : 'Requirements not met'}"></span>
                     <span class="step-toggle">▼</span>
                 </div>
             </div>
@@ -997,8 +1137,8 @@ function createStepCard(step, index) {
                     </div>
                 ` : ''}
                 <div class="step-buttons">
-                    <button class="step-execute-btn" onclick="executeStep(${index}, event)">
-                        ${isCompleted ? 'Execute Again' : 'Execute Step'}
+                    <button class="step-execute-btn${State.executingStepIndex === index ? ' executing' : ''}" onclick="executeStep(${index}, event)"${State.executingStepIndex === index ? ' disabled' : ''}>
+                        ${State.executingStepIndex === index ? 'Executing...' : (isCompleted ? 'Execute Again' : 'Execute Step')}
                     </button>
                     <button class="step-mark-btn ${isCompleted ? 'completed' : ''}" onclick="toggleStepComplete(${index}, event)">
                         ✓
@@ -1039,6 +1179,11 @@ function renderProcedureSteps() {
  * Toggles step card expansion
  */
 function toggleStepExpand(index) {
+    if (State.expandedSteps.has(index)) {
+        State.expandedSteps.delete(index);
+    } else {
+        State.expandedSteps.add(index);
+    }
     const card = document.querySelector(`.step-card[data-step-index="${index}"]`);
     if (card) {
         card.classList.toggle('expanded');
@@ -1069,6 +1214,7 @@ function resetProcedure() {
     if (!State.selectedProcedure) return;
     
     State.completedSteps.clear();
+    // Keep expandedSteps as-is to preserve open tabs
     renderProcedureSteps();
     logStatus('Procedure reset - all steps marked as incomplete');
 }
@@ -1094,6 +1240,16 @@ async function executeStep(index, event) {
     if (event) event.stopPropagation();
     
     if (!State.selectedProcedure) return;
+    
+    // Check if a step is already executing
+    if (State.executingStepIndex !== null) {
+        Modal.show(
+            'Step Already Executing',
+            `<p>Step ${State.executingStepIndex + 1} is currently executing. Please wait for it to complete before executing another step.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
     
     const step = State.selectedProcedure.steps[index];
     const isCompleted = State.completedSteps.has(index);
@@ -1133,13 +1289,32 @@ async function executeStep(index, event) {
 async function performStepExecution(index, step) {
     logStatus(`Executing step ${index + 1}: ${step.name}`);
     
+    // Mark step as executing
+    State.executingStepIndex = index;
+    renderProcedureSteps();
+    
     const actions = step.actions || [];
     
     for (const action of actions) {
         try {
-            await executeAction(action);
+            // Check if this is a multi-action (array of actions)
+            if (Array.isArray(action)) {
+                await executeMultiAction(action);
+            } else {
+                await executeAction(action);
+            }
         } catch (error) {
-            logError(`Action failed: ${action.type}`, error);
+            // Check if user cancelled - if so, silently stop without error modal
+            if (error.message === 'User cancelled') {
+                logStatus(`Step ${index + 1} cancelled by user`);
+                State.executingStepIndex = null;
+                renderProcedureSteps();
+                return;
+            }
+            
+            logError(`Action failed: ${Array.isArray(action) ? 'multi-action' : action.type}`, error);
+            State.executingStepIndex = null;
+            renderProcedureSteps();
             Modal.show('Action Failed', `<p>Failed to execute action: ${error.message}</p>`, [
                 { label: 'OK', type: 'primary' }
             ]);
@@ -1147,9 +1322,110 @@ async function performStepExecution(index, step) {
         }
     }
     
+    State.executingStepIndex = null;
     State.completedSteps.add(index);
     renderProcedureSteps();
     logStatus(`Step ${index + 1} completed: ${step.name}`);
+}
+
+/**
+ * Executes multiple actions simultaneously (only set_valve and pulse_valve supported)
+ * Combines all set_valve actions into one API call and all pulse_valve actions into one API call
+ * @returns Promise that resolves when all actions complete
+ */
+async function executeMultiAction(actions) {
+    const setValveStates = {};
+    const pulseValves = {};
+    const pulseInitialStates = {};
+    let maxPulseDuration = 0;
+    
+    // Collect all valve states and pulse commands
+    for (const action of actions) {
+        if (action.type === 'set_valve') {
+            setValveStates[action.valve_id] = action.state;
+        } else if (action.type === 'pulse_valve') {
+            // Check if valve is already pulsing
+            if (State.pulsingValves.has(action.valve_id)) {
+                throw new Error(`Valve ${action.valve_id} is already pulsing`);
+            }
+            pulseValves[action.valve_id] = action.duration;
+            // Store initial state for verification after pulse
+            const valve = State.valves.find(v => v.id === action.valve_id);
+            pulseInitialStates[action.valve_id] = valve ? valve.current_state : 'closed';
+            if (action.duration > maxPulseDuration) {
+                maxPulseDuration = action.duration;
+            }
+        }
+    }
+    
+    // Mark pulse valves as pulsing and update UI
+    for (const [valveId, duration] of Object.entries(pulseValves)) {
+        const id = parseInt(valveId);
+        State.pulsingValves.add(id);
+        updatePulseUI(id, true, duration);
+    }
+    
+    try {
+        // Execute both API calls in parallel
+        const promises = [];
+        
+        if (Object.keys(setValveStates).length > 0) {
+            promises.push(API.setValveStates(setValveStates));
+        }
+        
+        if (Object.keys(pulseValves).length > 0) {
+            promises.push(
+                API.pulseValves(pulseValves).then(response => {
+                    if (response.status === 'error' && response.failed_valves) {
+                        const firstError = Object.values(response.failed_valves)[0];
+                        throw new Error(firstError || 'Unknown pulse error');
+                    }
+                })
+            );
+        }
+        
+        await Promise.all(promises);
+        
+        // Wait for longest pulse to complete
+        if (maxPulseDuration > 0) {
+            await new Promise(resolve => setTimeout(resolve, maxPulseDuration * 1000));
+        }
+        
+        // Verify all set_valve states
+        for (const [valveId, expectedState] of Object.entries(setValveStates)) {
+            await verifyValveState(parseInt(valveId), expectedState);
+        }
+        
+        // Verify all pulse valves returned to initial state
+        for (const [valveId, initialState] of Object.entries(pulseInitialStates)) {
+            await verifyValveState(parseInt(valveId), initialState);
+        }
+    } finally {
+        // Clean up pulse valve states
+        for (const valveId of Object.keys(pulseValves)) {
+            const id = parseInt(valveId);
+            State.pulsingValves.delete(id);
+            updatePulseUI(id, false, 0);
+        }
+    }
+}
+
+/**
+ * Verifies that a valve has reached the expected state by polling
+ * @returns Promise that resolves when state is verified or rejects on timeout
+ */
+async function verifyValveState(valveId, expectedState, maxAttempts = 10, delayMs = 100) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        await pollValves();
+        const valve = State.valves.find(v => v.id === valveId);
+        if (valve && valve.current_state === expectedState) {
+            return true;
+        }
+        if (attempt < maxAttempts - 1) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+    throw new Error(`Valve ${valveId} did not reach expected state '${expectedState}'`);
 }
 
 /**
@@ -1160,7 +1436,7 @@ async function executeAction(action) {
     switch (action.type) {
         case 'set_valve':
             await API.setValveStates({ [action.valve_id]: action.state });
-            await pollValves();
+            await verifyValveState(action.valve_id, action.state);
             break;
 
         case 'pulse_valve': {
@@ -1171,6 +1447,10 @@ async function executeAction(action) {
             if (State.pulsingValves.has(valveId)) {
                 throw new Error(`Valve ${valveId} is already pulsing`);
             }
+
+            // Get initial state to verify return after pulse
+            const valve = State.valves.find(v => v.id === valveId);
+            const initialState = valve ? valve.current_state : 'closed';
 
             // Mark as pulsing and update UI
             State.pulsingValves.add(valveId);
@@ -1183,10 +1463,11 @@ async function executeAction(action) {
                 }
                 // Wait for pulse to complete
                 await new Promise(resolve => setTimeout(resolve, duration * 1000));
+                // Verify valve returned to initial state
+                await verifyValveState(valveId, initialState);
             } finally {
                 State.pulsingValves.delete(valveId);
                 updatePulseUI(valveId, false, 0);
-                await pollValves();
             }
             break;
         }
@@ -1218,13 +1499,29 @@ async function executeAction(action) {
  */
 async function initialLoad() {
     try {
-        const [valves, sensors] = await Promise.all([
+        const [valves, sensors, procedures, invalidValveStates, titleData] = await Promise.all([
             API.getValveInfo(),
-            API.getSensorInfo()
+            API.getSensorInfo(),
+            API.getProcedures(),
+            API.getInvalidValveStates(),
+            API.getWebsiteTitle()
         ]);
         
         State.valves = valves;
         State.sensors = sensors;
+        
+        // Update CONFIG with fetched data
+        CONFIG.procedures = procedures;
+        CONFIG.invalidValveStates = invalidValveStates;
+        
+        // Update website title
+        if (titleData && titleData.title) {
+            document.title = titleData.title;
+            const headerTitle = document.querySelector('.header-left h1');
+            if (headerTitle) {
+                headerTitle.textContent = titleData.title;
+            }
+        }
         
         renderValves();
         renderSensors();
@@ -1278,6 +1575,7 @@ async function init() {
     valvePollingLoop();
     sensorPollingLoop();
     safeModePollingLoop();
+    procedurePollingLoop();
     
     logStatus('Ground Control System initialized');
 }

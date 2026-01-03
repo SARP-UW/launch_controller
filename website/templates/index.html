@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ website_title }}</title>
+    <title>Ground Control</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -21,7 +21,7 @@
 
     <header class="header">
         <div class="header-left">
-            <h1>{{ website_title }}</h1>
+            <h1>Ground Control</h1>
         </div>
         <div class="header-right">
             <button id="safe-mode-btn" class="safe-mode-btn" onclick="toggleSafeMode()">
@@ -69,9 +69,10 @@
     </footer>
 
     <script>
+        // CONFIG will be populated via API calls
         const CONFIG = {
-            invalidValveStates: {{ invalid_valve_states | tojson | safe }},
-            procedures: {{ procedures | tojson | safe }}
+            invalidValveStates: [],
+            procedures: []
         };
     </script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>

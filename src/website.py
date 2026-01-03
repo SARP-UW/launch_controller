@@ -407,6 +407,66 @@ class ControllerWebsite:
                         "failed_valves": failed_valves
                     }), 400
 
+        @self._app.get("/api/get_procedures")
+        def get_procedures():
+            """
+            Gets the list of procedures.
+            """
+            user = request.remote_addr
+            with self._thread_lock:
+                if self._shutdown_flag:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: User attempted to get procedures while website shut down.")
+                    self._website_logger.log_data([user, "error", "Attempted to get procedures while website shut down."])
+                    return jsonify({"status": "error", "message": "Website has been shut down"}), 503
+                try:
+                    return jsonify(self._procedures)
+                except Exception as e:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: Failed to get procedures from {user}: {e}")
+                    self._website_logger.log_data([user, "error", f"Failed to get procedures: {e}"])
+                    return jsonify({"status": "error", "message": "Failed to get procedures"}), 500
+
+        @self._app.get("/api/get_invalid_valve_states")
+        def get_invalid_valve_states():
+            """
+            Gets the list of invalid valve states.
+            """
+            user = request.remote_addr
+            with self._thread_lock:
+                if self._shutdown_flag:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: User attempted to get invalid valve states while website shut down.")
+                    self._website_logger.log_data([user, "error", "Attempted to get invalid valve states while website shut down."])
+                    return jsonify({"status": "error", "message": "Website has been shut down"}), 503
+                try:
+                    return jsonify(self._invalid_valve_states)
+                except Exception as e:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: Failed to get invalid valve states from {user}: {e}")
+                    self._website_logger.log_data([user, "error", f"Failed to get invalid valve states: {e}"])
+                    return jsonify({"status": "error", "message": "Failed to get invalid valve states"}), 500
+
+        @self._app.get("/api/get_website_title")
+        def get_website_title():
+            """
+            Gets the website title.
+            """
+            user = request.remote_addr
+            with self._thread_lock:
+                if self._shutdown_flag:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: User attempted to get website title while website shut down.")
+                    self._website_logger.log_data([user, "error", "Attempted to get website title while website shut down."])
+                    return jsonify({"status": "error", "message": "Website has been shut down"}), 503
+                try:
+                    return jsonify({"title": self._website_title})
+                except Exception as e:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: Failed to get website title from {user}: {e}")
+                    self._website_logger.log_data([user, "error", f"Failed to get website title: {e}"])
+                    return jsonify({"status": "error", "message": "Failed to get website title"}), 500
+
         @self._app.get("/api/get_safe_mode")
         def get_safe_mode():
             """
@@ -463,14 +523,9 @@ class ControllerWebsite:
         @self._app.get("/")
         def index():
             """
-            Serves the main HTML page with embedded configuration data
+            Serves the main HTML page
             """
-            return render_template(
-                'index.html',
-                website_title = self._website_title,
-                invalid_valve_states = self._invalid_valve_states,
-                procedures = self._procedures
-            )
+            return render_template('index.html')
 
         if settings.PRINT_WEBSITE_STATUS:
             print(f"WEBSITE STATUS: Website running...")

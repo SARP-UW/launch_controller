@@ -3,6 +3,7 @@
     --bg-secondary: #1a1a1a;
     --bg-tertiary: #242424;
     --bg-hover: #2a2a2a;
+    --bg-hover-bright: #333333;
     --text-primary: #f0f0f0;
     --text-secondary: #a0a0a0;
     --text-muted: #666;
@@ -33,6 +34,11 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     background-color: var(--bg-primary);
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+    background-size: 40px 40px, 40px 40px, 100% 100%;
     color: var(--text-primary);
     min-height: 100vh;
     line-height: 1.5;
@@ -45,28 +51,29 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    background-color: var(--bg-secondary);
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(20, 20, 20, 0.85) 100%);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .footer {
     padding: 1rem 2rem;
-    background-color: var(--bg-secondary);
+    background: linear-gradient(0deg, var(--bg-secondary) 0%, rgba(20, 20, 20, 0.85) 100%);
     border-top: 1px solid var(--border-color);
     text-align: center;
     color: var(--text-muted);
     font-size: 0.85rem;
     flex-shrink: 0;
     margin-top: auto;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .footer p {
     margin: 0;
-}
 }
 
 .header-left {
@@ -97,6 +104,7 @@ body {
     background-color: var(--bg-tertiary);
     font-size: 0.9rem;
     color: var(--text-primary);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .status-dot {
@@ -124,29 +132,39 @@ body {
     display: flex;
     align-items: center;
     padding: 0.6rem 1rem;
-    border: 2px solid var(--danger);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
-    background-color: var(--bg-tertiary);
-    color: var(--danger);
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
     cursor: pointer;
     transition: var(--transition);
     font-size: 0.9rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .safe-mode-btn:hover {
-    border-color: white;
-    color: white;
+    background-color: var(--bg-hover);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.safe-mode-btn:active {
+    transform: scale(0.95);
 }
 
 .safe-mode-btn.active {
+    background-color: var(--success);
     border-color: var(--success);
-    color: var(--success);
-    background-color: rgba(34, 197, 94, 0.15);
+    color: white;
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .safe-mode-btn.active:hover {
-    border-color: white;
-    color: white;
+    background-color: #1a9e4a;
+}
+
+.safe-mode-btn.active:active {
+    transform: scale(0.95);
 }
 
 .main-content {
@@ -156,6 +174,7 @@ body {
     padding: 1.5rem 2rem;
     max-height: calc(100vh - 110px);
     align-items: start;
+    flex: 1;
 }
 
 .left-panel {
@@ -166,10 +185,11 @@ body {
 }
 
 section {
-    background-color: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.8) 100%);
     border-radius: var(--border-radius);
     padding: 1.25rem;
     border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 section h2 {
@@ -193,7 +213,7 @@ section h2 {
     padding: 1rem;
     border: 1px solid var(--border-color);
     transition: var(--transition);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .valve-header {
@@ -241,6 +261,7 @@ section h2 {
     transition: var(--transition);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .valve-btn.open-btn {
@@ -250,14 +271,16 @@ section h2 {
 }
 
 .valve-btn.open-btn:hover {
-    border-color: white;
+    background-color: var(--bg-hover-bright);
+    border-color: var(--text-muted);
     color: var(--text-primary);
 }
 
 .valve-btn.open-btn.active {
     background-color: var(--success);
     color: white;
-    border-color: var(--success);
+    border-color: #16a34a;
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .valve-btn.close-btn {
@@ -267,14 +290,16 @@ section h2 {
 }
 
 .valve-btn.close-btn:hover {
-    border-color: white;
+    background-color: var(--bg-hover-bright);
+    border-color: var(--text-muted);
     color: var(--text-primary);
 }
 
 .valve-btn.close-btn.active {
     background-color: var(--danger);
     color: white;
-    border-color: var(--danger);
+    border-color: #dc2626;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .valve-btn:active {
@@ -295,10 +320,12 @@ section h2 {
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
     overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .pulse-btn:hover:not(:disabled):not(.pulsing):not(:has(.pulse-duration-input:focus)):not(:has(.pulse-duration-input:hover)) {
-    border-color: white;
+    background-color: var(--bg-hover-bright);
+    border-color: var(--text-muted);
     color: var(--text-primary);
 }
 
@@ -313,9 +340,10 @@ section h2 {
 
 .pulse-btn.pulsing {
     background-color: var(--accent-primary);
-    border-color: var(--accent-primary);
+    border-color: #2563eb;
     color: white;
     cursor: not-allowed;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4), 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .pulse-btn.pulsing .pulse-progress {
@@ -393,7 +421,9 @@ section h2 {
     border-radius: var(--border-radius-sm);
     padding: 1rem;
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 0;
+    overflow: hidden;
 }
 
 .sensor-header {
@@ -427,16 +457,20 @@ section h2 {
 
 .sensor-data-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
 }
 
 .sensor-data-panel {
-    flex: 1;
-    background-color: var(--bg-secondary);
+    flex: 1 1 auto;
+    min-width: 0;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.75) 100%);
     border-radius: var(--border-radius-sm);
     padding: 0.75rem;
     border: 1px solid var(--border-color);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
 }
 
 .sensor-data-label {
@@ -451,6 +485,7 @@ section h2 {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--accent-primary);
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
 }
 
 .sensor-data-value.sensor-rate {
@@ -459,17 +494,20 @@ section h2 {
 
 .sensor-data-value.sensor-rate.positive {
     color: var(--success);
+    text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
 }
 
 .sensor-data-value.sensor-rate.negative {
     color: var(--danger);
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
 
 .sensor-chart-panel {
-    background-color: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.75) 100%);
     border-radius: var(--border-radius-sm);
     padding: 0.75rem;
     border: 1px solid var(--border-color);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .sensor-chart-container {
@@ -478,7 +516,7 @@ section h2 {
 }
 
 .procedures-panel {
-    background-color: var(--bg-secondary);
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(18, 18, 18, 0.8) 100%);
     border-radius: var(--border-radius);
     padding: 1.25rem;
     border: 1px solid var(--border-color);
@@ -486,6 +524,7 @@ section h2 {
     flex-direction: column;
     min-height: 300px;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .procedures-panel h2 {
@@ -520,10 +559,12 @@ section h2 {
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
     font-size: 0.9rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
     font-weight: 500;
     cursor: pointer;
     text-align: left;
     position: relative;
+    z-index: 101;
     transition: var(--transition);
 }
 
@@ -541,11 +582,21 @@ section h2 {
 
 .procedure-dropdown-btn:hover {
     background-color: var(--bg-hover);
+    border-color: var(--text-muted);
 }
 
 .procedure-dropdown-btn:focus {
     outline: none;
-    border-color: var(--accent-primary);
+}
+
+.procedure-selector.open .procedure-dropdown-btn {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-color: var(--border-color);
+}
+
+.procedure-selector.open .procedure-dropdown-btn:hover {
+    border-bottom-color: var(--text-muted);
 }
 
 .procedure-selector.open .procedure-dropdown-btn::after {
@@ -554,21 +605,27 @@ section h2 {
 
 .procedure-dropdown-menu {
     position: absolute;
-    top: calc(100% + 4px);
+    top: 100%;
     left: 0;
     right: 0;
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-sm);
-    max-height: 200px;
-    overflow-y: auto;
+    border-top: none;
+    border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
+    max-height: 0;
+    overflow: hidden;
     z-index: 100;
-    display: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.25s ease;
 }
 
 .procedure-selector.open .procedure-dropdown-menu {
-    display: block;
+    max-height: 200px;
+    overflow-y: auto;
+    opacity: 1;
+    transform: translateY(0);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 .procedure-dropdown-item {
@@ -577,15 +634,20 @@ section h2 {
     transition: var(--transition);
     color: var(--text-primary);
     font-size: 0.9rem;
+    border-left: 3px solid transparent;
+    position: relative;
+    z-index: 1;
 }
 
 .procedure-dropdown-item:hover {
     background-color: var(--bg-hover);
+    border-left-color: var(--text-muted);
 }
 
 .procedure-dropdown-item.selected {
     background-color: var(--bg-tertiary);
-    color: var(--accent-primary);
+    color: var(--text-primary);
+    border-left-color: var(--text-primary);
 }
 
 .procedure-dropdown-menu::-webkit-scrollbar {
@@ -617,11 +679,17 @@ section h2 {
     white-space: nowrap;
     display: flex;
     align-items: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .procedure-reset-btn:hover {
-    border-color: white;
+    background-color: var(--bg-hover);
+    border-color: var(--text-muted);
     color: var(--text-primary);
+}
+
+.procedure-reset-btn:active {
+    transform: scale(0.95);
 }
 
 .procedure-steps-container {
@@ -634,8 +702,9 @@ section h2 {
     min-height: 0;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    box-shadow: inset 0 10px 15px -10px var(--bg-tertiary), 
-                inset 0 -10px 15px -10px var(--bg-tertiary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+                inset 0 20px 25px -15px rgba(36, 36, 36, 0.95), 
+                inset 0 -20px 25px -15px rgba(36, 36, 36, 0.95);
 }
 
 .procedure-steps-container::-webkit-scrollbar {
@@ -652,13 +721,50 @@ section h2 {
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-color);
-    overflow: hidden;
+    border-left: 3px solid var(--danger);
+    overflow: visible;
     transition: var(--transition);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+
+.step-card::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    background: transparent;
+    box-shadow: 0 0 6px 1px rgba(239, 68, 68, 0.3);
+    border-radius: 0;
+    pointer-events: none;
+}
+
+.step-card.requirements-met {
+    border-left-color: var(--success);
+}
+
+.step-card.requirements-met::before {
+    box-shadow: 0 0 6px 1px rgba(34, 197, 94, 0.3);
+}
+
+.step-card.executing {
+    border-left-color: var(--warning);
+}
+
+.step-card.executing::before {
+    box-shadow: 0 0 6px 1px rgba(245, 158, 11, 0.3);
 }
 
 .step-card.completed {
     opacity: 0.6;
     border-color: var(--success);
+    border-left-color: var(--success);
+}
+
+.step-card.completed::before {
+    box-shadow: none;
 }
 
 .step-card.completed .step-header {
@@ -676,6 +782,26 @@ section h2 {
 
 .step-header:hover {
     background-color: #333333;
+}
+
+.step-card:not(.expanded) .step-header {
+    border-radius: calc(var(--border-radius-sm) - 1px);
+}
+
+.step-card:not(.expanded) .step-header:hover {
+    box-shadow: inset 0 -0.5px 0 0 var(--text-muted), 
+                inset -0.5px 0 0 0 var(--text-muted), 
+                inset 0 0.5px 0 0 var(--text-muted);
+}
+
+.step-card.expanded .step-header {
+    border-radius: calc(var(--border-radius-sm) - 1px) calc(var(--border-radius-sm) - 1px) 0 0;
+}
+
+.step-card.expanded .step-header:hover {
+    box-shadow: inset 0 0.5px 0 0 var(--text-muted), 
+                inset -0.5px 0 0 0 var(--text-muted),
+                inset 0 -0.5px 0 0 var(--text-muted);
 }
 
 .step-info {
@@ -701,6 +827,7 @@ section h2 {
 .step-card.completed .step-number {
     background-color: var(--success);
     color: white;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
 }
 
 .step-name {
@@ -712,17 +839,6 @@ section h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-}
-
-.requirements-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: var(--danger);
-}
-
-.requirements-indicator.met {
-    background-color: var(--success);
 }
 
 .step-toggle {
@@ -738,15 +854,16 @@ section h2 {
 .step-details {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
+    transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0 1rem;
-    border-top: 1px solid transparent;
+    border-top: none;
 }
 
 .step-card.expanded .step-details {
     max-height: 500px;
     padding: 0 1rem 1rem;
-    border-top-color: var(--border-color);
+    border-top: 1px solid var(--border-color);
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .step-buttons {
@@ -814,33 +931,87 @@ section h2 {
     background-color: var(--danger);
     flex-shrink: 0;
     margin-top: 0.35rem;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
 }
 
 .requirement-status.met {
     background-color: var(--success);
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
 }
 
 .step-execute-btn {
     flex: 1;
     padding: 0.6rem;
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
-    background-color: var(--accent-primary);
-    color: white;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
     font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    position: relative;
+    overflow: hidden;
 }
 
 .step-execute-btn:hover {
-    background-color: var(--accent-hover);
+    background-color: var(--bg-hover);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.step-execute-btn:active {
+    transform: scale(0.95);
 }
 
 .step-execute-btn:disabled {
     background-color: var(--bg-secondary);
+    border-color: var(--border-color);
     color: var(--text-muted);
     cursor: not-allowed;
+}
+
+.step-execute-btn:disabled:active {
+    transform: none;
+}
+
+.step-execute-btn.executing {
+    cursor: wait;
+    border-color: transparent;
+    background: 
+        linear-gradient(var(--bg-tertiary), var(--bg-tertiary)) padding-box,
+        conic-gradient(from var(--border-angle, 0deg), rgba(180, 180, 180, 0.8) 0deg, rgba(180, 180, 180, 0.8) 90deg, var(--border-color) 90deg, var(--border-color) 360deg) border-box;
+    border: 1px solid transparent;
+    animation: rotate-border 1s linear infinite;
+}
+
+@keyframes rotate-border {
+    to {
+        --border-angle: 360deg;
+    }
+}
+
+@property --border-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.executing-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .step-mark-btn {
@@ -853,20 +1024,27 @@ section h2 {
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .step-mark-btn:hover {
-    border-color: white;
+    background-color: var(--bg-hover);
+    border-color: var(--text-muted);
     color: var(--text-primary);
 }
 
+.step-mark-btn:active {
+    transform: scale(0.95);
+}
+
 .step-mark-btn.completed {
-    border-color: var(--success);
+    border-color: #16a34a;
     color: var(--success);
 }
 
 .step-mark-btn.completed:hover {
-    border-color: var(--danger);
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: #dc2626;
     color: var(--danger);
 }
 
@@ -882,6 +1060,18 @@ section h2 {
     align-items: center;
     z-index: 1000;
     backdrop-filter: blur(4px);
+    animation: modal-overlay-fade-in 0.2s ease-out;
+}
+
+@keyframes modal-overlay-fade-in {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
 }
 
 .modal-overlay.hidden {
@@ -896,7 +1086,49 @@ section h2 {
     width: 90%;
     max-height: 80vh;
     overflow: hidden;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 0, 0, 0.4);
+    animation: modal-slide-in 0.25s ease-out;
+}
+
+@keyframes modal-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-overlay.closing {
+    animation: modal-overlay-fade-out 0.2s ease-in forwards;
+}
+
+@keyframes modal-overlay-fade-out {
+    from {
+        opacity: 1;
+        backdrop-filter: blur(4px);
+    }
+    to {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+}
+
+.modal-container.closing {
+    animation: modal-slide-out 0.2s ease-in forwards;
+}
+
+@keyframes modal-slide-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(30px);
+    }
 }
 
 .modal-header {
@@ -904,6 +1136,7 @@ section h2 {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.25rem;
+    background-color: var(--bg-tertiary);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -928,12 +1161,13 @@ section h2 {
 }
 
 .modal-close-btn:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
 }
 
 .modal-content {
     padding: 1.25rem;
+    padding-bottom: 0.5rem;
     max-height: 300px;
     overflow-y: auto;
     color: var(--text-secondary);
@@ -962,59 +1196,78 @@ section h2 {
 
 .modal-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--bg-tertiary);
+    padding: 0.75rem 1.25rem;
+    padding-top: 0.5rem;
 }
 
 .modal-btn {
     padding: 0.6rem 1.25rem;
-    border: none;
+    border: 1px solid transparent;
     border-radius: var(--border-radius-sm);
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-btn:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .modal-btn.primary {
     background-color: var(--accent-primary);
     color: white;
+    border-color: var(--accent-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px 1px rgba(59, 130, 246, 0.3);
 }
 
 .modal-btn.primary:hover {
     background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(59, 130, 246, 0.4);
 }
 
 .modal-btn.secondary {
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-tertiary);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .modal-btn.secondary:hover {
     background-color: var(--bg-hover);
     color: var(--text-primary);
+    border-color: #555555;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .modal-btn.danger {
     background-color: var(--danger);
     color: white;
+    border-color: var(--danger);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px 1px rgba(239, 68, 68, 0.3);
 }
 
 .modal-btn.danger:hover {
     background-color: var(--danger-hover);
+    border-color: var(--danger-hover);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(239, 68, 68, 0.4);
 }
 
 .modal-btn.warning {
     background-color: var(--warning);
     color: white;
+    border-color: var(--warning);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px 1px rgba(245, 158, 11, 0.3);
 }
 
 .modal-btn.warning:hover {
     background-color: var(--warning-hover);
+    border-color: var(--warning-hover);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(245, 158, 11, 0.4);
 }
 
 .empty-state {
@@ -1031,6 +1284,7 @@ section h2 {
 @media (max-width: 1024px) {
     .main-content {
         grid-template-columns: 1fr;
+        max-height: none;
     }
     
     .procedures-panel {
@@ -1047,6 +1301,7 @@ section h2 {
     
     .main-content {
         padding: 1rem;
+        max-height: none;
     }
     
     .valves-grid {
@@ -1055,5 +1310,18 @@ section h2 {
     
     .sensors-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .sensor-card {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .sensor-data-panel {
+        max-width: 100%;
+    }
+    
+    .sensor-data-value {
+        font-size: 0.95rem;
     }
 }
