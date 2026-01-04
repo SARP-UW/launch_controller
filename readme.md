@@ -81,20 +81,138 @@ The first element in the website configuration file is the "general_config" sect
 }
 ```
 
-The second element in the website configuration file is the "invalid_valve_state" section. This section contains a list of valve states which are considered to be invalid. When the user attempts to set valves into one of these states they will be shown a popup warning message.
-
+The second element in the website configuration file is the "invalid_valve_state" section. This section contains a list of objects which each contain lists of valve states which are considered to be invalid. When the user attempts to set valves into one of these states they will be shown a popup warning message on the website.
 ```json
-// Format of list: [<valve ID>, <valve ID>]
 "invalid_valve_states": [
     {
         // May be ommited if the invalid state does not require any open valves
-        "open": <List of valve IDs which when open result in the invalid state>,
+        "open": <List of valve IDs [1, 2, ...] which when open result in the invalid state>,
 
         // May be ommited if the invalid state does not require any closed valves
-        "closed": <List of valve IDs which when closed result in the invalid state>
+        "closed": <List of valve IDs [1, 2, ...] which when closed result in the invalid state>
     }
+    // Repeat for number of invalid valve states
 ]
 ```
 
-The third element in the website configuration file is the "valve_safe_config"
+The third element in the website configuration file is the "system_safe_states". This section contains a list of safe states for the system which will be automatically entered when a user safes the system or "safe mode" is on and no user has been connected to the website for the configured timeout. Each system safe state contains three fields - a name, a list of requirements, and a list of actions. The first safe state in the list which has its requirements satisfied will have its actions executed when the system is safed.
+```json
+"system_safe_states": [
+    // Note: The first safe state (based on index in this list) to have all its requirements met will be executed.
+    {
+        "name": <Name of safe state>,
+        "requirements": [
+            // The following objects are types of requirements which can be included in this list.
+            {
+                "type": "pressure_above",
+                "sensor_id": <ID of target pressure sensor>,
+                "threshold": <Required minimum pressure of target sensor>
+            },
+            {
+                "type": "pressure_below",
+                "sensor_id": <ID of target pressure sensor>,
+                "threshold": <Required maximum pressure of target sensor>
+            },
+            {
+                "type": "pressure_between",
+                "sensor_id": <ID of target pressure sensor>,
+                "min_threshold": <Required minimum pressure of target sensor>,
+                "max_threshold": <Required maximum pressure of target sensor>
+            },
+            {
+                "type": "valve_state",
+                "valve_id": <ID of target valve>,
+                "state": <Required valve state ("open" or "closed")>
+            }
+        ],
+        "actions": [
+            // The following objects are types of actions which can be included in this list
+            // Note: actions are executed in the order they are found in this list
+            // Note: actions contained within a list will be executed simultaneously
+            {
+                "type": "set_valve",
+                "valve_id": <ID of target valve>,
+                "state": <State to set valve to ("open" or "closed")> 
+            },
+            {
+                // Toggles the state of the valve for the specified duration
+                "type": "pulse_valve",
+                "valve_id": <ID of target valve>,
+                "duration": <Duration of pulse in seconds>
+            },
+            {
+                "type": "wait",
+                "duration": <Duration to wait>
+            }
+        ]
+    },
+    // Repeat above object for each system safe state
+]
+```
+
+The final element in the website configuration file is the "procedures" section. This section contains a list of procedures which contain steps that can be executed by users on the website. Each procedure is represented as an object in the procedures list which contain a 'name' field and a 'steps' field. The 'steps' field is a list of steps which constitute the procedure. Each step itself contains three seperate subfields - the procedure name, requirements, and actions.
+```json
+"procedures": [
+    {
+        "name": <Name of procedure>,
+        "steps": [
+            // Order of steps in list is the order they are expected to be executed in.
+            {
+                "name": <Name of safe state>,
+                "requirements": [
+                    // The following objects are types of requirements which can be included in this list.
+                    {
+                        "type": "pressure_above",
+                        "sensor_id": <ID of target pressure sensor>,
+                        "threshold": <Required minimum pressure of target sensor>
+                    },
+                    {
+                        "type": "pressure_below",
+                        "sensor_id": <ID of target pressure sensor>,
+                        "threshold": <Required maximum pressure of target sensor>
+                    },
+                    {
+                        "type": "pressure_between",
+                        "sensor_id": <ID of target pressure sensor>,
+                        "min_threshold": <Required minimum pressure of target sensor>,
+                        "max_threshold": <Required maximum pressure of target sensor>
+                    },
+                    {
+                        "type": "valve_state",
+                        "valve_id": <ID of target valve>,
+                        "state": <Required valve state ("open" or "closed")>
+                    }
+                    {
+                        "type": "custom_message",
+                        "message": <Desired message to display in step requirements>
+                    }
+                ],
+                "actions": [
+                    // The following objects are types of actions which can be included in this list
+                    // Note: actions are executed in the order they are found in this list
+                    // Note: actions contained within a list will be executed simultaneously
+                    {
+                        "type": "set_valve",
+                        "valve_id": <ID of target valve>,
+                        "state": <State to set valve to ("open" or "closed")> 
+                    },
+                    {
+                        // Toggles the state of the valve for the specified duration
+                        "type": "pulse_valve",
+                        "valve_id": <ID of target valve>,
+                        "duration": <Duration of pulse in seconds>
+                    },
+                    {
+                        "type": "wait",
+                        "duration": <Duration to wait>
+                    }
+                ]
+            }
+            // Repeat above object for each step in procedure
+        ]
+    }
+    // Repeat above object for each desired procedure
+]
+```
+
 
