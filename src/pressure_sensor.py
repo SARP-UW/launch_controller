@@ -2,7 +2,7 @@ import math
 import random
 import time
 from typing import List, Dict
-import settings
+from . import settings
 
 # Only import hardware libraries if not in mock mode
 if not settings.MOCK_MODE:

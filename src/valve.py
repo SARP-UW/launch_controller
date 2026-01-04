@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict
-import settings
+from . import settings
 
 # Only import hardware libraries if not in mock mode
 if not settings.MOCK_MODE: 

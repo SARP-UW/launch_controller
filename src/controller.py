@@ -1,8 +1,8 @@
-from typing import Dict, List, Optional
-import settings
-from valve import Valve, ValveState
-from pressure_sensor import PressureSensor
-from logger import Logger
+from typing import List
+from . import settings
+from .valve import Valve, ValveState
+from .pressure_sensor import PressureSensor
+from .logger import Logger
 import threading
 import time
 

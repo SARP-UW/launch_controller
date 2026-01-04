@@ -173,7 +173,7 @@ body {
 }
 
 .safe-mode-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
 }
 
 .safe-mode-btn.active {
@@ -189,6 +189,53 @@ body {
 
 .safe-mode-btn.active:active {
     transform: scale(0.95);
+}
+
+.safe-system-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+.safe-system-btn:hover {
+    background-color: var(--bg-hover-bright);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.safe-system-btn:active {
+    transform: scale(0.92);
+}
+
+.safe-system-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.safe-system-btn:disabled:active {
+    transform: none;
+}
+
+.safe-system-btn.executing {
+    cursor: wait;
+    border-color: transparent;
+    background: 
+        linear-gradient(var(--bg-tertiary), var(--bg-tertiary)) padding-box,
+        conic-gradient(from var(--border-angle, 0deg), var(--warning) 0deg, var(--warning) 90deg, var(--border-color) 90deg, var(--border-color) 360deg) border-box;
+    border: 1px solid transparent;
+    animation: rotate-border 1s linear infinite;
 }
 
 .main-content {
@@ -330,7 +377,7 @@ section h2 {
 }
 
 .valve-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
 }
 
 /* Valve Pulse Controls */
@@ -790,13 +837,12 @@ section h2 {
 }
 
 .step-card.completed {
-    opacity: 0.6;
-    border-color: var(--success);
-    border-left-color: var(--success);
+    /* Completed styling handled by checkmark and header background */
+    border-left: 1px solid var(--border-color);
 }
 
 .step-card.completed::before {
-    box-shadow: none;
+    display: none;
 }
 
 .step-card.completed .step-header {
@@ -816,6 +862,10 @@ section h2 {
     background-color: #333333;
 }
 
+.step-card.completed .step-header:hover {
+    background-color: rgba(34, 197, 94, 0.2);
+}
+
 .step-card:not(.expanded) .step-header {
     border-radius: calc(var(--border-radius-sm) - 1px);
 }
@@ -826,6 +876,13 @@ section h2 {
                 inset 0 1px 0 0 var(--text-muted);
 }
 
+.step-card.completed:not(.expanded) .step-header:hover {
+    box-shadow: inset 0 -1px 0 0 var(--text-muted), 
+                inset -1px 0 0 0 var(--text-muted), 
+                inset 0 1px 0 0 var(--text-muted),
+                inset 1px 0 0 0 var(--text-muted);
+}
+
 .step-card.expanded .step-header {
     border-radius: calc(var(--border-radius-sm) - 1px) calc(var(--border-radius-sm) - 1px) 0 0;
 }
@@ -834,6 +891,13 @@ section h2 {
     box-shadow: inset 0 1px 0 0 var(--text-muted), 
                 inset -1px 0 0 0 var(--text-muted),
                 inset 0 -1px 0 0 var(--text-muted);
+}
+
+.step-card.completed.expanded .step-header:hover {
+    box-shadow: inset 0 1px 0 0 var(--text-muted), 
+                inset -1px 0 0 0 var(--text-muted),
+                inset 0 -1px 0 0 var(--text-muted),
+                inset 1px 0 0 0 var(--text-muted);
 }
 
 .step-info {
@@ -997,7 +1061,7 @@ section h2 {
 }
 
 .step-execute-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
 }
 
 .step-execute-btn:disabled {
@@ -1016,7 +1080,7 @@ section h2 {
     border-color: transparent;
     background: 
         linear-gradient(var(--bg-tertiary), var(--bg-tertiary)) padding-box,
-        conic-gradient(from var(--border-angle, 0deg), rgba(180, 180, 180, 0.8) 0deg, rgba(180, 180, 180, 0.8) 90deg, var(--border-color) 90deg, var(--border-color) 360deg) border-box;
+        conic-gradient(from var(--border-angle, 0deg), var(--warning) 0deg, var(--warning) 90deg, var(--border-color) 90deg, var(--border-color) 360deg) border-box;
     border: 1px solid transparent;
     animation: rotate-border 1s linear infinite;
 }
@@ -1069,7 +1133,7 @@ section h2 {
 }
 
 .step-mark-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
 }
 
 .step-mark-btn.completed {
@@ -1250,6 +1314,10 @@ section h2 {
 
 .modal-btn:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.modal-btn:active {
+    transform: scale(0.92);
 }
 
 .modal-btn.primary {

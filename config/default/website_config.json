@@ -12,15 +12,63 @@
             "open": [1, 2]
         }
     ],
-    "valve_safe_config": 
-    [
+    "system_safe_states": [
         {
-            "id": 1,
-            "state": "closed"
+            "name": "Safe state 1",
+            "requirements": [
+                {
+                    "type": "pressure_below",
+                    "sensor_id": 1,
+                    "threshold": 50.0
+                },
+                {
+                    "type": "valve_state",
+                    "valve_id": 1,
+                    "state": "closed"
+                }
+            ],
+            "actions": [
+                {
+                    "type": "set_valve",
+                    "valve_id": 1,
+                    "state": "open" 
+                },
+                {
+                    "type": "wait",
+                    "duration": 2
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 2,
+                    "state": "open"
+                }
+            ]
         },
         {
-            "id": 2,
-            "state": "open"
+            "name": "Safe state 2",
+            "requirements": [
+                {
+                    "type": "pressure_above",
+                    "sensor_id": 1,
+                    "threshold": 50.0
+                }
+            ],
+            "actions": [
+                {
+                    "type": "wait",
+                    "duration": 5
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 1,
+                    "state": "open"
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 2,
+                    "state": "closed"
+                }
+            ]
         }
     ],
     "procedures": [
@@ -107,6 +155,7 @@
             "name": "Shutdown Sequence",
             "steps": [
                 {
+                    "id": 1,
                     "name": "Initialize System",
                     "requirements": [
                         {
@@ -149,6 +198,7 @@
                     ]
                 },
                 {
+                    "id": 2,
                     "name": "Pulse stuff",
                     "requirements": [],
                     "actions": [

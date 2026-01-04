@@ -17,10 +17,7 @@ const PROCEDURE_POLL_INTERVAL = 1000;
 
 // Chart configuration
 const CHART_MAX_POINTS = 100;
-const CHART_COLORS = [
-    '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', 
-    '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'
-];
+const CHART_COLOR = '#3b82f6';
 
 // Application state
 const State = {
@@ -36,7 +33,10 @@ const State = {
     expandedSteps: new Set(),
     currentRequirementsMet: {},
     pulsingValves: new Set(), // Track which valves are currently pulsing
-    executingStepIndex: null // Track which step is currently executing
+    executingStepIndex: null, // Track which step is currently executing
+    executingStepUser: null, // Track who is executing the step (for display)
+    safingSystem: false, // Track if system is being safed
+    safingSystemUser: null // Track who is safing the system
 };
 
 // Logging utilities
@@ -143,10 +143,6 @@ const API = {
         return this.request('/api/send_heartbeat');
     },
     
-    async getServerStatus() {
-        return this.request('/api/get_server_status');
-    },
-    
     async getValveInfo() {
         return this.request('/api/get_valve_info');
     },
@@ -190,6 +186,41 @@ const API = {
 
     async getWebsiteTitle() {
         return this.request('/api/get_website_title');
+    },
+
+    async getProcedureStatus() {
+        return this.request('/api/get_procedure_status');
+    },
+
+    async isSafing() {
+        return this.request('/api/is_safing');
+    },
+
+    async startStepExecution(procedureIndex, stepIndex) {
+        return this.request('/api/start_step_execution', {
+            method: 'POST',
+            body: JSON.stringify({ procedure_index: procedureIndex, step_index: stepIndex })
+        });
+    },
+
+    async setStepCompletion(procedureIndex, stepIndex, completed) {
+        return this.request('/api/set_step_completion', {
+            method: 'POST',
+            body: JSON.stringify({ procedure_index: procedureIndex, step_index: stepIndex, completed: completed })
+        });
+    },
+
+    async resetProcedure(procedureIndex) {
+        return this.request('/api/reset_procedure', {
+            method: 'POST',
+            body: JSON.stringify({ procedure_index: procedureIndex })
+        });
+    },
+
+    async safeSystem() {
+        return this.request('/api/safe_system', {
+            method: 'POST'
+        });
     }
 };
 
@@ -354,6 +385,19 @@ function checkInvalidValveState(valveId, newState) {
  * Sets valve state with validation
  */
 async function setValveState(valveId, state) {
+    // Block valve operations while executing or safing
+    if (State.executingStepIndex !== null || State.safingSystem) {
+        const blockingAction = State.safingSystem ? 'system is being safed' : 'a step is executing';
+        const blockingUser = State.safingSystem ? State.safingSystemUser : State.executingStepUser;
+        const userInfo = blockingUser ? ` by ${blockingUser}` : '';
+        Modal.show(
+            'Operation Blocked',
+            `<p>Cannot modify valves while ${blockingAction}${userInfo}. Please wait for it to complete.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
+    
     const violations = checkInvalidValveState(valveId, state);
     
     if (violations.length > 0) {
@@ -391,6 +435,19 @@ async function executeValveChange(valveId, state) {
  * Pulses a valve for the specified duration
  */
 async function pulseValve(valveId) {
+    // Block valve operations while executing or safing
+    if (State.executingStepIndex !== null || State.safingSystem) {
+        const blockingAction = State.safingSystem ? 'system is being safed' : 'a step is executing';
+        const blockingUser = State.safingSystem ? State.safingSystemUser : State.executingStepUser;
+        const userInfo = blockingUser ? ` by ${blockingUser}` : '';
+        Modal.show(
+            'Operation Blocked',
+            `<p>Cannot pulse valves while ${blockingAction}${userInfo}. Please wait for it to complete.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
+    
     // Prevent multiple pulses on the same valve
     if (State.pulsingValves.has(valveId)) {
         logError(`Valve ${valveId} is already pulsing`);
@@ -477,13 +534,15 @@ function updatePulseUI(valveId, isPulsing, duration) {
         button.classList.add('pulsing');
         button.disabled = true;
 
-        // Start progress animation
-        progress.style.transition = 'none';
-        progress.style.width = '100%';
-        // Force reflow
-        progress.offsetHeight;
-        progress.style.transition = `width ${duration}s linear`;
-        progress.style.width = '0%';
+        // Only show progress animation for durations >= 0.2s
+        if (duration >= 0.2) {
+            progress.style.transition = 'none';
+            progress.style.width = '100%';
+            // Force reflow
+            progress.offsetHeight;
+            progress.style.transition = `width ${duration}s linear`;
+            progress.style.width = '0%';
+        }
     } else {
         input.disabled = false;
         button.classList.remove('pulsing');
@@ -527,7 +586,6 @@ async function valvePollingLoop() {
  * Creates sensor display card HTML
  */
 function createSensorCard(sensor, index) {
-    const colorIndex = index % CHART_COLORS.length;
     return `
         <div class="sensor-card" data-sensor-id="${sensor.id}">
             <div class="sensor-header">
@@ -560,8 +618,6 @@ function initSensorChart(sensorId, index) {
     const ctx = document.getElementById(`sensor-chart-${sensorId}`);
     if (!ctx) return;
     
-    const colorIndex = index % CHART_COLORS.length;
-    
     State.sensorHistory[sensorId] = [];
     
     State.sensorCharts[sensorId] = new Chart(ctx, {
@@ -570,20 +626,55 @@ function initSensorChart(sensorId, index) {
             labels: [],
             datasets: [{
                 data: [],
-                borderColor: CHART_COLORS[colorIndex],
-                backgroundColor: `${CHART_COLORS[colorIndex]}20`,
+                borderColor: CHART_COLOR,
+                backgroundColor: `${CHART_COLOR}20`,
                 borderWidth: 2,
                 fill: true,
                 tension: 0.3,
-                pointRadius: 0
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: CHART_COLOR,
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             animation: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#444',
+                    borderWidth: 1,
+                    padding: 8,
+                    displayColors: false,
+                    callbacks: {
+                        title: function() {
+                            return '';
+                        },
+                        label: function(context) {
+                            const pressure = context.parsed.y;
+                            const dataIndex = context.dataIndex;
+                            const history = State.sensorHistory[sensorId];
+                            if (history && history[dataIndex]) {
+                                const secondsAgo = ((Date.now() - history[dataIndex].time) / 1000).toFixed(1);
+                                return [`${pressure.toFixed(1)} PSI`, `${secondsAgo}s ago`];
+                            }
+                            return [`${pressure.toFixed(1)} PSI`];
+                        }
+                    }
+                }
             },
             scales: {
                 x: {
@@ -640,14 +731,16 @@ function updateSensorDisplay(sensorId, pressure) {
     
     const history = State.sensorHistory[sensorId];
     if (history) {
+        const now = Date.now();
+        
         // Calculate rate of change using average over last several readings
         const rateEl = document.getElementById(`sensor-rate-${sensorId}`);
         if (rateEl && history.length >= 10) {
             // Use readings from 10 samples ago for more stable rate calculation
             const sampleWindow = 10;
-            const oldPressure = history[history.length - sampleWindow];
-            const timeDelta = (sampleWindow * SENSOR_POLL_INTERVAL) / 1000; // Convert to seconds
-            const rate = (pressure - oldPressure) / timeDelta;
+            const oldEntry = history[history.length - sampleWindow];
+            const timeDelta = (now - oldEntry.time) / 1000; // Convert to seconds
+            const rate = (pressure - oldEntry.pressure) / timeDelta;
             const rateStr = rate >= 0 ? `+${rate.toFixed(1)}` : rate.toFixed(1);
             rateEl.textContent = `${rateStr} PSI/s`;
             rateEl.classList.toggle('positive', rate > 0.5);
@@ -656,7 +749,7 @@ function updateSensorDisplay(sensorId, pressure) {
             rateEl.textContent = '-- PSI/s';
         }
         
-        history.push(pressure);
+        history.push({ time: now, pressure: pressure });
         if (history.length > CHART_MAX_POINTS) {
             history.shift();
         }
@@ -664,7 +757,7 @@ function updateSensorDisplay(sensorId, pressure) {
         const chart = State.sensorCharts[sensorId];
         if (chart) {
             chart.data.labels = history.map((_, i) => i);
-            chart.data.datasets[0].data = history;
+            chart.data.datasets[0].data = history.map(entry => entry.pressure);
             chart.update('none');
         }
     }
@@ -734,6 +827,79 @@ function updateSafeModeUI() {
 }
 
 /**
+ * Triggers manual safe system operation
+ */
+async function safeSystem() {
+    // Block if already safing or executing
+    if (State.safingSystem) {
+        const userInfo = State.safingSystemUser ? ` by ${State.safingSystemUser}` : '';
+        Modal.show(
+            'System Already Safing',
+            `<p>The system is already being safed${userInfo}. Please wait for it to complete.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
+    
+    if (State.executingStepIndex !== null) {
+        const userInfo = State.executingStepUser ? ` by ${State.executingStepUser}` : '';
+        Modal.show(
+            'Step Executing',
+            `<p>A step is currently executing${userInfo}. Please wait for it to complete before safing the system.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
+    
+    // Confirmation dialog
+    const confirmed = await new Promise(resolve => {
+        Modal.show(
+            'Confirm Safe System',
+            '<p>Are you sure you want to safe the system? This will close all valves to their safe states.</p>',
+            [
+                { label: 'Cancel', type: 'secondary', action: () => resolve(false) },
+                { label: 'Safe System', type: 'primary', action: () => resolve(true) }
+            ]
+        );
+    });
+    
+    if (!confirmed) return;
+    
+    try {
+        const result = await API.safeSystem();
+        if (result.status === 'success') {
+            logStatus('Safe system initiated');
+            // The polling will update the UI state
+        } else {
+            throw new Error(result.message || 'Failed to initiate safe system');
+        }
+    } catch (error) {
+        logError('Failed to safe system', error);
+        Modal.show('Error', `<p>Failed to safe system: ${error.message}</p>`, [
+            { label: 'OK', type: 'secondary' }
+        ]);
+    }
+}
+
+/**
+ * Updates safe system button UI
+ */
+function updateSafeSystemUI() {
+    const btn = document.getElementById('safe-system-btn');
+    if (!btn) return;
+    
+    if (State.safingSystem) {
+        btn.classList.add('executing');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="safe-system-text">Safing...</span>';
+    } else {
+        btn.classList.remove('executing');
+        btn.disabled = State.executingStepIndex !== null;
+        btn.innerHTML = '<span class="safe-system-text">Safe System</span>';
+    }
+}
+
+/**
  * Polls safe mode status from server
  */
 async function pollSafeMode() {
@@ -786,13 +952,115 @@ async function pollProcedures() {
 }
 
 /**
- * Procedure polling loop - only polls when not executing a step
+ * Procedure polling loop - polls for procedure definition changes
  */
 async function procedurePollingLoop() {
     if (State.connected && State.executingStepIndex === null) {
         await pollProcedures();
     }
     setTimeout(procedurePollingLoop, PROCEDURE_POLL_INTERVAL);
+}
+
+// Polling interval for procedure status (completion and execution state)
+const PROCEDURE_STATUS_POLL_INTERVAL = 250;
+
+/**
+ * Polls procedure status (completion and execution state) from server
+ */
+async function pollProcedureStatus() {
+    try {
+        const status = await API.getProcedureStatus();
+        
+        let needsRender = false;
+        
+        // Update completion state for current procedure
+        const currentProcIndex = State.selectedProcedureIndex;
+        const serverCompleted = new Set(status.completion[currentProcIndex] || []);
+        
+        // Check if completion state changed
+        if (serverCompleted.size !== State.completedSteps.size ||
+            [...serverCompleted].some(i => !State.completedSteps.has(i))) {
+            State.completedSteps = serverCompleted;
+            needsRender = true;
+        }
+        
+        // Update execution state
+        const executing = status.executing;
+        const wasExecuting = State.executingStepIndex;
+        if (executing && executing.procedure_index === currentProcIndex) {
+            // A step is executing in the current procedure
+            if (State.executingStepIndex !== executing.step_index ||
+                State.executingStepUser !== executing.user) {
+                State.executingStepIndex = executing.step_index;
+                State.executingStepUser = executing.user;
+                needsRender = true;
+            }
+        } else {
+            // No step executing in current procedure
+            if (State.executingStepIndex !== null) {
+                State.executingStepIndex = null;
+                State.executingStepUser = null;
+                needsRender = true;
+            }
+        }
+        
+        // Update safe system button UI when execution state changes
+        if (wasExecuting !== State.executingStepIndex) {
+            updateSafeSystemUI();
+        }
+        
+        if (needsRender) {
+            renderProcedureSteps();
+        }
+    } catch (error) {
+        logError('Failed to poll procedure status', error);
+    }
+}
+
+/**
+ * Polls safing status from server
+ */
+async function pollSafingStatus() {
+    try {
+        const status = await API.isSafing();
+        
+        const wasSafing = State.safingSystem;
+        if (status.safing) {
+            State.safingSystem = true;
+            State.safingSystemUser = status.user;
+        } else {
+            State.safingSystem = false;
+            State.safingSystemUser = null;
+        }
+        
+        // Update UI when safing state changes
+        if (wasSafing !== State.safingSystem) {
+            updateSafeSystemUI();
+            renderProcedureSteps();
+        }
+    } catch (error) {
+        logError('Failed to poll safing status', error);
+    }
+}
+
+/**
+ * Procedure status polling loop
+ */
+async function procedureStatusPollingLoop() {
+    if (State.connected) {
+        await pollProcedureStatus();
+    }
+    setTimeout(procedureStatusPollingLoop, PROCEDURE_STATUS_POLL_INTERVAL);
+}
+
+/**
+ * Safing status polling loop
+ */
+async function safingStatusPollingLoop() {
+    if (State.connected) {
+        await pollSafingStatus();
+    }
+    setTimeout(safingStatusPollingLoop, PROCEDURE_STATUS_POLL_INTERVAL);
 }
 
 // Track if procedures have been initialized to avoid duplicate event listeners
@@ -870,7 +1138,7 @@ function initProcedures() {
 /**
  * Handles procedure selection change
  */
-function selectProcedure(index) {
+async function selectProcedure(index) {
     if (typeof index !== 'number' || isNaN(index) || !CONFIG.procedures[index]) {
         State.selectedProcedure = null;
         document.getElementById('procedure-steps').innerHTML = '';
@@ -881,7 +1149,26 @@ function selectProcedure(index) {
     State.selectedProcedureIndex = index;
     State.completedSteps.clear();
     State.expandedSteps.clear(); // Clear expanded steps when changing procedures
+    State.executingStepIndex = null;
+    State.executingStepUser = null;
     renderProcedureSteps();
+    
+    // Fetch completion state from server for the newly selected procedure
+    try {
+        const status = await API.getProcedureStatus();
+        const serverCompleted = status.completion[index] || [];
+        State.completedSteps = new Set(serverCompleted);
+        
+        // Check if a step is executing in this procedure
+        if (status.executing && status.executing.procedure_index === index) {
+            State.executingStepIndex = status.executing.step_index;
+            State.executingStepUser = status.executing.user;
+        }
+        
+        renderProcedureSteps();
+    } catch (error) {
+        logError('Failed to fetch procedure status on selection', error);
+    }
 }
 
 /**
@@ -1108,12 +1395,33 @@ function createStepCard(step, index) {
     
     // Check if this step is currently executing
     const isExecuting = State.executingStepIndex === index;
+    
     if (isExecuting) {
         reqClass = 'executing';
-        indicatorTitle = 'Step executing';
+        indicatorTitle = State.executingStepUser 
+            ? `Step executing by ${State.executingStepUser}`
+            : 'Step executing';
     }
     
     const isExpanded = State.expandedSteps.has(index);
+    
+    // Determine execute button text
+    let executeButtonText = 'Execute Step';
+    let executeButtonDisabled = false;
+    if (isExecuting) {
+        executeButtonText = State.executingStepUser 
+            ? `Executing (${State.executingStepUser})`
+            : 'Executing...';
+        executeButtonDisabled = true;
+    } else if (State.executingStepIndex !== null) {
+        // Another step is executing - disable this button
+        executeButtonDisabled = true;
+    } else if (State.safingSystem) {
+        // System is being safed - disable this button
+        executeButtonDisabled = true;;
+    } else if (isCompleted) {
+        executeButtonText = 'Execute Again';
+    }
     
     return `
         <div class="step-card ${isCompleted ? 'completed' : ''} ${isExpanded ? 'expanded' : ''} ${reqClass}" data-step-index="${index}" title="${indicatorTitle}">
@@ -1161,8 +1469,8 @@ function createStepCard(step, index) {
                     </div>
                 ` : ''}
                 <div class="step-buttons">
-                    <button class="step-execute-btn${State.executingStepIndex === index ? ' executing' : ''}" onclick="executeStep(${index}, event)"${State.executingStepIndex === index ? ' disabled' : ''}>
-                        ${State.executingStepIndex === index ? 'Executing...' : (isCompleted ? 'Execute Again' : 'Execute Step')}
+                    <button class="step-execute-btn${isExecuting ? ' executing' : ''}" onclick="executeStep(${index}, event)"${executeButtonDisabled ? ' disabled' : ''}>
+                        ${executeButtonText}
                     </button>
                     <button class="step-mark-btn ${isCompleted ? 'completed' : ''}" onclick="toggleStepComplete(${index}, event)">
                         ✓
@@ -1197,6 +1505,20 @@ function renderProcedureSteps() {
     }
     
     container.innerHTML = steps.map((step, i) => createStepCard(step, i)).join('');
+    
+    // Fix expanded states after DOM recreation
+    State.expandedSteps.forEach(index => {
+        const card = document.querySelector(`.step-card[data-step-index="${index}"]`);
+        if (card) {
+            const details = card.querySelector('.step-details');
+            if (details) {
+                // Calculate and set proper height for expanded cards
+                details.style.maxHeight = 'none';
+                const contentHeight = details.scrollHeight;
+                details.style.maxHeight = `${contentHeight + 20}px`;
+            }
+        }
+    });
 }
 
 /**
@@ -1247,30 +1569,54 @@ function toggleStepExpand(index) {
 /**
  * Toggles a step's completion status without executing it
  */
-function toggleStepComplete(index, event) {
+async function toggleStepComplete(index, event) {
     if (event) event.stopPropagation();
     
-    if (State.completedSteps.has(index)) {
-        State.completedSteps.delete(index);
-        logStatus(`Step ${index + 1} marked as incomplete`);
-    } else {
-        State.completedSteps.add(index);
-        logStatus(`Step ${index + 1} marked as complete`);
-    }
+    const newCompleted = !State.completedSteps.has(index);
     
-    renderProcedureSteps();
+    try {
+        await API.setStepCompletion(State.selectedProcedureIndex, index, newCompleted);
+        
+        if (newCompleted) {
+            State.completedSteps.add(index);
+            logStatus(`Step ${index + 1} marked as complete`);
+        } else {
+            State.completedSteps.delete(index);
+            logStatus(`Step ${index + 1} marked as incomplete`);
+        }
+        
+        renderProcedureSteps();
+    } catch (error) {
+        logError('Failed to update step completion status', error);
+        Modal.show(
+            'Update Failed',
+            `<p>Failed to update step completion status: ${error.message}</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+    }
 }
 
 /**
  * Resets all steps in the current procedure
  */
-function resetProcedure() {
+async function resetProcedure() {
     if (!State.selectedProcedure) return;
     
-    State.completedSteps.clear();
-    // Keep expandedSteps as-is to preserve open tabs
-    renderProcedureSteps();
-    logStatus('Procedure reset - all steps marked as incomplete');
+    try {
+        await API.resetProcedure(State.selectedProcedureIndex);
+        
+        State.completedSteps.clear();
+        // Keep expandedSteps as-is to preserve open tabs
+        renderProcedureSteps();
+        logStatus('Procedure reset - all steps marked as incomplete');
+    } catch (error) {
+        logError('Failed to reset procedure', error);
+        Modal.show(
+            'Reset Failed',
+            `<p>Failed to reset procedure: ${error.message}</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+    }
 }
 
 /**
@@ -1410,11 +1756,23 @@ async function executeStep(index, event) {
     
     if (!State.selectedProcedure) return;
     
+    // Check if system is being safed
+    if (State.safingSystem) {
+        const userInfo = State.safingSystemUser ? ` by ${State.safingSystemUser}` : '';
+        Modal.show(
+            'System Safing',
+            `<p>The system is currently being safed${userInfo}. Please wait for it to complete before executing a step.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
+    
     // Check if a step is already executing
     if (State.executingStepIndex !== null) {
+        const executorInfo = State.executingStepUser ? ` by ${State.executingStepUser}` : '';
         Modal.show(
             'Step Already Executing',
-            `<p>Step ${State.executingStepIndex + 1} is currently executing. Please wait for it to complete before executing another step.</p>`,
+            `<p>Step ${State.executingStepIndex + 1} is currently executing${executorInfo}. Please wait for it to complete before executing another step.</p>`,
             [{ label: 'OK', type: 'primary' }]
         );
         return;
@@ -1457,200 +1815,43 @@ async function executeStep(index, event) {
 }
 
 /**
- * Performs the actual step execution
+ * Performs the actual step execution by requesting the server to execute it.
+ * The server handles all action execution; the client just polls for status updates.
  */
 async function performStepExecution(index, step) {
-    logStatus(`Executing step ${index + 1}: ${step.name}`);
+    logStatus(`Requesting execution of step ${index + 1}: ${step.name}`);
     
-    // Mark step as executing
-    State.executingStepIndex = index;
-    renderProcedureSteps();
-    
-    const actions = step.actions || [];
-    
-    for (const action of actions) {
-        try {
-            // Check if this is a multi-action (array of actions)
-            if (Array.isArray(action)) {
-                await executeMultiAction(action);
+    // Request server to execute the step
+    try {
+        const result = await API.startStepExecution(State.selectedProcedureIndex, index);
+        if (result.status === 'error') {
+            // Another step is already executing
+            if (result.executing) {
+                Modal.show(
+                    'Step Already Executing',
+                    `<p>Step ${result.executing.step_index + 1} is currently being executed by another user (${result.executing.user}). Please wait for it to complete.</p>`,
+                    [{ label: 'OK', type: 'primary' }]
+                );
             } else {
-                await executeAction(action);
+                Modal.show(
+                    'Execution Failed',
+                    `<p>${result.message || 'Failed to start step execution'}</p>`,
+                    [{ label: 'OK', type: 'primary' }]
+                );
             }
-        } catch (error) {
-            // Check if user cancelled - if so, silently stop without error modal
-            if (error.message === 'User cancelled') {
-                logStatus(`Step ${index + 1} cancelled by user`);
-                State.executingStepIndex = null;
-                renderProcedureSteps();
-                return;
-            }
-            
-            logError(`Action failed: ${Array.isArray(action) ? 'multi-action' : action.type}`, error);
-            State.executingStepIndex = null;
-            renderProcedureSteps();
-            Modal.show('Action Failed', `<p>Failed to execute action: ${error.message}</p>`, [
-                { label: 'OK', type: 'primary' }
-            ]);
             return;
         }
-    }
-    
-    State.executingStepIndex = null;
-    State.completedSteps.add(index);
-    renderProcedureSteps();
-    logStatus(`Step ${index + 1} completed: ${step.name}`);
-}
-
-/**
- * Executes multiple actions simultaneously (only set_valve and pulse_valve supported)
- * Combines all set_valve actions into one API call and all pulse_valve actions into one API call
- * @returns Promise that resolves when all actions complete
- */
-async function executeMultiAction(actions) {
-    const setValveStates = {};
-    const pulseValves = {};
-    const pulseInitialStates = {};
-    let maxPulseDuration = 0;
-    
-    // Collect all valve states and pulse commands
-    for (const action of actions) {
-        if (action.type === 'set_valve') {
-            setValveStates[action.valve_id] = action.state;
-        } else if (action.type === 'pulse_valve') {
-            // Check if valve is already pulsing
-            if (State.pulsingValves.has(action.valve_id)) {
-                throw new Error(`Valve ${action.valve_id} is already pulsing`);
-            }
-            pulseValves[action.valve_id] = action.duration;
-            // Store initial state for verification after pulse
-            const valve = State.valves.find(v => v.id === action.valve_id);
-            pulseInitialStates[action.valve_id] = valve ? valve.current_state : 'closed';
-            if (action.duration > maxPulseDuration) {
-                maxPulseDuration = action.duration;
-            }
-        }
-    }
-    
-    // Mark pulse valves as pulsing and update UI
-    for (const [valveId, duration] of Object.entries(pulseValves)) {
-        const id = parseInt(valveId);
-        State.pulsingValves.add(id);
-        updatePulseUI(id, true, duration);
-    }
-    
-    try {
-        // Execute both API calls in parallel
-        const promises = [];
         
-        if (Object.keys(setValveStates).length > 0) {
-            promises.push(API.setValveStates(setValveStates));
-        }
+        logStatus(`Step ${index + 1} execution started on server`);
+        // Server is now executing the step - status polling will update the UI
         
-        if (Object.keys(pulseValves).length > 0) {
-            promises.push(
-                API.pulseValves(pulseValves).then(response => {
-                    if (response.status === 'error' && response.failed_valves) {
-                        const firstError = Object.values(response.failed_valves)[0];
-                        throw new Error(firstError || 'Unknown pulse error');
-                    }
-                })
-            );
-        }
-        
-        await Promise.all(promises);
-        
-        // Wait for longest pulse to complete
-        if (maxPulseDuration > 0) {
-            await new Promise(resolve => setTimeout(resolve, maxPulseDuration * 1000));
-        }
-        
-        // Verify all set_valve states
-        for (const [valveId, expectedState] of Object.entries(setValveStates)) {
-            await verifyValveState(parseInt(valveId), expectedState);
-        }
-        
-        // Verify all pulse valves returned to initial state
-        for (const [valveId, initialState] of Object.entries(pulseInitialStates)) {
-            await verifyValveState(parseInt(valveId), initialState);
-        }
-    } finally {
-        // Clean up pulse valve states
-        for (const valveId of Object.keys(pulseValves)) {
-            const id = parseInt(valveId);
-            State.pulsingValves.delete(id);
-            updatePulseUI(id, false, 0);
-        }
-    }
-}
-
-/**
- * Verifies that a valve has reached the expected state by polling
- * @returns Promise that resolves when state is verified or rejects on timeout
- */
-async function verifyValveState(valveId, expectedState, maxAttempts = 10, delayMs = 100) {
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        await pollValves();
-        const valve = State.valves.find(v => v.id === valveId);
-        if (valve && valve.current_state === expectedState) {
-            return true;
-        }
-        if (attempt < maxAttempts - 1) {
-            await new Promise(resolve => setTimeout(resolve, delayMs));
-        }
-    }
-    throw new Error(`Valve ${valveId} did not reach expected state '${expectedState}'`);
-}
-
-/**
- * Executes a single action
- * @returns Promise that resolves when action completes
- */
-async function executeAction(action) {
-    switch (action.type) {
-        case 'set_valve':
-            await API.setValveStates({ [action.valve_id]: action.state });
-            await verifyValveState(action.valve_id, action.state);
-            break;
-
-        case 'pulse_valve': {
-            const valveId = action.valve_id;
-            const duration = action.duration;
-
-            // Check if valve is already pulsing
-            if (State.pulsingValves.has(valveId)) {
-                throw new Error(`Valve ${valveId} is already pulsing`);
-            }
-
-            // Get initial state to verify return after pulse
-            const valve = State.valves.find(v => v.id === valveId);
-            const initialState = valve ? valve.current_state : 'closed';
-
-            // Mark as pulsing and update UI
-            State.pulsingValves.add(valveId);
-            updatePulseUI(valveId, true, duration);
-
-            try {
-                const response = await API.pulseValves({ [valveId]: duration });
-                if (response.status === 'error' && response.failed_valves) {
-                    throw new Error(response.failed_valves[valveId] || 'Unknown error');
-                }
-                // Wait for pulse to complete
-                await new Promise(resolve => setTimeout(resolve, duration * 1000));
-                // Verify valve returned to initial state
-                await verifyValveState(valveId, initialState);
-            } finally {
-                State.pulsingValves.delete(valveId);
-                updatePulseUI(valveId, false, 0);
-            }
-            break;
-        }
-            
-        case 'wait':
-            await new Promise(resolve => setTimeout(resolve, action.duration * 1000));
-            break;
-            
-        default:
-            logError(`Unknown action type: ${action.type}`);
+    } catch (error) {
+        logError('Failed to start step execution on server', error);
+        Modal.show(
+            'Execution Failed',
+            `<p>Failed to start step execution: ${error.message}</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
     }
 }
 
@@ -1757,6 +1958,8 @@ async function init() {
     sensorPollingLoop();
     safeModePollingLoop();
     procedurePollingLoop();
+    procedureStatusPollingLoop();
+    safingStatusPollingLoop();
     
     logStatus('Ground Control System initialized');
 }
