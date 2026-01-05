@@ -1,0 +1,4 @@
+.venv
+log/*
+!log/readme.md
+src/__pycache__

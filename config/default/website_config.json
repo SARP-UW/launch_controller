@@ -1,0 +1,213 @@
+{
+    "general_config": {
+        "website_title": "Launch Controller",
+        "website_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\website_log.txt",
+        "port": 8080,
+        "safe_state_timeout": 300.0
+    },
+    "invalid_valve_states": [
+        {
+            "open": [1, 2]
+        }
+    ],
+    "system_safe_states": [
+        {
+            "name": "Safe state 1",
+            "requirements": [
+                {
+                    "type": "pressure_below",
+                    "sensor_id": 1,
+                    "threshold": 50.0
+                },
+                {
+                    "type": "valve_state",
+                    "valve_id": 1,
+                    "state": "closed"
+                }
+            ],
+            "actions": [
+                {
+                    "type": "set_valve",
+                    "valve_id": 1,
+                    "state": "open" 
+                },
+                {
+                    "type": "wait",
+                    "duration": 2
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 2,
+                    "state": "open"
+                }
+            ]
+        },
+        {
+            "name": "Safe state 2",
+            "requirements": [
+                {
+                    "type": "pressure_above",
+                    "sensor_id": 1,
+                    "threshold": 50.0
+                }
+            ],
+            "actions": [
+                {
+                    "type": "wait",
+                    "duration": 5
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 1,
+                    "state": "open"
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 2,
+                    "state": "closed"
+                }
+            ]
+        }
+    ],
+    "procedures": [
+        {
+            "name": "Startup Sequence",
+            "steps": [
+                {
+                    "name": "Initialize System",
+                    "requirements": [
+                        {
+                            "type": "pressure_below",
+                            "sensor_id": 1,
+                            "threshold": 50.0
+                        },
+                        {
+                            "type": "valve_state",
+                            "valve_id": 1,
+                            "state": "closed"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "wait",
+                            "duration": 2
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 2,
+                            "state": "open"
+                        }
+                    ]
+                },
+                {
+                    "name": "Shutdown System",
+                    "requirements": [
+                        {
+                            "type": "pressure_above",
+                            "sensor_id": 1,
+                            "threshold": 50.0
+                        },
+                        {
+                            "type": "pressure_between",
+                            "sensor_id": 2,
+                            "min_threshold": 20.0,
+                            "max_threshold": 80.0
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "wait",
+                            "duration": 5
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "open"
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 2,
+                            "state": "closed"
+                        }
+                    ]
+                },
+                {
+                    "name": "Pulse stuff",
+                    "requirements": [],
+                    "actions": [
+                        {
+                            "type": "pulse_valve",
+                            "valve_id": 2,
+                            "duration": 0.5
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Shutdown Sequence",
+            "steps": [
+                {
+                    "id": 1,
+                    "name": "Initialize System",
+                    "requirements": [
+                        {
+                            "type": "pressure_below",
+                            "sensor_id": 1,
+                            "threshold": 50.0
+                        },
+                        {
+                            "type": "valve_state",
+                            "valve_id": 1,
+                            "state": "closed"
+                        },
+                        {
+                            "type": "custom_message",
+                            "message": "Ensure x is met."
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "wait",
+                            "duration": 5
+                        },
+                        [
+                            {
+                                "type": "pulse_valve",
+                                "valve_id": 1,
+                                "duration": 1.0
+                            },
+                            {
+                                "type": "set_valve",
+                                "valve_id": 2,
+                                "state": "closed"
+                            }
+                        ]
+                    ]
+                },
+                {
+                    "id": 2,
+                    "name": "Pulse stuff",
+                    "requirements": [],
+                    "actions": [
+                        {
+                            "type": "pulse_valve",
+                            "valve_id": 2,
+                            "duration": 0.5
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

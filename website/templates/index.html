@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ground Control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div id="modal-container" class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title">Warning</h3>
+                <button class="modal-close-btn" onclick="Modal.close()">&times;</button>
+            </div>
+            <div id="modal-content" class="modal-content"></div>
+            <div id="modal-actions" class="modal-actions"></div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="header-left">
+            <h1>Ground Control</h1>
+            <span id="header-time" class="header-time"></span>
+        </div>
+        <div class="header-right">
+            <button id="safe-system-btn" class="safe-system-btn" onclick="safeSystem()">
+                <span class="safe-system-text">Safe System</span>
+            </button>
+            <button id="safe-mode-btn" class="safe-mode-btn" onclick="toggleSafeMode()">
+                <span class="safe-mode-text">Safe Mode: OFF</span>
+            </button>
+            <div id="connection-status" class="status-indicator disconnected">
+                <span class="status-dot"></span>
+                <span class="status-text">Disconnected</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="left-panel">
+            <section class="valves-section">
+                <h2>Valve Control</h2>
+                <div id="valves-container" class="valves-grid"></div>
+            </section>
+
+            <section class="sensors-section">
+                <h2>Pressure Sensors</h2>
+                <div id="sensors-container" class="sensors-grid"></div>
+            </section>
+        </div>
+
+        <aside class="procedures-panel">
+            <h2>Procedures</h2>
+            <div class="procedure-header">
+                <div class="procedure-selector" id="procedure-selector">
+                    <button class="procedure-dropdown-btn" id="procedure-dropdown-btn" type="button">
+                        Select Procedure
+                    </button>
+                    <div class="procedure-dropdown-menu" id="procedure-dropdown-menu"></div>
+                </div>
+                <button class="procedure-reset-btn" onclick="resetProcedure()" title="Reset all steps">Reset</button>
+            </div>
+            <div class="procedure-steps-container">
+                <div id="procedure-steps" class="procedure-steps"></div>
+            </div>
+        </aside>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Society for Advanced Rocket Propulsion (SARP)</p>
+    </footer>
+
+    <script>
+        // CONFIG will be populated via API calls
+        const CONFIG = {
+            invalidValveStates: [],
+            procedures: []
+        };
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
