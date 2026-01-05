@@ -3,8 +3,9 @@ This repo contains the code for the SARP launch controllers (fill/prop controlle
 allows users to control valves, read pressure sensors, and execute complex procedures
 from a single unified UI (website).
 
-## Usage
+## Execution
 
+### Starting the Program
 Create python virtual environment (optional):
 ```bash
 python -m venv <VENV NAME>
@@ -75,8 +76,6 @@ The first element in the website configuration file is the "general_config" sect
     "website_title": <Title for website>,
     "website_log_path": <Path to file where website status/error information is logged>,
     "port": <Port where website is hosted>,
-    "polling_rate": <Rate at which website users are queried to determine disconnections in Hz>,
-    "heartbeat_timeout": <Duration between updates required for users to be marked disconnected>,
     "safe_state_timeout": <Duration before safe state activates after last user disconnection>
 }
 ```
@@ -215,4 +214,36 @@ The final element in the website configuration file is the "procedures" section.
 ]
 ```
 
+## Usage
 
+### Connecting to the Website
+Once the program is running users can connect to the website/UI by entering the URL: http://localhost:\<configured port number\>. Note that in order to connect to this website users must be connected to the same WiFi network as the device which is running this program.
+
+### Valve States
+Each configured valve will have its own panel in the "valve control" section of the website. These panels each contain three buttons, "open", "closed", and "pulse". Clicking on the open button sets the valve to its "open" state, clicking on the "closed" button sets the valve to its "closed" state and clicking on the "pulse" button will toggle the state of the valve for the duration entered in the textbox (i.e. if open, the valve will close upon clicking pulse, and then open again after the specified duration). While a pulse operation is active on a valve its state cannot be changed in any way.
+
+### Pressure Readings
+Each configured pressure sensor will have its own panel in the "pressure sensors" section of the website. These panels contain a reading of the current pressure, rate of change of pressure, and a graph showing the last minute of pressure readings. A popup panel is shown when hovering over the graph which displays the pressure at that point and the duration between that reading and the current time.
+
+### Procedures
+Configured procedures will be shown in the procedures panel on the website. To select a procedure the procedure selection dropdown can be used. Clicking on a step in the procedure toggles the visibility of it's details panel which contains information about the requirements and actions that constitute that step. Dots next to each non-message requirement indicate if they are met and the colored line to the left of the procedure indicates if all non-message requirements in that step are met (red if not met, green if met).
+
+To run a step click the "execute step" button in a step's expanded panel. If the requirements for the step are not met and/or the previous step was not marked as completed a popup warning box will be shown. Once a step has finished executing it will be marked as complete and a checkbox will be shown in its header. To manually toggle the completion status of a step (without executing it) the button to the right of the "execute step" button can be pressed. To reset the completion status of all steps in a procedure the "reset" button next to the procedure selection dropdown button can be pressed.
+
+Note that while a procedure is executing attempts to execute another procedure, safe the system or change a valve's state will be blocked and a popup will be shown to the user.
+
+### Safing the System and Safe Mode
+To manually safe the system the "safe system" button in the header can be pressed. To toggle the system's "safe mode" the "safe mode" button in the header can be pressed. When safe mode is active the system will automatically safe itself when no user has been connected to the website for the configured timeout (in website config file).
+
+Note that when safe mode is entered the first "step" in the "system_safe_states" list that has all requirements satisifed will be executed (no other steps will be executed).
+
+### Connection Status
+Connection status to the server is shown in the panel on the left side of the header. If the server (this program) stops and then starts again the website should re-establish it's connection without requiring the page to be reloaded.
+
+## Contributors
+The following SARP members have made contributions to this project:
+- Aaron McBride
+- Riya Kulkarni
+- Ankhita Sathanur
+- Cooper Reynolds
+- Xavier Beach

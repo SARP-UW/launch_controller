@@ -9,18 +9,6 @@ from .valve import ValveState
 from .logger import Logger
 from . import settings
  
-# Minimum permissable heartbeat timeout in seconds
-MIN_HEARTBEAT_TIMEOUT = 0.1
-
-# Maximum permissable heartbeat timeout in seconds
-MAX_HEARTBEAT_TIMEOUT = 1000.0
-
-# Minimum permissable polling rate in Hz
-MIN_POLLING_RATE = 0.1
-
-# Maximum permissable polling rate in Hz
-MAX_POLLING_RATE = 1000.0
-
 # Minimum permissable safe state timeout in seconds
 MIN_SAFE_STATE_TIMEOUT = 0.1
 
@@ -107,7 +95,7 @@ class ControllerWebsite:
         """
         Background thread method to periodically check user heartbeats and manage safe states.
         """
-        interval = 1.0 / self._polling_rate
+        interval = 1.0 / settings.WEBSITE_THREAD_UPDATE_RATE
         while True:
             with self._thread_lock:
                 if self._shutdown_flag:
@@ -115,7 +103,7 @@ class ControllerWebsite:
                 try:
                     current_time = time.time()
                     for user, last_heartbeat in dict(self._user_heartbeats).items():
-                        if (current_time - last_heartbeat) > self._heartbeat_timeout:
+                        if (current_time - last_heartbeat) > settings.WEBSITE_HEARTBEAT_TIMEOUT:
                             if settings.PRINT_WEBSITE_STATUS:
                                 print(f"WEBSITE STATUS: User {user} disconnected.")
                             self._website_logger.log_data([user, "status", "User disconnected"])
@@ -260,15 +248,13 @@ class ControllerWebsite:
             self._website_logger.log_data([user, "error", f"Action execution failed: {e}"])
             return False
 
-    def __init__(self, controller: Controller, port: int, polling_rate: float, heartbeat_timeout: float, safe_state_timeout: float, website_log_path: str, website_title: str, system_safe_states: List[dict], invalid_valve_states: dict, procedures: dict) -> None:
+    def __init__(self, controller: Controller, port: int, safe_state_timeout: float, website_log_path: str, website_title: str, system_safe_states: List[dict], invalid_valve_states: dict, procedures: dict) -> None:
         """
         Initializes a ControllerWebsite object.
         
         Args:
             controller: The Controller object to interface with.
             port: The port number for the web server.
-            polling_rate: The rate (in Hz) at which the website polls for data.
-            heartbeat_timeout: The time (in seconds) after which a user is considered disconnected if no heartbeat is received.
             website_log_path: Path to file to use for logging website status.
             safe_state_timeout: The time (in seconds) after which the system is put into a safe state if no heartbeat is received from user with safe mode enabled.
             website_title: The title to display in the website header.
@@ -282,22 +268,12 @@ class ControllerWebsite:
             raise ValueError(f"Port number is invalid: {port} < {MIN_PORT_VALUE}")
         if port > MAX_PORT_VALUE:
             raise ValueError(f"Port number is invalid: {port} > {MAX_PORT_VALUE}")
-        if heartbeat_timeout < MIN_HEARTBEAT_TIMEOUT:
-            raise ValueError(f"Heartbeat timeout is invalid: {heartbeat_timeout} < {MIN_HEARTBEAT_TIMEOUT}")
-        if heartbeat_timeout > MAX_HEARTBEAT_TIMEOUT:
-            raise ValueError(f"Heartbeat timeout is invalid: {heartbeat_timeout} > {MAX_HEARTBEAT_TIMEOUT}")
-        if polling_rate < MIN_POLLING_RATE:
-            raise ValueError(f"Polling rate is invalid: {polling_rate} < {MIN_POLLING_RATE}")
-        if polling_rate > MAX_POLLING_RATE:
-            raise ValueError(f"Polling rate is invalid: {polling_rate} > {MAX_POLLING_RATE}")
-        if (1 / polling_rate) > heartbeat_timeout:
-            raise ValueError(f"Polling period is greater than heartbeat timeout: {1 / polling_rate}s > {heartbeat_timeout}s")
         if safe_state_timeout < MIN_SAFE_STATE_TIMEOUT:
             raise ValueError(f"Safe state timeout is invalid: {safe_state_timeout} < {MIN_SAFE_STATE_TIMEOUT}")
         if safe_state_timeout > MAX_SAFE_STATE_TIMEOUT:
             raise ValueError(f"Safe state timeout is invalid: {safe_state_timeout} > {MAX_SAFE_STATE_TIMEOUT}")
-        if safe_state_timeout < heartbeat_timeout:
-            raise ValueError(f"Safe state timeout is less than heartbeat timeout: {safe_state_timeout} s < {heartbeat_timeout} s")            
+        if safe_state_timeout < settings.WEBSITE_HEARTBEAT_TIMEOUT:
+            raise ValueError(f"Safe state timeout is less than heartbeat timeout: {safe_state_timeout} s < {settings.WEBSITE_HEARTBEAT_TIMEOUT} s")            
 
         # Build valid ID sets from controller for validation
         valid_valve_ids = {int(valve["id"]) for valve in controller.valve_info}
@@ -691,8 +667,6 @@ class ControllerWebsite:
 
         self._controller = controller
         self._port = port
-        self._polling_rate = polling_rate
-        self._heartbeat_timeout = heartbeat_timeout
         self._website_logger = Logger(
             path = website_log_path,
             col = ["user", "type", "status"]
@@ -757,7 +731,7 @@ class ControllerWebsite:
         @self._app.get("/api/get_valve_info")
         def get_valve_info():
             """
-            Gets list of info for all valves (id, name, default_state, current_state).
+            Gets list of info for all valves (id, name, default_state, current_state, is_pulsing, pulse_info).
             """
             user = request.remote_addr
             with self._thread_lock:
@@ -767,7 +741,20 @@ class ControllerWebsite:
                     self._website_logger.log_data([user, "error", "Attempted to get valve info while website shut down."])
                     return jsonify({"status": "error", "message": "Website has been shut down"}), 503
                 try:
-                    return jsonify(self._controller.valve_info)
+                    import time
+                    current_time = time.time()
+                    valve_info = self._controller.valve_info
+                    # Add pulsing status and info to each valve
+                    for valve in valve_info:
+                        pulse_info = self._controller.get_pulse_info(valve["id"])
+                        valve["is_pulsing"] = pulse_info is not None
+                        if pulse_info:
+                            # Calculate remaining time and progress
+                            elapsed = current_time - pulse_info["start_time"]
+                            valve["pulse_duration"] = pulse_info["duration"]
+                            valve["pulse_elapsed"] = elapsed
+                            valve["pulse_remaining"] = max(0, pulse_info["duration"] - elapsed)
+                    return jsonify(valve_info)
                 except Exception as e:
                     if settings.PRINT_WEBSITE_ERRORS:
                         print(f"WEBSITE ERROR: Failed to get valve info from {user}: {e}")
@@ -797,7 +784,8 @@ class ControllerWebsite:
         @self._app.post("/api/set_valve_states")
         def set_valve_states():
             """
-            Updates valve states based on provided dict (valve_id: state)
+            Updates valve states based on provided dict.
+            Supports: valve_id: "open", "closed", or "pulse:duration" (e.g., "pulse:1.5")
             """
             user = request.remote_addr
             with self._thread_lock:
@@ -833,7 +821,7 @@ class ControllerWebsite:
                     return jsonify({"status": "success"})
 
                 failed_valves: Dict[str, str] = {}
-                for valve_id_str, state_str in data.items():
+                for valve_id_str, action in data.items():
                     try:
                         try:
                             valve_id = int(valve_id_str)
@@ -845,128 +833,76 @@ class ControllerWebsite:
                             self._website_logger.log_data([user, "error", error_msg])
                             continue
                         
-                        if not isinstance(state_str, str):
+                        if not isinstance(action, str):
                             if settings.PRINT_WEBSITE_ERRORS:
-                                print(f"WEBSITE ERROR: State for valve {valve_id} from {user} must be a string")
-                            error_msg = f"State for valve {valve_id} must be a string"
+                                print(f"WEBSITE ERROR: Action for valve {valve_id} from {user} must be a string")
+                            error_msg = f"Action for valve {valve_id} must be a string"
                             failed_valves[valve_id_str] = error_msg
                             self._website_logger.log_data([user, "error", error_msg])
                             continue
                         
-                        try:
-                            state_enum = ValveState[state_str.strip().upper()]
-                        except (KeyError, AttributeError):
+                        # Check if valve is currently pulsing
+                        if self._controller.get_pulse_info(valve_id) is not None:
                             if settings.PRINT_WEBSITE_ERRORS:
-                                print(f"WEBSITE ERROR: Invalid valve state from {user} for valve {valve_id}: {state_str}")
-                            error_msg = f"Invalid valve state: {state_str}"
+                                print(f"WEBSITE ERROR: Valve {valve_id} is currently pulsing, cannot modify")
+                            error_msg = f"Valve {valve_id} is currently pulsing"
                             failed_valves[valve_id_str] = error_msg
                             self._website_logger.log_data([user, "error", error_msg])
                             continue
+                        
+                        action = action.strip()
+                        
+                        # Check if this is a pulse command (format: "pulse:duration")
+                        if action.lower().startswith("pulse:"):
+                            try:
+                                duration = float(action[6:])
+                            except (ValueError, TypeError):
+                                if settings.PRINT_WEBSITE_ERRORS:
+                                    print(f"WEBSITE ERROR: Invalid pulse duration for valve {valve_id} from {user}: {action}")
+                                error_msg = f"Invalid pulse duration: {action}"
+                                failed_valves[valve_id_str] = error_msg
+                                self._website_logger.log_data([user, "error", error_msg])
+                                continue
+                            
+                            self._controller.pulse_valve(id=valve_id, duration=duration)
+                            if settings.PRINT_WEBSITE_STATUS:
+                                print(f"WEBSITE STATUS: User {user} pulsed valve {valve_id} for {duration}s")
+                            self._website_logger.log_data([user, "action", f"Pulsed valve {valve_id} for {duration}s"])
+                        else:
+                            # Regular state change (open/closed)
+                            try:
+                                state_enum = ValveState[action.upper()]
+                            except (KeyError, AttributeError):
+                                if settings.PRINT_WEBSITE_ERRORS:
+                                    print(f"WEBSITE ERROR: Invalid valve action from {user} for valve {valve_id}: {action}")
+                                error_msg = f"Invalid valve action: {action}"
+                                failed_valves[valve_id_str] = error_msg
+                                self._website_logger.log_data([user, "error", error_msg])
+                                continue
 
-                        self._controller.set_valve(id=valve_id, state=state_enum)
-                        if settings.PRINT_WEBSITE_STATUS:
-                            print(f"WEBSITE STATUS: User {user} set valve {valve_id} to {state_str}")
-                        self._website_logger.log_data([user, "action", f"Set valve {valve_id} to {state_str}"])
+                            self._controller.set_valve(id=valve_id, state=state_enum)
+                            if settings.PRINT_WEBSITE_STATUS:
+                                print(f"WEBSITE STATUS: User {user} set valve {valve_id} to {action}")
+                            self._website_logger.log_data([user, "action", f"Set valve {valve_id} to {action}"])
                             
                     except ValueError as e:
                         if settings.PRINT_WEBSITE_ERRORS:
                             print(f"WEBSITE ERROR: Failed to set valve state for {user}: {e}")
-                        error_msg = f"WEBSITE ERROR: Failed to set valve state: {e}"
+                        error_msg = f"Failed to set valve state: {e}"
+                        failed_valves[valve_id_str] = error_msg
+                        self._website_logger.log_data([user, "error", error_msg])
+                        
+                    except RuntimeError as e:
+                        if settings.PRINT_WEBSITE_ERRORS:
+                            print(f"WEBSITE ERROR: Failed to modify valve {valve_id_str} for {user}: {e}")
+                        error_msg = str(e)
                         failed_valves[valve_id_str] = error_msg
                         self._website_logger.log_data([user, "error", error_msg])
                         
                     except Exception as e:
                         if settings.PRINT_WEBSITE_ERRORS:
                             print(f"WEBSITE ERROR: Failed to set valve {valve_id_str} state for {user}: {e}")
-                        error_msg = f"WEBSITE ERROR: Failed to set valve {valve_id_str} state: {e}"
-                        failed_valves[valve_id_str] = error_msg
-                        self._website_logger.log_data([user, "error", error_msg])
-                
-                if len(failed_valves) == 0:
-                    return jsonify({"status": "success"})
-                else:
-                    return jsonify({
-                        "status": "error",
-                        "failed_valves": failed_valves
-                    }), 400
-
-        @self._app.post("/api/pulse_valves")
-        def pulse_valves():
-            """
-            Pulses multiple valves based on provided dict (valve_id: duration)
-            """
-            user = request.remote_addr
-            with self._thread_lock:
-                if self._shutdown_flag:
-                    if settings.PRINT_WEBSITE_ERRORS:
-                        print(f"WEBSITE ERROR: User attempted to pulse valves while website shut down.")
-                    self._website_logger.log_data([user, "error", "Attempted to pulse valves while website shut down."])
-                    return jsonify({"status": "error", "message": "Website has been shut down"}), 503
-                
-                # Block valve operations while executing or safing
-                if self._currently_executing is not None:
-                    exec_user = self._currently_executing["user"]
-                    return jsonify({"status": "error", "message": f"Cannot pulse valves while step is executing (by {exec_user})"}), 409
-                
-                if self._safing_system is not None:
-                    safing_user = self._safing_system["user"]
-                    return jsonify({"status": "error", "message": f"Cannot pulse valves while system is being safed (by {safing_user})"}), 409
-                
-                if not request.is_json:
-                    if settings.PRINT_WEBSITE_ERRORS:
-                        print(f"WEBSITE ERROR: Pulse valves request from {user} missing JSON body")
-                    self._website_logger.log_data([user, "error", "Pulse valves request missing JSON body"])
-                    return jsonify({"status": "error", "message": "Pulse valves request missing JSON body"}), 400
-
-                data = request.get_json()
-                if not isinstance(data, dict):
-                    if settings.PRINT_WEBSITE_ERRORS:
-                        print(f"WEBSITE ERROR: Pulse valves request from {user} body must be a dict")
-                    self._website_logger.log_data([user, "error", "Pulse valves request body must be a dict"])
-                    return jsonify({"status": "error", "message": "Request body must be a dict"}), 400
-            
-                if len(data) == 0:
-                    return jsonify({"status": "success"})
-
-                failed_valves: Dict[str, str] = {}
-                for valve_id_str, duration in data.items():
-                    try:
-                        try:
-                            valve_id = int(valve_id_str)
-                        except (ValueError, TypeError):
-                            if settings.PRINT_WEBSITE_ERRORS:
-                                print(f"WEBSITE ERROR: Invalid valve ID from {user}: {valve_id_str}")
-                            error_msg = f"Invalid valve ID: {valve_id_str}"
-                            failed_valves[valve_id_str] = error_msg
-                            self._website_logger.log_data([user, "error", error_msg])
-                            continue
-                        
-                        try:
-                            duration = float(duration)
-                        except (ValueError, TypeError):
-                            if settings.PRINT_WEBSITE_ERRORS:
-                                print(f"WEBSITE ERROR: Invalid duration for valve {valve_id} from {user}: {duration}")
-                            error_msg = f"Duration for valve {valve_id} must be a number"
-                            failed_valves[valve_id_str] = error_msg
-                            self._website_logger.log_data([user, "error", error_msg])
-                            continue
-
-                        self._controller.pulse_valve(id=valve_id, duration=duration)
-                        if settings.PRINT_WEBSITE_STATUS:
-                            print(f"WEBSITE STATUS: User {user} pulsed valve {valve_id} for {duration}s")
-                        self._website_logger.log_data([user, "action", f"Pulsed valve {valve_id} for {duration}s"])
-                            
-                    except (ValueError, RuntimeError) as e:
-                        if settings.PRINT_WEBSITE_ERRORS:
-                            print(f"WEBSITE ERROR: Failed to pulse valve {valve_id_str} for {user}: {e}")
-                        error_msg = str(e)
-                        failed_valves[valve_id_str] = error_msg
-                        self._website_logger.log_data([user, "error", f"Failed to pulse valve {valve_id_str}: {e}"])
-                        
-                    except Exception as e:
-                        if settings.PRINT_WEBSITE_ERRORS:
-                            print(f"WEBSITE ERROR: Failed to pulse valve {valve_id_str} for {user}: {e}")
-                        error_msg = f"Internal error pulsing valve {valve_id_str}"
+                        error_msg = f"Failed to set valve {valve_id_str} state: {e}"
                         failed_valves[valve_id_str] = error_msg
                         self._website_logger.log_data([user, "error", error_msg])
                 
@@ -1508,8 +1444,8 @@ class ControllerWebsite:
             print(f"WEBSITE INFO: Controller id: {id(self._controller)}")
             print(f"WEBSITE INFO: Website title: {self._website_title}")
             print(f"WEBSITE INFO: Website port: {self._port}")
-            print(f"WEBSITE INFO: Polling rate: {self._polling_rate}Hz")
-            print(f"WEBSITE INFO: Heartbeat timeout: {self._heartbeat_timeout}s")
+            print(f"WEBSITE INFO: Polling rate: {settings.WEBSITE_THREAD_UPDATE_RATE}Hz")
+            print(f"WEBSITE INFO: Heartbeat timeout: {settings.WEBSITE_HEARTBEAT_TIMEOUT}s")
             print(f"WEBSITE INFO: Safe state timeout: {self._safe_state_timeout}s")
             print(f"WEBSITE INFO: Website logger: {str(self._website_logger)}")
             print(f"WEBSITE INFO: System safe states: {self._system_safe_states}")
@@ -1520,8 +1456,8 @@ class ControllerWebsite:
         self._website_logger.log_data(["system", "info", f"Controller id: {id(self._controller)}"])
         self._website_logger.log_data(["system", "info", f"Website title: {self._website_title}"])
         self._website_logger.log_data(["system", "info", f"Website port: {self._port}"])
-        self._website_logger.log_data(["system", "info", f"Polling rate: {self._polling_rate}Hz"])
-        self._website_logger.log_data(["system", "info", f"Heartbeat timeout: {self._heartbeat_timeout}s"])
+        self._website_logger.log_data(["system", "info", f"Polling rate: {settings.WEBSITE_THREAD_UPDATE_RATE}Hz"])
+        self._website_logger.log_data(["system", "info", f"Heartbeat timeout: {settings.WEBSITE_HEARTBEAT_TIMEOUT}s"])
         self._website_logger.log_data(["system", "info", f"Safe state timeout: {self._safe_state_timeout}s"])
         self._website_logger.log_data(["system", "info", f"Website logger: {str(self._website_logger)}"])
         self._website_logger.log_data(["system", "info", f"System safe states: {self._system_safe_states}"])
@@ -1559,10 +1495,6 @@ class ControllerWebsite:
         
         if 'port' not in config['general_config']:
             raise KeyError(f"Website config missing key: 'general_config.port'")
-        if 'polling_rate' not in config['general_config']:
-            raise KeyError(f"Website config missing key: 'general_config.polling_rate'")
-        if 'heartbeat_timeout' not in config['general_config']:
-            raise KeyError(f"Website config missing key: 'general_config.heartbeat_timeout'")
         if 'website_log_path' not in config['general_config']:
             raise KeyError(f"Website config missing key: 'general_config.website_log_path'")
         if 'safe_state_timeout' not in config['general_config']:
@@ -1576,16 +1508,6 @@ class ControllerWebsite:
             port = int(config['general_config']['port'])
         except (ValueError, TypeError):
             raise ValueError(f"Website config 'general_config.port' must be an integer, got: {type(config['general_config']['port']).__name__}")
-        
-        try:
-            polling_rate = float(config['general_config']['polling_rate'])
-        except (ValueError, TypeError):
-            raise ValueError(f"Website config 'general_config.polling_rate' must be a number, got: {type(config['general_config']['polling_rate']).__name__}")
-        
-        try:
-            heartbeat_timeout = float(config['general_config']['heartbeat_timeout'])
-        except (ValueError, TypeError):
-            raise ValueError(f"Website config 'general_config.heartbeat_timeout' must be a number, got: {type(config['general_config']['heartbeat_timeout']).__name__}")
         
         website_log_path = config['general_config']['website_log_path']
         if not isinstance(website_log_path, str):
@@ -1615,8 +1537,6 @@ class ControllerWebsite:
         return cls(
             controller = controller,
             port = port,
-            polling_rate = polling_rate,
-            heartbeat_timeout = heartbeat_timeout,
             safe_state_timeout = safe_state_timeout,
             website_log_path = website_log_path,
             website_title = website_title,

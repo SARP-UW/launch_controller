@@ -3,8 +3,6 @@
         "website_title": "Launch Controller",
         "website_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\website_log.txt",
         "port": 8080,
-        "polling_rate": 20.0,
-        "heartbeat_timeout": 5.0,
         "safe_state_timeout": 300.0
     },
     "invalid_valve_states": [

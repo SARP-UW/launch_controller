@@ -1,9 +1,19 @@
+###################################################################################################
+# Website Settings
+###################################################################################################
+
+# The rate (in Hz) at which the website update thread runs
+WEBSITE_THREAD_UPDATE_RATE: float = 20.0
+
+# The time (in seconds) after which a user is considered disconnected if no heartbeat is received
+WEBSITE_HEARTBEAT_TIMEOUT: float = 3.0
+
+###################################################################################################
+# General System Settings
+###################################################################################################
 
 # If true, application runs in "mock" mode (simulates hardware interaction)
 MOCK_MODE: bool = True
-
-# Timeout (in seconds) for joining threads during shutdown
-THREAD_JOIN_TIMEOUT: float = 5.0
 
 # If true, application prints valve state changes to console
 PRINT_VALVE_STATES: bool = True

@@ -9,6 +9,9 @@ import time
 # Maximum sensor data rate in Hz
 MAX_SENSOR_DATA_RATE = 1000.0
 
+# Minimum sensor data rate in Hz
+MIN_SENSOR_DATA_RATE = 0.1
+
 class Controller:
     """
     Class which represents the controller managing valves and pressure sensors.
@@ -56,8 +59,8 @@ class Controller:
         _valve_list = list(valve_list)
         _pressure_sensor_list = list(pressure_sensor_list)
         
-        if sensor_data_rate < 0.0:
-            raise ValueError(f"Sensor data rate is invalid: {sensor_data_rate} < 0.0")
+        if sensor_data_rate < MIN_SENSOR_DATA_RATE:
+            raise ValueError(f"Sensor data rate is invalid: {sensor_data_rate} < {MIN_SENSOR_DATA_RATE}")
         if sensor_data_rate > MAX_SENSOR_DATA_RATE:
             raise ValueError(f"Sensor data rate is invalid: {sensor_data_rate} > {MAX_SENSOR_DATA_RATE}")
         
@@ -79,7 +82,7 @@ class Controller:
         self._current_pressure_list = [0.0 for _ in _pressure_sensor_list]
         self._shutdown_flag = False
         self._thread_lock = threading.Lock()
-        self._pulsing_valves: set[int] = set()
+        self._pulsing_valves: dict[int, dict] = {}  # valve_id -> {"start_time": float, "duration": float}
         
         if len(_pressure_sensor_list) > 0:
             self._sensor_data_logger = Logger(
@@ -255,7 +258,7 @@ class Controller:
                 raise ValueError(f"Controller has no valve with ID: {id}")
             if id in self._pulsing_valves:
                 raise RuntimeError(f"Valve {id} is already being pulsed")
-            self._pulsing_valves.add(id)
+            self._pulsing_valves[id] = {"start_time": time.time(), "duration": duration}
         
         def do_pulse():
             """
@@ -290,11 +293,26 @@ class Controller:
             finally:
                 with self._thread_lock:
                     if not self._shutdown_flag:
-                        self._pulsing_valves.discard(id)
+                        self._pulsing_valves.pop(id, None)
         
         thread = threading.Thread(target = do_pulse, daemon = True)
         thread.start()
+    
+    def get_pulse_info(self, id: int) -> dict | None:
+        """
+        Gets pulse information for a valve if it's currently pulsing.
         
+        Args:
+            id: The unique ID of the valve to check.
+            
+        Returns:
+            Dict with "start_time" and "duration" if pulsing, None otherwise.
+        """
+        if self._shutdown_flag:
+            raise RuntimeError("Controller has been shut down")
+        with self._thread_lock:
+            return self._pulsing_valves.get(id, None)
+    
     def shutdown(self) -> None:
         """
         Shuts down controller. After this function is called, calls to other methods will raise an exception.

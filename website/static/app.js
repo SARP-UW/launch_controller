@@ -9,11 +9,13 @@ const LOG_STATUS = true;
 const LOG_ERRORS = true;
 
 // Polling intervals (ms)
-const HEARTBEAT_INTERVAL = 100;
-const VALVE_POLL_INTERVAL = 100;
+const HEARTBEAT_INTERVAL = 250;
+const VALVE_POLL_INTERVAL = 250;
 const SENSOR_POLL_INTERVAL = 100;
-const SAFE_MODE_POLL_INTERVAL = 100;
-const PROCEDURE_POLL_INTERVAL = 1000;
+const SAFE_MODE_POLL_INTERVAL = 500;
+const PROCEDURE_POLL_INTERVAL = 5000;
+const PROCEDURE_STATUS_POLL_INTERVAL = 500;
+const SAFING_STATUS_POLL_INTERVAL = 500;
 
 // Chart configuration
 const CHART_MAX_POINTS = 100;
@@ -166,13 +168,6 @@ const API = {
         return this.request('/api/set_safe_mode', {
             method: 'POST',
             body: JSON.stringify({ safe_mode: enabled })
-        });
-    },
-
-    async pulseValves(pulses) {
-        return this.request('/api/pulse_valves', {
-            method: 'POST',
-            body: JSON.stringify(pulses)
         });
     },
 
@@ -398,6 +393,16 @@ async function setValveState(valveId, state) {
         return;
     }
     
+    // Block if valve is currently pulsing
+    if (State.pulsingValves.has(valveId)) {
+        Modal.show(
+            'Valve Pulsing',
+            `<p>Cannot change valve state while it is currently pulsing. Please wait for the pulse to complete.</p>`,
+            [{ label: 'OK', type: 'primary' }]
+        );
+        return;
+    }
+    
     const violations = checkInvalidValveState(valveId, state);
     
     if (violations.length > 0) {
@@ -487,21 +492,30 @@ async function pulseValve(valveId) {
  * Executes the pulse operation with visual feedback
  */
 async function executePulse(valveId, duration) {
-    // Mark valve as pulsing
-    State.pulsingValves.add(valveId);
-    updatePulseUI(valveId, true, duration);
-
+    // Disable the button immediately to prevent visual changes during API call
+    const card = document.querySelector(`.valve-card[data-valve-id="${valveId}"]`);
+    const button = card?.querySelector('.pulse-btn');
+    const input = card?.querySelector('.pulse-duration-input');
+    if (button) button.disabled = true;
+    if (input) input.disabled = true;
+    
     try {
-        // Start the pulse on the server
-        const response = await API.pulseValves({ [valveId]: duration });
+        // Start the pulse on the server using combined endpoint
+        const response = await API.setValveStates({ [valveId]: `pulse:${duration}` });
         
         if (response.status === 'error' && response.failed_valves) {
+            // Re-enable on error
+            if (button) button.disabled = false;
+            if (input) input.disabled = false;
             throw new Error(response.failed_valves[valveId] || 'Unknown error');
         }
 
         logStatus(`Valve ${valveId} pulse started for ${duration}s`);
+        
+        // Poll immediately to get server state and show UI update with accurate timing
+        await pollValves();
 
-        // Wait for pulse duration (progress animation runs independently)
+        // Wait for pulse duration (progress animation runs independently via polling)
         await new Promise(resolve => setTimeout(resolve, duration * 1000));
 
         logStatus(`Valve ${valveId} pulse completed`);
@@ -511,17 +525,19 @@ async function executePulse(valveId, duration) {
             { label: 'OK', type: 'primary' }
         ]);
     } finally {
-        // Mark valve as no longer pulsing
-        State.pulsingValves.delete(valveId);
-        updatePulseUI(valveId, false, 0);
-        await pollValves(); // Refresh valve state
+        // Refresh valve state to sync with server
+        await pollValves();
     }
 }
 
 /**
  * Updates the pulse UI elements for a valve
+ * @param {number} valveId - The valve ID
+ * @param {boolean} isPulsing - Whether the valve is currently pulsing
+ * @param {number} duration - Total pulse duration (for initiating user)
+ * @param {number} remaining - Remaining time in seconds (for syncing with other users)
  */
-function updatePulseUI(valveId, isPulsing, duration) {
+function updatePulseUI(valveId, isPulsing, duration, remaining = null) {
     const card = document.querySelector(`.valve-card[data-valve-id="${valveId}"]`);
     if (!card) return;
 
@@ -534,13 +550,20 @@ function updatePulseUI(valveId, isPulsing, duration) {
         button.classList.add('pulsing');
         button.disabled = true;
 
+        // Calculate the effective remaining time and start position
+        const effectiveRemaining = remaining !== null ? remaining : duration;
+        const effectiveDuration = duration || effectiveRemaining;
+        
         // Only show progress animation for durations >= 0.2s
-        if (duration >= 0.2) {
+        if (effectiveRemaining >= 0.1 && effectiveDuration > 0) {
+            // Calculate current progress (what percentage is remaining)
+            const progressPercent = (effectiveRemaining / effectiveDuration) * 100;
+            
             progress.style.transition = 'none';
-            progress.style.width = '100%';
+            progress.style.width = `${progressPercent}%`;
             // Force reflow
             progress.offsetHeight;
-            progress.style.transition = `width ${duration}s linear`;
+            progress.style.transition = `width ${effectiveRemaining}s linear`;
             progress.style.width = '0%';
         }
     } else {
@@ -564,6 +587,23 @@ async function pollValves() {
         
         valves.forEach(valve => {
             updateValveUI(valve.id, valve.current_state);
+            
+            // Sync pulsing status from server
+            if (valve.is_pulsing) {
+                const wasAlreadyPulsing = State.pulsingValves.has(valve.id);
+                if (!wasAlreadyPulsing) {
+                    // Valve started pulsing - add to state and show progress animation
+                    State.pulsingValves.add(valve.id);
+                    updatePulseUI(valve.id, true, valve.pulse_duration, valve.pulse_remaining);
+                }
+                // If already pulsing, don't restart the animation (it's already running)
+            } else {
+                if (State.pulsingValves.has(valve.id)) {
+                    // Pulse completed
+                    State.pulsingValves.delete(valve.id);
+                    updatePulseUI(valve.id, false, 0);
+                }
+            }
         });
         
         updateAllStepRequirements();
@@ -961,9 +1001,6 @@ async function procedurePollingLoop() {
     setTimeout(procedurePollingLoop, PROCEDURE_POLL_INTERVAL);
 }
 
-// Polling interval for procedure status (completion and execution state)
-const PROCEDURE_STATUS_POLL_INTERVAL = 250;
-
 /**
  * Polls procedure status (completion and execution state) from server
  */
@@ -1060,7 +1097,7 @@ async function safingStatusPollingLoop() {
     if (State.connected) {
         await pollSafingStatus();
     }
-    setTimeout(safingStatusPollingLoop, PROCEDURE_STATUS_POLL_INTERVAL);
+    setTimeout(safingStatusPollingLoop, SAFING_STATUS_POLL_INTERVAL);
 }
 
 // Track if procedures have been initialized to avoid duplicate event listeners
