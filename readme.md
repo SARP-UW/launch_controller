@@ -237,11 +237,3 @@ The final element in the website configuration file is the "procedures" section.
     // Repeat above object for each desired procedure
 ]
 ```
-
-## Contributors
-The following SARP members have made contributions to this project:
-- Aaron McBride
-- Riya Kulkarni
-- Ankhita Sathanur
-- Cooper Reynolds
-- Xavier Beach
