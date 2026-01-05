@@ -1,2 +1,0 @@
-timestamp, type, message
-2026-01-01T13:10:18.742084, status, Program starting

@@ -18,7 +18,7 @@ const PROCEDURE_STATUS_POLL_INTERVAL = 500;
 const SAFING_STATUS_POLL_INTERVAL = 500;
 
 // Chart configuration
-const CHART_MAX_POINTS = 100;
+const CHART_TIME_WINDOW = 60000; // 60 seconds in milliseconds
 const CHART_COLOR = '#3b82f6';
 
 // Application state
@@ -388,7 +388,7 @@ async function setValveState(valveId, state) {
         Modal.show(
             'Operation Blocked',
             `<p>Cannot modify valves while ${blockingAction}${userInfo}. Please wait for it to complete.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
@@ -398,7 +398,7 @@ async function setValveState(valveId, state) {
         Modal.show(
             'Valve Pulsing',
             `<p>Cannot change valve state while it is currently pulsing. Please wait for the pulse to complete.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
@@ -448,14 +448,18 @@ async function pulseValve(valveId) {
         Modal.show(
             'Operation Blocked',
             `<p>Cannot pulse valves while ${blockingAction}${userInfo}. Please wait for it to complete.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
     
     // Prevent multiple pulses on the same valve
     if (State.pulsingValves.has(valveId)) {
-        logError(`Valve ${valveId} is already pulsing`);
+        Modal.show(
+            'Valve Pulsing',
+            `<p>This valve is already pulsing. Please wait for the pulse to complete.</p>`,
+            [{ label: 'OK', type: 'secondary' }]
+        );
         return;
     }
 
@@ -464,11 +468,33 @@ async function pulseValve(valveId) {
 
     if (duration <= 0) {
         Modal.show('Invalid Duration', '<p>Pulse duration must be greater than 0.</p>', [
-            { label: 'OK', type: 'primary' }
+            { label: 'OK', type: 'secondary' }
         ]);
         return;
     }
 
+    // Warn for long pulse durations
+    if (duration > 60) {
+        const valve = State.valves.find(v => v.id === valveId);
+        const valveName = valve ? valve.name : `Valve ${valveId}`;
+        Modal.show(
+            'Long Pulse Duration',
+            `<p>Are you sure you want to pulse <strong>${valveName}</strong> for <strong>${duration} seconds</strong>? This operation cannot be aborted!</p>`,
+            [
+                { label: 'Cancel', type: 'secondary' },
+                { label: 'Pulse', type: 'warning', callback: () => executePulseWithWarningCheck(valveId, duration) }
+            ]
+        );
+        return;
+    }
+
+    executePulseWithWarningCheck(valveId, duration);
+}
+
+/**
+ * Checks for invalid valve state warnings and executes pulse
+ */
+function executePulseWithWarningCheck(valveId, duration) {
     // Check for invalid state warnings (similar to setValveState)
     const valve = State.valves.find(v => v.id === valveId);
     const newState = valve?.current_state === 'open' ? 'closed' : 'open';
@@ -522,7 +548,7 @@ async function executePulse(valveId, duration) {
     } catch (error) {
         logError(`Failed to pulse valve ${valveId}`, error);
         Modal.show('Pulse Failed', `<p>Failed to pulse valve: ${error.message}</p>`, [
-            { label: 'OK', type: 'primary' }
+            { label: 'OK', type: 'secondary' }
         ]);
     } finally {
         // Refresh valve state to sync with server
@@ -790,7 +816,10 @@ function updateSensorDisplay(sensorId, pressure) {
         }
         
         history.push({ time: now, pressure: pressure });
-        if (history.length > CHART_MAX_POINTS) {
+        
+        // Remove old data points outside the time window
+        const cutoffTime = now - CHART_TIME_WINDOW;
+        while (history.length > 0 && history[0].time < cutoffTime) {
             history.shift();
         }
         
@@ -870,13 +899,23 @@ function updateSafeModeUI() {
  * Triggers manual safe system operation
  */
 async function safeSystem() {
+    // Block if any valve is pulsing
+    if (State.pulsingValves.size > 0) {
+        Modal.show(
+            'Valve Pulsing',
+            `<p>Cannot safe the system while a valve is pulsing. Please wait for all pulses to complete.</p>`,
+            [{ label: 'OK', type: 'secondary' }]
+        );
+        return;
+    }
+    
     // Block if already safing or executing
     if (State.safingSystem) {
         const userInfo = State.safingSystemUser ? ` by ${State.safingSystemUser}` : '';
         Modal.show(
             'System Already Safing',
             `<p>The system is already being safed${userInfo}. Please wait for it to complete.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
@@ -886,7 +925,7 @@ async function safeSystem() {
         Modal.show(
             'Step Executing',
             `<p>A step is currently executing${userInfo}. Please wait for it to complete before safing the system.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
@@ -895,10 +934,10 @@ async function safeSystem() {
     const confirmed = await new Promise(resolve => {
         Modal.show(
             'Confirm Safe System',
-            '<p>Are you sure you want to safe the system? This will close all valves to their safe states.</p>',
+            '<p>Are you sure you want to safe the system?</p>',
             [
-                { label: 'Cancel', type: 'secondary', action: () => resolve(false) },
-                { label: 'Safe System', type: 'primary', action: () => resolve(true) }
+                { label: 'Cancel', type: 'secondary', callback: () => resolve(false) },
+                { label: 'Safe System', type: 'primary', callback: () => resolve(true) }
             ]
         );
     });
@@ -1444,18 +1483,10 @@ function createStepCard(step, index) {
     
     // Determine execute button text
     let executeButtonText = 'Execute Step';
-    let executeButtonDisabled = false;
     if (isExecuting) {
         executeButtonText = State.executingStepUser 
             ? `Executing (${State.executingStepUser})`
             : 'Executing...';
-        executeButtonDisabled = true;
-    } else if (State.executingStepIndex !== null) {
-        // Another step is executing - disable this button
-        executeButtonDisabled = true;
-    } else if (State.safingSystem) {
-        // System is being safed - disable this button
-        executeButtonDisabled = true;;
     } else if (isCompleted) {
         executeButtonText = 'Execute Again';
     }
@@ -1506,7 +1537,7 @@ function createStepCard(step, index) {
                     </div>
                 ` : ''}
                 <div class="step-buttons">
-                    <button class="step-execute-btn${isExecuting ? ' executing' : ''}" onclick="executeStep(${index}, event)"${executeButtonDisabled ? ' disabled' : ''}>
+                    <button class="step-execute-btn${isExecuting ? ' executing' : ''}" onclick="executeStep(${index}, event)">
                         ${executeButtonText}
                     </button>
                     <button class="step-mark-btn ${isCompleted ? 'completed' : ''}" onclick="toggleStepComplete(${index}, event)">
@@ -1628,7 +1659,7 @@ async function toggleStepComplete(index, event) {
         Modal.show(
             'Update Failed',
             `<p>Failed to update step completion status: ${error.message}</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
     }
 }
@@ -1651,7 +1682,7 @@ async function resetProcedure() {
         Modal.show(
             'Reset Failed',
             `<p>Failed to reset procedure: ${error.message}</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
     }
 }
@@ -1793,13 +1824,23 @@ async function executeStep(index, event) {
     
     if (!State.selectedProcedure) return;
     
+    // Block if any valve is pulsing
+    if (State.pulsingValves.size > 0) {
+        Modal.show(
+            'Valve Pulsing',
+            `<p>Cannot execute a step while a valve is pulsing. Please wait for all pulses to complete.</p>`,
+            [{ label: 'OK', type: 'secondary' }]
+        );
+        return;
+    }
+    
     // Check if system is being safed
     if (State.safingSystem) {
         const userInfo = State.safingSystemUser ? ` by ${State.safingSystemUser}` : '';
         Modal.show(
             'System Safing',
             `<p>The system is currently being safed${userInfo}. Please wait for it to complete before executing a step.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
@@ -1810,7 +1851,7 @@ async function executeStep(index, event) {
         Modal.show(
             'Step Already Executing',
             `<p>Step ${State.executingStepIndex + 1} is currently executing${executorInfo}. Please wait for it to complete before executing another step.</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
         return;
     }
@@ -1867,13 +1908,13 @@ async function performStepExecution(index, step) {
                 Modal.show(
                     'Step Already Executing',
                     `<p>Step ${result.executing.step_index + 1} is currently being executed by another user (${result.executing.user}). Please wait for it to complete.</p>`,
-                    [{ label: 'OK', type: 'primary' }]
+                    [{ label: 'OK', type: 'secondary' }]
                 );
             } else {
                 Modal.show(
                     'Execution Failed',
                     `<p>${result.message || 'Failed to start step execution'}</p>`,
-                    [{ label: 'OK', type: 'primary' }]
+                    [{ label: 'OK', type: 'secondary' }]
                 );
             }
             return;
@@ -1887,7 +1928,7 @@ async function performStepExecution(index, step) {
         Modal.show(
             'Execution Failed',
             `<p>Failed to start step execution: ${error.message}</p>`,
-            [{ label: 'OK', type: 'primary' }]
+            [{ label: 'OK', type: 'secondary' }]
         );
     }
 }
