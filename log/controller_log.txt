@@ -1266,3 +1266,4 @@ timestamp, type, message
 2026-01-04T18:03:20.809584, info, Sensor data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
 2026-01-04T18:03:20.809749, info, Valve data logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
 2026-01-04T18:03:20.810075, info, Controller logger: Logger(path = C:\Users\aaron\files\sarp\Ground_Control\log\controller_log.txt, col = ['type', 'message'])
+2026-01-04T18:08:25.026476, status, Controller shutdown
