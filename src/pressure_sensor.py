@@ -29,7 +29,7 @@ PS_MAX_PRESSURE = 10000.0
 if not settings.MOCK_MODE:
     
     # Global I2C bus for pressure sensor ADCs
-    PS_ADC_I2C_BUS = I2C(board.SCL1, board.SDA1)
+    PS_ADC_I2C_BUS = I2C(board.SCL, board.SDA)
 
     # List of ADCs used to read pressure sensors
     PS_ADC_LIST: List[ADS1115] = [

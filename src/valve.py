@@ -11,7 +11,7 @@ if not settings.MOCK_MODE:
 VALVE_COUNT = 10
 
 if not settings.MOCK_MODE:
-    
+        
     # Mapping of valve IDs to their corresponding GPIO pins
     VALVE_PIN_MAP: Dict[int, int] = {
         1: board.D13,
