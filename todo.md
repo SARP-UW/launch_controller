@@ -12,3 +12,5 @@
 - Handle safe system (and mode) when no safe state configured.
 - Look into adding subtle background pattern for valve control and pressure sensor panels
 - Reverse position (left right) of open/closed buttons for valves on UI
+- When shutting of program GPIO does not reset (check other reset logic as well) (done partially - check logic)
+- Look into shutting down globally initialized busses/drivers

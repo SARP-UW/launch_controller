@@ -319,8 +319,10 @@ class Controller:
         """
         with self._thread_lock:
             if self._shutdown_flag:
-                return
-            self._shutdown_flag = True                    
+                raise RuntimeError("Controller has already been shut down")
+            self._shutdown_flag = True
+            for valve in self._valve_list:
+                valve.shutdown()
             if settings.PRINT_CONTROLLER_STATUS:
                 print("CONTROLLER STATUS: Controller shutdown")
             self._controller_logger.log_data(["status", "Controller shutdown"])
