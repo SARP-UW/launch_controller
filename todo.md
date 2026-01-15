@@ -10,3 +10,4 @@
 - Update website address printout on startup so that it is correct (works when running on computer but not raspi -> computer - needs additional IP)
 - Handle procedures panel when no procedures are setup
 - Handle safe system (and mode) when no safe state configured.
+- Look into adding subtle background pattern for valve control and pressure sensor panels
