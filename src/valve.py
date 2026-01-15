@@ -153,4 +153,5 @@ class Valve:
         self._shutdown_flag = True
         self._state = self._default_state
         if not settings.MOCK_MODE:
+            self._io.value = False
             self._io.deinit()
