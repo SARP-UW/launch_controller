@@ -7,3 +7,6 @@
 - Update default config (so it is generally useful).
 - Investigate current log files to ensure consistency and reduce redudency (remove some? merge some? reformat some?)
 - Figure out venv issues on raspi - add instructions about --break-system-packages in the readme.md
+- Update website address printout on startup so that it is correct (works when running on computer but not raspi -> computer - needs additional IP)
+- Handle procedures panel when no procedures are setup
+- Handle safe system (and mode) when no safe state configured.
