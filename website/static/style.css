@@ -244,6 +244,8 @@ body {
     gap: 1.5rem;
     padding: 1.5rem 2rem 2.5rem 2rem;
     align-items: start;
+    position: relative;
+    z-index: 1;
 }
 
 .left-panel {
