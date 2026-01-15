@@ -55,7 +55,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
     flex-shrink: 0;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
@@ -70,7 +70,7 @@ body {
     background: transparent;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
     pointer-events: none;
-    z-index: 99;
+    z-index: 999;
 }
 
 .footer {
@@ -244,8 +244,6 @@ body {
     gap: 1.5rem;
     padding: 1.5rem 2rem 2.5rem 2rem;
     align-items: start;
-    position: relative;
-    z-index: 1;
 }
 
 .left-panel {

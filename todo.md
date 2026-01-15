@@ -11,3 +11,4 @@
 - Handle procedures panel when no procedures are setup
 - Handle safe system (and mode) when no safe state configured.
 - Look into adding subtle background pattern for valve control and pressure sensor panels
+- Reverse position (left right) of open/closed buttons for valves on UI
