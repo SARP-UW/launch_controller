@@ -1,10 +1,31 @@
 import json
 import argparse
 import os
+import subprocess
 import time
+import socket
 from src.controller import Controller
 import src.settings as settings
 from src.website import ControllerWebsite
+
+def _get_ip_str() -> str:
+    """
+    Gets the IP address of this device as a string or <device ip> if unknown.
+    This is some stack overflow magic - no idea how it works
+    """
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+            if ip and not ip.startswith('127.'):
+                return ip
+        finally:
+            s.close()
+    except Exception:
+        pass
+
+    return "<device ip>"
 
 def main():
     """
@@ -70,7 +91,7 @@ def main():
         website_config = load_config(args.website_config)
         website = ControllerWebsite.from_config(controller = controller, config = website_config)        
         print(f"SYSTEM STATUS: System running!")
-        print(f"SYSTEM STATUS: Website at: http://localhost:{website_config['general_config']['port']}")
+        print(f"SYSTEM STATUS: Website at: http://{_get_ip_str()}:{website_config['general_config']['port']}")
     
         while True:
             time.sleep(1)
