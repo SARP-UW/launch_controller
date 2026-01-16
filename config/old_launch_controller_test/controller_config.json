@@ -16,8 +16,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -28,8 +28,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -40,8 +40,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -52,8 +52,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -64,8 +64,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -76,8 +76,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -88,8 +88,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         },
         {
@@ -100,8 +100,8 @@
                 "max": 4.5
             },
             "pressure_range": {
-                "min": 0.5, 
-                "max": 2000
+                "min": 0, 
+                "max": 1000
             }
         }
     ],

@@ -11,6 +11,9 @@ if not settings.MOCK_MODE:
     from adafruit_ads1x15.ads1115 import ADS1115
     from adafruit_ads1x15.analog_in import AnalogIn
 
+# Gain for pressure sensor ADCs
+PS_ADC_GAIN = 2/3
+
 # Number of supported pressure sensors
 PS_COUNT = 8
 
@@ -33,8 +36,8 @@ if not settings.MOCK_MODE:
 
     # List of ADCs used to read pressure sensors
     PS_ADC_LIST: List[ADS1115] = [
-        ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x48),
-        ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x49)
+        ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x48, gain = PS_ADC_GAIN),
+        ADS1115(i2c = PS_ADC_I2C_BUS, address = 0x49, gain = PS_ADC_GAIN)
     ]
 
     # Mapping of pressure sensor IDs to their corresponding ADCs
