@@ -14,16 +14,16 @@ if not settings.MOCK_MODE:
         
     # Mapping of valve IDs to their corresponding GPIO pins
     VALVE_PIN_MAP: Dict[int, int] = {
-        1: board.D13,
-        2: board.D6,
-        3: board.D5,
-        4: board.D11,
-        5: board.D9,
-        6: board.D10,
-        7: board.D22,
-        8: board.D27,
-        9: board.D17,
-        10: board.D4
+        10: board.D13,
+        9: board.D6,
+        8: board.D5,
+        7: board.D11,
+        6: board.D9,
+        5: board.D10,
+        4: board.D22,
+        3: board.D27,
+        2: board.D17,
+        1: board.D4
     }
 
 class ValveState(Enum):
