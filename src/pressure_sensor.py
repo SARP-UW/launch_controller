@@ -42,14 +42,14 @@ if not settings.MOCK_MODE:
 
     # Mapping of pressure sensor IDs to their corresponding ADCs
     PS_ADC_MAP: Dict[int, ADS1115] = {
-        1: PS_ADC_LIST[0],
-        2: PS_ADC_LIST[0],
-        3: PS_ADC_LIST[0],
-        4: PS_ADC_LIST[0],
-        5: PS_ADC_LIST[1],
-        6: PS_ADC_LIST[1],
-        7: PS_ADC_LIST[1],
-        8: PS_ADC_LIST[1]
+        1: PS_ADC_LIST[1],
+        2: PS_ADC_LIST[1],
+        3: PS_ADC_LIST[1],
+        4: PS_ADC_LIST[1],
+        5: PS_ADC_LIST[0],
+        6: PS_ADC_LIST[0],
+        7: PS_ADC_LIST[0],
+        8: PS_ADC_LIST[0]
     }
 
     # Mapping of pressure sensor IDs to their corresponding ADC channels
