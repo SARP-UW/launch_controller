@@ -13,7 +13,7 @@ WEBSITE_HEARTBEAT_TIMEOUT: float = 3.0
 ###################################################################################################
 
 # If true, application runs in "mock" mode (simulates hardware interaction)
-MOCK_MODE: bool = True
+MOCK_MODE: bool = False
 
 # If true, application prints valve state changes to console
 PRINT_VALVE_STATES: bool = True
