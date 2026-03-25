@@ -6,6 +6,39 @@
         "safe_state_timeout": 300.0
     },
     "invalid_valve_states": [],
-    "system_safe_states": ["closed", "open", "open", "closed", "closed"],
+    "system_safe_states": [
+        {
+            "name": "Safe State",
+            "requirements": [
+            ],
+            "actions": [
+                {
+                    "type": "set_valve",
+                    "valve_id": 1,
+                    "state": "closed" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 2,
+                    "state": "open" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 3,
+                    "state": "open" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 4,
+                    "state": "closed" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 5,
+                    "state": "closed" 
+                }
+            ]
+        }
+    ],
     "procedures": []
 }
