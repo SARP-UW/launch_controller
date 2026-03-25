@@ -3,7 +3,7 @@
         "website_title": "Launch Controller Test",
         "website_log_path": "/home/sarp/logs/website_log.txt",
         "port": 8080,
-        "safe_state_timeout": 300.0
+        "safe_state_timeout": 5.0
     },
     "invalid_valve_states": [],
     "system_safe_states": [
