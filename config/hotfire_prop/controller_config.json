@@ -1,0 +1,136 @@
+{
+    "general_config":
+    {
+        "pressure_sensor_data_rate": 10.0,
+        "controller_log_path": "/home/sarp/logs/controller_status_log.txt",
+        "pressure_sensor_data_log_path": "/home/sarp/logs/pressure_sensor_log.txt",
+        "valve_data_log_path": "/home/sarp/logs/valve_state_log.txt"
+    },
+    "pressure_sensor_config":
+    [
+        {
+            "id": 1,
+            "name": "Pressure sensor 1",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 2,
+            "name": "Pressure sensor 2",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 3,
+            "name": "Pressure sensor 3",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 4,
+            "name": "Pressure sensor 4",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 5,
+            "name": "Pressure sensor 5",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 6,
+            "name": "Pressure sensor 6",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 7,
+            "name": "Pressure sensor 7",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 8,
+            "name": "Pressure sensor 8",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        }
+    ],
+    "valve_config":
+    [
+        {
+            "id": 1,
+            "name": "Valve 8",
+            "default_state": "closed"
+        },
+        {
+            "id": 2,
+            "name": "Valve 9",
+            "default_state": "open"
+        },
+        {
+            "id": 3,
+            "name": "Valve 10",
+            "default_state": "open"
+        },
+        {
+            "id": 4,
+            "name": "Valve 11",
+            "default_state": "closed"
+        },
+        {
+            "id": 5,
+            "name": "Valve 12",
+            "default_state": "closed"
+        }
+    ]
+}
