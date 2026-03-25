@@ -1,0 +1,88 @@
+{
+    "general_config":
+    {
+        "pressure_sensor_data_rate": 10.0,
+        "controller_log_path": "/home/sarp/logs/controller_status_log.txt",
+        "pressure_sensor_data_log_path": "/home/sarp/logs/pressure_sensor_log.txt",
+        "valve_data_log_path": "/home/sarp/logs/valve_state_log.txt"
+    },
+    "pressure_sensor_config":
+    [
+        {
+            "id": 1,
+            "name": "5-OT",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        },
+        {
+            "id": 2,
+            "name": "6-FT",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        },
+        {
+            "id": 3,
+            "name": "7-OV",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        },
+        {
+            "id": 4,
+            "name": "8-FV",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        }
+    ],
+    "valve_config":
+    [
+        {
+            "id": 6,
+            "name": "8-OTIV",
+            "default_state": "closed"
+        },
+        {
+            "id": 7,
+            "name": "9-OTVV",
+            "default_state": "open"
+        },
+        {
+            "id": 8,
+            "name": "10-OTVV",
+            "default_state": "open"
+        },
+        {
+            "id": 9,
+            "name": "11-OMV",
+            "default_state": "closed"
+        },
+        {
+            "id": 10,
+            "name": "12-FMV",
+            "default_state": "closed"
+        }
+    ]
+}

@@ -1,0 +1,134 @@
+{
+    "general_config": {
+        "website_title": "Fill Controller",
+        "website_log_path": "/home/sarp/logs/website_log.txt",
+        "port": 8080,
+        "safe_state_timeout": 300.0
+    },
+    "invalid_valve_states": [
+        {
+            "open": [1, 2]
+        },
+        {
+            "open": [4, 5]
+        }
+    ],
+    "system_safe_states": [
+        {
+            "name": "Safe State",
+            "requirements": [
+            ],
+            "actions": [
+                {
+                    "type": "set_valve",
+                    "valve_id": 1,
+                    "state": "closed" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 2,
+                    "state": "open" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 3,
+                    "state": "open" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 3,
+                    "state": "closed" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 5,
+                    "state": "open" 
+                },
+                {
+                    "type": "set_valve",
+                    "valve_id": 6,
+                    "state": "open" 
+                }
+            ]
+        }
+    ],
+    "procedures": [
+        {
+            "name": "Fill Utilities",
+            "steps": [
+                {
+                    "name": "Close All Valves",
+                    "requirements": [],
+                    "actions": [
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 2,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 3,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 4,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 5,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 6,
+                            "state": "closed" 
+                        }
+                    ]
+                },
+                {
+                    "name": "Set All Nominal",
+                    "requirements": [],
+                    "actions": [
+                        {
+                            "type": "set_valve",
+                            "valve_id": 1,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 2,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 3,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 4,
+                            "state": "closed" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 5,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 6,
+                            "state": "open" 
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,93 @@
+{
+    "general_config":
+    {
+        "pressure_sensor_data_rate": 10.0,
+        "controller_log_path": "/home/sarp/logs/controller_status_log.txt",
+        "pressure_sensor_data_log_path": "/home/sarp/logs/pressure_sensor_log.txt",
+        "valve_data_log_path": "/home/sarp/logs/valve_state_log.txt"
+    },
+    "pressure_sensor_config":
+    [
+        {
+            "id": 1,
+            "name": "1-PU",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 5000
+            }
+        },
+        {
+            "id": 2,
+            "name": "2-PF",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        },
+        {
+            "id": 3,
+            "name": "3-OU",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        },
+        {
+            "id": 4,
+            "name": "4-OF",
+            "voltage_range": {
+                "min": 0.5,
+                "max": 4.5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 2000
+            }
+        }
+    ],
+    "valve_config":
+    [
+        {
+            "id": 1,
+            "name": "1-PUIV",
+            "default_state": "closed"
+        },
+        {
+            "id": 2,
+            "name": "2-PLVV",
+            "default_state": "open"
+        },
+        {
+            "id": 3,
+            "name": "3-PFFV",
+            "default_state": "open"
+        },
+        {
+            "id": 4,
+            "name": "4-OUIV",
+            "default_state": "closed"
+        },
+        {
+            "id": 5,
+            "name": "5-OLVV",
+            "default_state": "open"
+        },
+        {
+            "id": 6,
+            "name": "6-OFFV",
+            "default_state": "open"
+        }
+    ]
+}

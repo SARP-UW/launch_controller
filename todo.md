@@ -13,3 +13,20 @@
 - Look into adding subtle background pattern for valve control and pressure sensor panels
 - Reverse position (left right) of open/closed buttons for valves on UI
 - Look into shutting down globally initialized busses/drivers
+- Remove valve state enum and replace with string
+- Check string conversion methods (specifically valve is wrong)
+- fix graph scaling
+- Add max/min pressure (absolute)
+- Make sure shutdown errors are only for functions which really need it (probably pretty good)
+- Ensure calling shutdown twice causes error
+- Change ID to input
+- Add checking so we can't have two initialized objects with same ID/input
+- Make sure mutable global variables have type hints (make sure they are also not all caps)
+- Add constants for pins of I2C bus
+- Add type hints to class fields
+- Add comments to __del__ methods
+- Add "ommits current state info" to __str__ methods
+- Add is_shutdown methods to all applicable classes
+- Standardize dict arguments to __init__ constructors in classes (maybe add _cfg on end?)
+- Look into changing valve_info method to something better (split info and state into two properties). Also update comments.
+- Standardize ordering of methods in classes.
