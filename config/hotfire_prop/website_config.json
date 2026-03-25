@@ -6,6 +6,6 @@
         "safe_state_timeout": 300.0
     },
     "invalid_valve_states": [],
-    "system_safe_states": [],
+    "system_safe_states": ["closed", "open", "open", "closed", "closed"],
     "procedures": []
 }
