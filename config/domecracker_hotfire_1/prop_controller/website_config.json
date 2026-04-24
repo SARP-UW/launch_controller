@@ -122,6 +122,28 @@
                             "state": "open" 
                         }
                     ]
+                },
+                {
+                    "name": "Purge Prop ",
+                    "requirements": [
+                    ],
+                    "actions": [
+                        {
+                            "type": "set_valve",
+                            "valve_id": 6,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 7,
+                            "state": "open" 
+                        },
+                        {
+                            "type": "set_valve",
+                            "valve_id": 8,
+                            "state": "open" 
+                        }
+                    ]
                 }
             ]
         }

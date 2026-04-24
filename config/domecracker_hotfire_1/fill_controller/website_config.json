@@ -93,38 +93,18 @@
                     ]
                 },
                 {
-                    "name": "Set All Nominal",
+                    "name": "Purge Fill",
                     "requirements": [],
                     "actions": [
                         {
                             "type": "set_valve",
                             "valve_id": 1,
-                            "state": "closed" 
+                            "state": "open" 
                         },
                         {
                             "type": "set_valve",
                             "valve_id": 2,
-                            "state": "open" 
-                        },
-                        {
-                            "type": "set_valve",
-                            "valve_id": 3,
-                            "state": "open" 
-                        },
-                        {
-                            "type": "set_valve",
-                            "valve_id": 4,
                             "state": "closed" 
-                        },
-                        {
-                            "type": "set_valve",
-                            "valve_id": 5,
-                            "state": "open" 
-                        },
-                        {
-                            "type": "set_valve",
-                            "valve_id": 6,
-                            "state": "open" 
                         }
                     ]
                 }
