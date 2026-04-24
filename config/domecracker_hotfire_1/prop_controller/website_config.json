@@ -109,7 +109,7 @@
                         },
                         {
                             "type": "wait",
-                            "duration": 0.25
+                            "duration": 1.25
                         },
                         {
                             "type": "set_valve",
