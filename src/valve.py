@@ -60,8 +60,10 @@ class Valve:
            
         if not settings.MOCK_MODE:
             self._io = DigitalInOut(VALVE_PIN_MAP[id])
+            current_value = self._io.value  # read pin state before switching to OUTPUT
             self._io.direction = Direction.OUTPUT
-            self._io.value = False
+            self._io.value = current_value
+            self._state = ValveState.OPEN if current_value != (default_state == ValveState.OPEN) else ValveState.CLOSED
 
     @classmethod
     def from_config(cls, config: Dict) -> "Valve":
