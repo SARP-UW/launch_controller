@@ -148,12 +148,10 @@ class Valve:
                     
     def shutdown(self) -> None:
         """
-        Shuts down the valve, returning it to its default state.
+        Shuts down the valve, preserving its current GPIO state so it persists across restarts.
         """
         if self._shutdown_flag:
             raise RuntimeError("Valve has already been shut down")
         self._shutdown_flag = True
-        self._state = self._default_state
         if not settings.MOCK_MODE:
-            self._io.value = False
             self._io.deinit()
