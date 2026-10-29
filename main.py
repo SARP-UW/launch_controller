@@ -7,6 +7,7 @@ import socket
 from src.controller import Controller
 import src.settings as settings
 from src.website import ControllerWebsite
+from spoke import Spoke
 
 def _get_ip_str() -> str:
     """
@@ -80,11 +81,18 @@ def main():
     
     controller = None
     website = None
+
+    
     try:
         if settings.VERBOSE_SYS_MODE:
             print(f"SYSTEM STATUS: Initializing controller from config: {args.controller_config}")
         controller_config = load_config(args.controller_config)
         controller = Controller.from_config(config = controller_config)
+        from src.valve import ValveState
+        spoke = Spoke('cc', {
+                    'set_valve': lambda args: controller.set_valve(int(args['id']), ValveState(args['state'])),      # command name -> handler function
+                    # 'get_state': controller.get_state,
+                })
 
         if settings.VERBOSE_SYS_MODE:
             print(f"SYSTEM STATUS: Initializing website from config: {args.website_config}")
@@ -92,9 +100,11 @@ def main():
         website = ControllerWebsite.from_config(controller = controller, config = website_config)        
         print(f"SYSTEM STATUS: System running!")
         print(f"SYSTEM STATUS: Website at: http://{_get_ip_str()}:{website_config['general_config']['port']}")
-    
+
+        spoke.start()
         while True:
             time.sleep(1)
+        
     
     except KeyboardInterrupt:
         print("\nSYSTEM STATUS: Stopping system...")
@@ -102,6 +112,7 @@ def main():
             website.shutdown()
         if controller:
             controller.shutdown()
+        # spoke.stop()
 
 if __name__ == "__main__":
     main()
