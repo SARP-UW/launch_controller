@@ -6,6 +6,7 @@ import time
 import socket
 from src.controller import Controller
 import src.settings as settings
+from src.operations import ControllerOperations
 from src.website import ControllerWebsite
 
 def _get_ip_str() -> str:
@@ -44,14 +45,14 @@ def main():
     parser.add_argument(
         '-c', '--controller_config',
         type=str,
-        default=f'{os.path.dirname(__file__)}/config/default/controller_config.json',
-        help='Path to controller configuration file (default: config/default/controller_config.json)'
+        default=f'{os.path.dirname(__file__)}/config/example/controller_config.json',
+        help='Path to controller configuration file (default: config/example/controller_config.json)'
     )
     parser.add_argument(
         '-w', '--website_config',
         type=str,
-        default=f'{os.path.dirname(__file__)}/config/default/website_config.json',
-        help='Path to website configuration file (default: config/default/website_config.json)'
+        default=f'{os.path.dirname(__file__)}/config/example/website_config.json',
+        help='Path to website configuration file (default: config/example/website_config.json)'
     )
     args = parser.parse_args()
     
@@ -79,6 +80,7 @@ def main():
         print(f"  - PRINT_CONTROLLER_STATUS = {settings.PRINT_CONTROLLER_STATUS}")
     
     controller = None
+    operations = None
     website = None
     try:
         if settings.VERBOSE_SYS_MODE:
@@ -89,7 +91,8 @@ def main():
         if settings.VERBOSE_SYS_MODE:
             print(f"SYSTEM STATUS: Initializing website from config: {args.website_config}")
         website_config = load_config(args.website_config)
-        website = ControllerWebsite.from_config(controller = controller, config = website_config)        
+        operations = ControllerOperations.from_config(controller = controller, config = website_config)
+        website = ControllerWebsite.from_config(operations = operations, config = website_config)
         print(f"SYSTEM STATUS: System running!")
         print(f"SYSTEM STATUS: Website at: http://{_get_ip_str()}:{website_config['general_config']['port']}")
     
@@ -100,6 +103,8 @@ def main():
         print("\nSYSTEM STATUS: Stopping system...")
         if website:
             website.shutdown()
+        if operations:
+            operations.shutdown()
         if controller:
             controller.shutdown()
 
