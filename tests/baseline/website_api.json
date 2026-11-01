@@ -1,0 +1,1758 @@
+[
+  {
+    "body": null,
+    "name": "index page",
+    "request": "GET /",
+    "response": "<text/html>",
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "server status",
+    "request": "GET /api/get_server_status",
+    "response": {
+      "status": "running"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "heartbeat",
+    "request": "GET /api/send_heartbeat",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "valve info",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "sensor info",
+    "request": "GET /api/get_sensor_info",
+    "response": [
+      {
+        "current_pressure": 25.0,
+        "id": 1,
+        "max_pressure": 1000.0,
+        "min_pressure": 0.0,
+        "name": "Main Pressure Sensor"
+      },
+      {
+        "current_pressure": 50.0,
+        "id": 2,
+        "max_pressure": 1000.0,
+        "min_pressure": 0.0,
+        "name": "Secondary Pressure Sensor"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "procedures",
+    "request": "GET /api/get_procedures",
+    "response": [
+      {
+        "name": "Startup Sequence",
+        "steps": [
+          {
+            "actions": [
+              {
+                "state": "open",
+                "type": "set_valve",
+                "valve_id": 1
+              },
+              {
+                "duration": 2,
+                "type": "wait"
+              },
+              {
+                "state": "open",
+                "type": "set_valve",
+                "valve_id": 2
+              }
+            ],
+            "name": "Initialize System",
+            "requirements": [
+              {
+                "sensor_id": 1,
+                "threshold": 50.0,
+                "type": "pressure_below"
+              },
+              {
+                "state": "closed",
+                "type": "valve_state",
+                "valve_id": 1
+              }
+            ]
+          },
+          {
+            "actions": [
+              {
+                "duration": 5,
+                "type": "wait"
+              },
+              {
+                "state": "open",
+                "type": "set_valve",
+                "valve_id": 1
+              },
+              {
+                "state": "closed",
+                "type": "set_valve",
+                "valve_id": 2
+              }
+            ],
+            "name": "Shutdown System",
+            "requirements": [
+              {
+                "sensor_id": 1,
+                "threshold": 50.0,
+                "type": "pressure_above"
+              },
+              {
+                "max_threshold": 80.0,
+                "min_threshold": 20.0,
+                "sensor_id": 2,
+                "type": "pressure_between"
+              }
+            ]
+          },
+          {
+            "actions": [
+              {
+                "duration": 0.5,
+                "type": "pulse_valve",
+                "valve_id": 2
+              }
+            ],
+            "name": "Pulse stuff",
+            "requirements": []
+          }
+        ]
+      },
+      {
+        "name": "Shutdown Sequence",
+        "steps": [
+          {
+            "actions": [
+              {
+                "state": "open",
+                "type": "set_valve",
+                "valve_id": 1
+              },
+              {
+                "duration": 5,
+                "type": "wait"
+              },
+              [
+                {
+                  "duration": 1.0,
+                  "type": "pulse_valve",
+                  "valve_id": 1
+                },
+                {
+                  "state": "closed",
+                  "type": "set_valve",
+                  "valve_id": 2
+                }
+              ]
+            ],
+            "id": 1,
+            "name": "Initialize System",
+            "requirements": [
+              {
+                "sensor_id": 1,
+                "threshold": 50.0,
+                "type": "pressure_below"
+              },
+              {
+                "state": "closed",
+                "type": "valve_state",
+                "valve_id": 1
+              },
+              {
+                "message": "Ensure x is met.",
+                "type": "custom_message"
+              }
+            ]
+          },
+          {
+            "actions": [
+              {
+                "duration": 0.5,
+                "type": "pulse_valve",
+                "valve_id": 2
+              }
+            ],
+            "id": 2,
+            "name": "Pulse stuff",
+            "requirements": []
+          }
+        ]
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "invalid valve states",
+    "request": "GET /api/get_invalid_valve_states",
+    "response": [
+      {
+        "open": [
+          1,
+          2
+        ]
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "website title",
+    "request": "GET /api/get_website_title",
+    "response": {
+      "title": "Launch Controller"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "safe mode",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "safe_mode": false
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {},
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "is safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "1": "open"
+    },
+    "name": "set valve 1 open",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after set valve 1 open",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": {
+      "1": "  CLOSED "
+    },
+    "name": "set valve 1 closed (case + whitespace)",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "1": "open",
+      "2": "open"
+    },
+    "name": "set two valves",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {},
+    "name": "empty dict",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "99": "open"
+    },
+    "name": "unknown valve id",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "99": "Failed to set valve state: Controller has no valve with ID: 99"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "abc": "open"
+    },
+    "name": "non-integer valve id",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "abc": "Invalid valve ID: abc"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "1": 5
+    },
+    "name": "non-string action",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "1": "Action for valve 1 must be a string"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "1": "sideways"
+    },
+    "name": "invalid action",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "1": "Invalid valve action: sideways"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "1": "pulse:abc"
+    },
+    "name": "invalid pulse duration",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "1": "Invalid pulse duration: pulse:abc"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "1": "pulse:-1"
+    },
+    "name": "negative pulse duration",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "1": "Failed to set valve state: Pulse duration must be positive: -1.0"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "1": "closed",
+      "99": "open"
+    },
+    "name": "partial failure",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "99": "Failed to set valve state: Controller has no valve with ID: 99"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": null,
+    "name": "after partial failure (valve 1 closed)",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": [
+      "1",
+      "open"
+    ],
+    "name": "body is a list",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "message": "Request body must be a dict",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": "<raw> 1=open",
+    "name": "body not JSON",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "message": "Set valve states request missing JSON body",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "1": "closed",
+      "2": "closed"
+    },
+    "name": "reset valves closed",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "2": "pulse:0.5"
+    },
+    "name": "pulse valve 2",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during pulse",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": true,
+        "name": "Secondary Valve",
+        "pulse_duration": 0.5,
+        "pulse_elapsed": "<float>",
+        "pulse_remaining": "<float>"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": {
+      "2": "open"
+    },
+    "name": "modify valve while pulsing",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "failed_valves": {
+        "2": "Valve 2 is currently pulsing"
+      },
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": null,
+    "name": "after pulse",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": "<raw> true",
+    "name": "safe mode: no JSON body",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "message": "Set safe mode request missing JSON body",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {},
+    "name": "safe mode: missing field",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "message": "Missing 'safe_mode' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "safe_mode": "yes"
+    },
+    "name": "safe mode: non-bool",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "message": "'safe_mode' field must be a boolean",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "safe_mode": true
+    },
+    "name": "safe mode: enable",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "safe mode: after enable",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "safe_mode": true
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "safe_mode": false
+    },
+    "name": "safe mode: disable",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "safe mode: after disable",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "safe_mode": false
+    },
+    "status": 200
+  },
+  {
+    "body": "<raw> x",
+    "name": "start step: no JSON body",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Request missing JSON body",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "step_index": 0
+    },
+    "name": "start step: missing procedure_index",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Missing 'procedure_index' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": "a",
+      "step_index": 0
+    },
+    "name": "start step: non-int procedure_index",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "'procedure_index' must be an integer",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 0
+    },
+    "name": "start step: missing step_index",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Missing 'step_index' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": "a"
+    },
+    "name": "start step: non-int step_index",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "'step_index' must be an integer",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 9,
+      "step_index": 0
+    },
+    "name": "start step: procedure out of range",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Invalid procedure index: 9",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 9
+    },
+    "name": "start step: step out of range",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Invalid step index: 9",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 0
+    },
+    "name": "start step 0/0",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during step 0/0: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during step 0/0: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during step 0/0: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {},
+      "executing": {
+        "procedure_index": 0,
+        "step_index": 0,
+        "user": "127.0.0.1"
+      }
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "2": "open"
+    },
+    "name": "during step: set valve",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "message": "Cannot modify valves while step is executing (by 127.0.0.1)",
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 2
+    },
+    "name": "during step: start another step",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "executing": {
+        "procedure_index": 0,
+        "step_index": 0,
+        "user": "127.0.0.1"
+      },
+      "message": "Another step is already being executed",
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": null,
+    "name": "during step: safe system",
+    "request": "POST /api/safe_system",
+    "response": {
+      "executing": {
+        "procedure_index": 0,
+        "step_index": 0,
+        "user": "127.0.0.1"
+      },
+      "message": "Cannot safe system while step is executing (by 127.0.0.1)",
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": {
+      "procedure_index": 0
+    },
+    "name": "during step: reset same procedure",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "message": "Cannot reset procedure while a step is executing",
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": {
+      "procedure_index": 1
+    },
+    "name": "during step: reset other procedure",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": 0,
+      "step_index": 1
+    },
+    "name": "during step: set completion",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after step 0/0: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after step 0/0: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after step 0/0: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "0": [
+          0,
+          1
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 2
+    },
+    "name": "start pulse step 0/2",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after step 0/2: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after step 0/2: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after step 0/2: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "0": [
+          0,
+          1,
+          2
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": "<raw> x",
+    "name": "completion: no JSON body",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "Request missing JSON body",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "step_index": 0
+    },
+    "name": "completion: missing procedure_index",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "Missing 'procedure_index' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": "a",
+      "step_index": 0
+    },
+    "name": "completion: non-int procedure_index",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "'procedure_index' must be an integer",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": 0
+    },
+    "name": "completion: missing step_index",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "Missing 'step_index' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": 0,
+      "step_index": "a"
+    },
+    "name": "completion: non-int step_index",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "'step_index' must be an integer",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 0
+    },
+    "name": "completion: missing completed",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "Missing 'completed' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": 1,
+      "procedure_index": 0,
+      "step_index": 0
+    },
+    "name": "completion: non-bool completed",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "'completed' must be a boolean",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": 9,
+      "step_index": 0
+    },
+    "name": "completion: procedure out of range",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "Invalid procedure index: 9",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": 0,
+      "step_index": 9
+    },
+    "name": "completion: step out of range",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "message": "Invalid step index: 9",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "completed": true,
+      "procedure_index": 1,
+      "step_index": 1
+    },
+    "name": "completion: mark 1/1 complete",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "completed": false,
+      "procedure_index": 0,
+      "step_index": 0
+    },
+    "name": "completion: mark 0/0 incomplete",
+    "request": "POST /api/set_step_completion",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "completion: status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "0": [
+          1,
+          2
+        ],
+        "1": [
+          1
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": "<raw> x",
+    "name": "reset: no JSON body",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "message": "Request missing JSON body",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {},
+    "name": "reset: missing procedure_index",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "message": "Missing 'procedure_index' field",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": "a"
+    },
+    "name": "reset: non-int procedure_index",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "message": "'procedure_index' must be an integer",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 9
+    },
+    "name": "reset: out of range",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "message": "Invalid procedure index: 9",
+      "status": "error"
+    },
+    "status": 400
+  },
+  {
+    "body": {
+      "procedure_index": 0
+    },
+    "name": "reset: procedure 0",
+    "request": "POST /api/reset_procedure",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "reset: status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "1": [
+          1
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "1": "closed",
+      "2": "closed"
+    },
+    "name": "safe system 1: close valves",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "safe system 1: start",
+    "request": "POST /api/safe_system",
+    "response": {
+      "message": "Safe system initiated",
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during safe system 1: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during safe system 1: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": true,
+      "user": "127.0.0.1"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "during safe system 1: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "1": [
+          1
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "2": "open"
+    },
+    "name": "during safing: set valve",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "message": "Cannot modify valves while system is being safed (by 127.0.0.1)",
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 2
+    },
+    "name": "during safing: start step",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Cannot execute step while system is being safed (by 127.0.0.1)",
+      "safing": {
+        "user": "127.0.0.1"
+      },
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": null,
+    "name": "during safing: safe system again",
+    "request": "POST /api/safe_system",
+    "response": {
+      "message": "System is already being safed by 127.0.0.1",
+      "safing": {
+        "user": "127.0.0.1"
+      },
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": null,
+    "name": "after safe system 1: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after safe system 1: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after safe system 1: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "1": [
+          1
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "safe system none: start",
+    "request": "POST /api/safe_system",
+    "response": {
+      "message": "Safe system initiated",
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after safe system none: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after safe system none: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "after safe system none: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "1": [
+          1
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "shutdown: server status",
+    "request": "GET /api/get_server_status",
+    "response": {
+      "status": "shutdown"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "shutdown: heartbeat",
+    "request": "GET /api/send_heartbeat",
+    "response": {
+      "message": "Website has been shut down",
+      "status": "error"
+    },
+    "status": 500
+  },
+  {
+    "body": null,
+    "name": "shutdown: valve info",
+    "request": "GET /api/get_valve_info",
+    "response": {
+      "message": "Website has been shut down",
+      "status": "error"
+    },
+    "status": 503
+  },
+  {
+    "body": null,
+    "name": "shutdown: safe mode",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "message": "Website has been shut down",
+      "status": "error"
+    },
+    "status": 503
+  },
+  {
+    "body": {
+      "1": "open"
+    },
+    "name": "shutdown: set valve",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "message": "Website has been shut down",
+      "status": "error"
+    },
+    "status": 503
+  },
+  {
+    "body": null,
+    "name": "shutdown: safe system",
+    "request": "POST /api/safe_system",
+    "response": {
+      "message": "Website has been shut down",
+      "status": "error"
+    },
+    "status": 503
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 0
+    },
+    "name": "shutdown: start step",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "message": "Website has been shut down",
+      "status": "error"
+    },
+    "status": 503
+  },
+  {
+    "body": {
+      "safe_mode": true
+    },
+    "name": "auto-safe: enable safe mode",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: safe mode during auto-safe",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "safe_mode": false
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: during auto-safe: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: during auto-safe: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": true,
+      "user": "system"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: during auto-safe: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {},
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "2": "open"
+    },
+    "name": "auto-safe: during auto-safe: set valve",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "message": "Cannot modify valves while system is being safed (by system)",
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": null,
+    "name": "auto-safe: during auto-safe: safe system",
+    "request": "POST /api/safe_system",
+    "response": {
+      "message": "System is already being safed by system",
+      "safing": {
+        "user": "system"
+      },
+      "status": "error"
+    },
+    "status": 409
+  },
+  {
+    "body": null,
+    "name": "auto-safe: safe mode after auto-safe",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "safe_mode": false
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: after auto-safe: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: after auto-safe: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: after auto-safe: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {},
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "1": "closed",
+      "2": "closed"
+    },
+    "name": "auto-safe: step+timeout: close valves",
+    "request": "POST /api/set_valve_states",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "safe_mode": true
+    },
+    "name": "auto-safe: step+timeout: enable safe mode",
+    "request": "POST /api/set_safe_mode",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": {
+      "procedure_index": 0,
+      "step_index": 0
+    },
+    "name": "auto-safe: step+timeout: start step 0/0",
+    "request": "POST /api/start_step_execution",
+    "response": {
+      "status": "success"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: when safing starts: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: when safing starts: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": true,
+      "user": "system"
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: when safing starts: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "0": [
+          0
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: safe mode after",
+    "request": "GET /api/get_safe_mode",
+    "response": {
+      "safe_mode": false
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: after: valves",
+    "request": "GET /api/get_valve_info",
+    "response": [
+      {
+        "current_state": "open",
+        "default_state": "closed",
+        "id": 1,
+        "is_pulsing": false,
+        "name": "Main Valve"
+      },
+      {
+        "current_state": "closed",
+        "default_state": "closed",
+        "id": 2,
+        "is_pulsing": false,
+        "name": "Secondary Valve"
+      }
+    ],
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: after: safing",
+    "request": "GET /api/is_safing",
+    "response": {
+      "safing": false,
+      "user": null
+    },
+    "status": 200
+  },
+  {
+    "body": null,
+    "name": "auto-safe: step+timeout: after: procedure status",
+    "request": "GET /api/get_procedure_status",
+    "response": {
+      "completion": {
+        "0": [
+          0
+        ]
+      },
+      "executing": null
+    },
+    "status": 200
+  }
+]
