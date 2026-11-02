@@ -9,6 +9,7 @@ import src.settings as settings
 from src.website import ControllerWebsite
 from spoke import Spoke
 from src.valve import ValveState
+from src.spoke_handler import SpokeHandler
 
 
 def _get_ip_str() -> str:
@@ -90,8 +91,9 @@ def main():
             print(f"SYSTEM STATUS: Initializing controller from config: {args.controller_config}")
         controller_config = load_config(args.controller_config)
         controller = Controller.from_config(config = controller_config)
+        handler = SpokeHandler(controller)
         spoke = Spoke('cc', {
-                    'set_valve': lambda args: controller.set_valve(int(args['id']), ValveState(args['state'])),      # command name -> handler function
+                    'set_valve': handler.set_valve,      # command name -> handler function
                     # 'get_state': controller.get_state,
                 })
         spoke.start()
