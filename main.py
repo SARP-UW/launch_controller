@@ -94,6 +94,7 @@ def main():
         handler = SpokeHandler(controller)
         spoke = Spoke('cc', {
                     'set_valve': handler.set_valve,      # command name -> handler function
+                    'pulse_valve': handler.pulse_valve
                     # 'get_state': controller.get_state,
                 })
         spoke.start()
