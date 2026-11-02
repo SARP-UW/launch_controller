@@ -18,3 +18,7 @@ class SpokeHandler:
     duration = float(args.get("duration", 1.0))
     self._controller.pulse_valve(valve_id, duration)
     time.sleep(duration)
+
+  def wait(self, args: Dict):
+    duration = float(args.get("duration", 1.0))
+    time.sleep(duration)

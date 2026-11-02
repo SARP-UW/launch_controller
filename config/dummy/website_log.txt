@@ -806,3 +806,16 @@ timestamp, user, type, status
 2026-11-02T12:11:45.620401, system, info, System safe states: [{'name': 'Safe state 1', 'requirements': [{'type': 'pressure_below', 'sensor_id': 1, 'threshold': 50.0}, {'type': 'valve_state', 'valve_id': 1, 'state': 'closed'}], 'actions': [{'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'wait', 'duration': 2}, {'type': 'set_valve', 'valve_id': 2, 'state': 'open'}]}, {'name': 'Safe state 2', 'requirements': [{'type': 'pressure_above', 'sensor_id': 1, 'threshold': 50.0}], 'actions': [{'type': 'wait', 'duration': 5}, {'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'set_valve', 'valve_id': 2, 'state': 'closed'}]}]
 2026-11-02T12:11:45.620709, system, info, Invalid valve states: [{'open': [1, 2]}]
 2026-11-02T12:12:17.693945, 10.19.179.241, status, User connected
+2026-11-02T12:14:08.092469, system, status, Server shutting down
+2026-11-02T12:14:12.629397, system, status, Server started
+2026-11-02T12:14:12.630077, system, info, Website id: 1318841921088
+2026-11-02T12:14:12.634626, system, info, Controller id: 1318841918064
+2026-11-02T12:14:12.635559, system, info, Website title: Launch Controller
+2026-11-02T12:14:12.636997, system, info, Website port: 8080
+2026-11-02T12:14:12.637752, system, info, Polling rate: 20.0Hz
+2026-11-02T12:14:12.638658, system, info, Heartbeat timeout: 3.0s
+2026-11-02T12:14:12.639090, system, info, Safe state timeout: 300.0s
+2026-11-02T12:14:12.639522, system, info, Website logger: Logger(path = config\dummy\website_log.txt, col = ['user', 'type', 'status'])
+2026-11-02T12:14:12.640036, system, info, System safe states: [{'name': 'Safe state 1', 'requirements': [{'type': 'pressure_below', 'sensor_id': 1, 'threshold': 50.0}, {'type': 'valve_state', 'valve_id': 1, 'state': 'closed'}], 'actions': [{'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'wait', 'duration': 2}, {'type': 'set_valve', 'valve_id': 2, 'state': 'open'}]}, {'name': 'Safe state 2', 'requirements': [{'type': 'pressure_above', 'sensor_id': 1, 'threshold': 50.0}], 'actions': [{'type': 'wait', 'duration': 5}, {'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'set_valve', 'valve_id': 2, 'state': 'closed'}]}]
+2026-11-02T12:14:12.640746, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-11-02T12:14:12.836938, 10.19.179.241, status, User connected
