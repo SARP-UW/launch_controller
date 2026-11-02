@@ -704,3 +704,29 @@ timestamp, user, type, status
 2026-10-29T16:38:07.597620, 10.19.120.124, status, User connected
 2026-10-29T16:46:34.612231, 10.19.120.124, status, User disconnected
 2026-10-29T16:52:12.934237, system, status, Server shutting down
+2026-11-02T06:49:30.199716, system, status, Server started
+2026-11-02T06:49:30.200399, system, info, Website id: 2112027272800
+2026-11-02T06:49:30.200783, system, info, Controller id: 2112027271456
+2026-11-02T06:49:30.201093, system, info, Website title: Launch Controller
+2026-11-02T06:49:30.201423, system, info, Website port: 8080
+2026-11-02T06:49:30.201744, system, info, Polling rate: 20.0Hz
+2026-11-02T06:49:30.202082, system, info, Heartbeat timeout: 3.0s
+2026-11-02T06:49:30.202368, system, info, Safe state timeout: 300.0s
+2026-11-02T06:49:30.202646, system, info, Website logger: Logger(path = config\dummy\website_log.txt, col = ['user', 'type', 'status'])
+2026-11-02T06:49:30.202961, system, info, System safe states: [{'name': 'Safe state 1', 'requirements': [{'type': 'pressure_below', 'sensor_id': 1, 'threshold': 50.0}, {'type': 'valve_state', 'valve_id': 1, 'state': 'closed'}], 'actions': [{'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'wait', 'duration': 2}, {'type': 'set_valve', 'valve_id': 2, 'state': 'open'}]}, {'name': 'Safe state 2', 'requirements': [{'type': 'pressure_above', 'sensor_id': 1, 'threshold': 50.0}], 'actions': [{'type': 'wait', 'duration': 5}, {'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'set_valve', 'valve_id': 2, 'state': 'closed'}]}]
+2026-11-02T06:49:30.203240, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-11-02T06:50:41.499967, 10.0.0.83, status, User connected
+2026-11-02T06:55:53.600157, system, status, Server shutting down
+2026-11-02T06:56:06.888020, system, status, Server started
+2026-11-02T06:56:06.889345, system, info, Website id: 2366579043232
+2026-11-02T06:56:06.890195, system, info, Controller id: 2366579040544
+2026-11-02T06:56:06.891239, system, info, Website title: Launch Controller
+2026-11-02T06:56:06.891959, system, info, Website port: 8080
+2026-11-02T06:56:06.892278, system, info, Polling rate: 20.0Hz
+2026-11-02T06:56:06.892762, system, info, Heartbeat timeout: 3.0s
+2026-11-02T06:56:06.893109, system, info, Safe state timeout: 300.0s
+2026-11-02T06:56:06.893567, system, info, Website logger: Logger(path = config\dummy\website_log.txt, col = ['user', 'type', 'status'])
+2026-11-02T06:56:06.894146, system, info, System safe states: [{'name': 'Safe state 1', 'requirements': [{'type': 'pressure_below', 'sensor_id': 1, 'threshold': 50.0}, {'type': 'valve_state', 'valve_id': 1, 'state': 'closed'}], 'actions': [{'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'wait', 'duration': 2}, {'type': 'set_valve', 'valve_id': 2, 'state': 'open'}]}, {'name': 'Safe state 2', 'requirements': [{'type': 'pressure_above', 'sensor_id': 1, 'threshold': 50.0}], 'actions': [{'type': 'wait', 'duration': 5}, {'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'set_valve', 'valve_id': 2, 'state': 'closed'}]}]
+2026-11-02T06:56:06.894462, system, info, Invalid valve states: [{'open': [1, 2]}]
+2026-11-02T06:56:07.140079, 10.0.0.83, status, User connected
+2026-11-02T07:13:49.581044, system, status, Server shutting down

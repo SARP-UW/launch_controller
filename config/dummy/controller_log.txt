@@ -34,3 +34,21 @@ timestamp, type, message
 2026-10-29T16:19:02.888139, info, Valve data logger: Logger(path = config\dummy\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
 2026-10-29T16:19:02.888417, info, Controller logger: Logger(path = config\dummy\controller_log.txt, col = ['type', 'message'])
 2026-10-29T16:52:12.935090, status, Controller shutdown
+2026-11-02T06:49:30.165910, status, Controller started
+2026-11-02T06:49:30.166604, info, Controller id: 2112027271456
+2026-11-02T06:49:30.167045, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-11-02T06:49:30.167425, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-11-02T06:49:30.167995, info, Sensor Data Rate: 10.0 Hz
+2026-11-02T06:49:30.168675, info, Sensor data logger: Logger(path = config\dummy\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-11-02T06:49:30.169731, info, Valve data logger: Logger(path = config\dummy\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-11-02T06:49:30.170230, info, Controller logger: Logger(path = config\dummy\controller_log.txt, col = ['type', 'message'])
+2026-11-02T06:55:53.601316, status, Controller shutdown
+2026-11-02T06:56:06.858125, status, Controller started
+2026-11-02T06:56:06.859099, info, Controller id: 2366579040544
+2026-11-02T06:56:06.859589, info, Valves: ['Valve(id = 1, name = Main Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)', 'Valve(id = 2, name = Secondary Valve, default_state = ValveState.CLOSED, state = ValveState.CLOSED)']
+2026-11-02T06:56:06.860091, info, Pressure Sensors: ['PressureSensor(id = 1, name = Main Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)', 'PressureSensor(id = 2, name = Secondary Pressure Sensor, min_voltage = 0.0, max_voltage = 5.0, min_pressure = 0.0, max_pressure = 1000.0)']
+2026-11-02T06:56:06.860619, info, Sensor Data Rate: 10.0 Hz
+2026-11-02T06:56:06.861048, info, Sensor data logger: Logger(path = config\dummy\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
+2026-11-02T06:56:06.861510, info, Valve data logger: Logger(path = config\dummy\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
+2026-11-02T06:56:06.861852, info, Controller logger: Logger(path = config\dummy\controller_log.txt, col = ['type', 'message'])
+2026-11-02T07:13:49.582037, status, Controller shutdown
