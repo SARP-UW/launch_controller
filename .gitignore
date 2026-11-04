@@ -3,3 +3,5 @@ log/*
 !log/readme.md
 __pycache__/
 logs/
+config/local/
+config/demo_local/
