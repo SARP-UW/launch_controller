@@ -3,3 +3,4 @@ log/*
 !log/readme.md
 src/__pycache__
 __pycache__
+config/*
