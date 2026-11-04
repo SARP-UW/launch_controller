@@ -819,3 +819,6 @@ timestamp, user, type, status
 2026-11-02T12:14:12.640036, system, info, System safe states: [{'name': 'Safe state 1', 'requirements': [{'type': 'pressure_below', 'sensor_id': 1, 'threshold': 50.0}, {'type': 'valve_state', 'valve_id': 1, 'state': 'closed'}], 'actions': [{'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'wait', 'duration': 2}, {'type': 'set_valve', 'valve_id': 2, 'state': 'open'}]}, {'name': 'Safe state 2', 'requirements': [{'type': 'pressure_above', 'sensor_id': 1, 'threshold': 50.0}], 'actions': [{'type': 'wait', 'duration': 5}, {'type': 'set_valve', 'valve_id': 1, 'state': 'open'}, {'type': 'set_valve', 'valve_id': 2, 'state': 'closed'}]}]
 2026-11-02T12:14:12.640746, system, info, Invalid valve states: [{'open': [1, 2]}]
 2026-11-02T12:14:12.836938, 10.19.179.241, status, User connected
+2026-11-02T12:29:36.609792, 10.19.179.241, status, User disconnected
+2026-11-02T14:02:43.129840, 10.19.179.241, status, User connected
+2026-11-02T14:05:05.281281, system, status, Server shutting down

@@ -114,3 +114,4 @@ timestamp, type, message
 2026-11-02T12:14:12.598149, info, Sensor data logger: Logger(path = config\dummy\pressure_log.txt, col = ['1: Main Pressure Sensor', '2: Secondary Pressure Sensor'])
 2026-11-02T12:14:12.599270, info, Valve data logger: Logger(path = config\dummy\valve_log.txt, col = ['1: Main Valve', '2: Secondary Valve'])
 2026-11-02T12:14:12.600031, info, Controller logger: Logger(path = config\dummy\controller_log.txt, col = ['type', 'message'])
+2026-11-02T14:05:05.282265, status, Controller shutdown
