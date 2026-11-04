@@ -1,5 +1,6 @@
 {
     "general_config": {
+        "node_id": "fill_controller",
         "website_title": "Launch Controller Test",
         "website_log_path": "/home/sarp/logs/website_log.txt",
         "port": 8080,
