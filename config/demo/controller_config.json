@@ -1,0 +1,49 @@
+{
+    "general_config":
+    {
+        "pressure_sensor_data_rate": 10.0,
+        "controller_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\controller_log.txt",
+        "pressure_sensor_data_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\pressure_log.txt",
+        "valve_data_log_path": "C:\\Users\\aaron\\files\\sarp\\Ground_Control\\log\\valve_log.txt"
+    },
+    "pressure_sensor_config":
+    [
+        {
+            "id": 1,
+            "name": "Main Pressure Sensor",
+            "voltage_range": {
+                "min": 0,
+                "max": 5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        },
+        {
+            "id": 2,
+            "name": "Secondary Pressure Sensor",
+            "voltage_range": {
+                "min": 0,
+                "max": 5
+            },
+            "pressure_range": {
+                "min": 0, 
+                "max": 1000
+            }
+        }
+    ],
+    "valve_config":
+    [
+        {
+            "id": 1,
+            "name": "Main Valve",
+            "default_state": "closed"
+        },
+        {
+            "id": 2,
+            "name": "Secondary Valve",
+            "default_state": "closed"
+        }
+    ]
+}
