@@ -22,3 +22,4 @@ class SpokeHandler:
   def wait(self, args: Dict):
     duration = float(args.get("duration", 1.0))
     time.sleep(duration)
+    
