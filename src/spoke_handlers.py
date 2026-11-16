@@ -11,25 +11,37 @@ Each handler follows the spoke.py contract:
 Every handler accepts an optional `operator` argument; it is recorded in the logs as "hub:<operator>"
 (or just "hub" when omitted). Unknown arguments are rejected, so a typo fails loudly instead of being ignored.
 
-Commands:
-    set_valve            {valve_id, state}                          state: "open" | "closed"
-    pulse_valve          {valve_id, duration}                       duration in seconds, > 0
-    set_valves           {<valve_id>: <action>, ...}                action: "open" | "closed" | "pulse:<seconds>"
-    safe_system          {}                                         returns right away; runs in a thread
+Commands ([...] = optional):
+    set_valve            {valve_id, state, [force]}                 state: "open" | "closed"
+    pulse_valve          {valve_id, duration, [force]}              duration in seconds, > 0
+    set_valves           {<valve_id>: <action>, ..., [force]}       action: "open" | "closed" | "pulse:<seconds>"
+    safe_system          {}                                         returns right away; aborts a running step
     set_safe_mode        {enabled}                                  enabled: "true" | "false"
-    start_step           {procedure_index, step_index}              returns right away; runs in a thread
+    start_step           {procedure_index, step_index,              returns right away; runs in a thread
+                          [force], [expected_last_step]}            expected_last_step: "P:S" | "none"
     set_step_completion  {procedure_index, step_index, completed}   completed: "true" | "false"
     reset_procedure      {procedure_index}
     get_state            {}                                         live valves, sensors, safe mode, safing, procedure status
     get_config           {}                                         valve/sensor names and ranges, procedures, safe states, ...
 
 Numbers in returned data reach the hub as floats (protobuf Struct), so ids come back as e.g. 3.0.
+
+Invalid valve states: set_valve, pulse_valve, set_valves and start_step are checked against invalid_valve_states.
+A change that would break a rule fails with a message starting "InvalidValveStateError:" and changes nothing.
+After the operator confirms, resend the same command with force="true". safe_system is never checked.
+
+Step sequence: start_step with expected_last_step ("P:S" for the step the hub believes last completed, or "none")
+fails with "StepSequenceError: last successful step is P:S" and runs nothing if the controller disagrees.
+The controller's last step is in telemetry (last_step_*, last_successful_*).
 """
 from typing import Callable, Dict, Optional
-from .operations import ControllerOperations, ValveChangeError
+from .operations import ControllerOperations, ValveChangeError, NOT_CHECKED
 
 # Argument accepted by every command, for logging who sent it.
 OPERATOR_ARG = "operator"
+
+# Optional argument of valve and step commands: apply even if it causes an invalid valve state.
+FORCE_ARG = "force"
 
 Args = Dict[str, str]
 Handler = Callable[[Args], Optional[dict]]
@@ -79,6 +91,26 @@ def _parse_bool(args: Args, name: str) -> bool:
     raise ValueError(f"'{name}' must be 'true' or 'false', got: {args[name]!r}")
 
 
+def _parse_force(args: Args) -> bool:
+    return _parse_bool(args, FORCE_ARG) if FORCE_ARG in args else False
+
+
+def _parse_expected_last_step(args: Args) -> object:
+    """
+    Parses start_step's optional expected_last_step: "P:S" -> (P, S), "none" -> None, absent -> NOT_CHECKED.
+    """
+    if "expected_last_step" not in args:
+        return NOT_CHECKED
+    value = args["expected_last_step"].strip().lower()
+    if value == "none":
+        return None
+    try:
+        procedure_index, step_index = value.split(":")
+        return (int(procedure_index), int(step_index))
+    except ValueError:
+        raise ValueError(f"'expected_last_step' must be 'P:S' (e.g. '0:2') or 'none', got: {args['expected_last_step']!r}")
+
+
 def _parse_valve_state(args: Args, name: str) -> str:
     value = args[name].strip().lower()
     if value not in ("open", "closed"):
@@ -94,33 +126,35 @@ def make_handlers(operations: ControllerOperations) -> Dict[str, Handler]:
         operations: The ControllerOperations object the commands act on (shared with the website, if running).
     """
 
-    def apply_single_valve_change(valve_id: int, action: str, user: str) -> None:
-        """Applies one valve change, raising with that valve's error message if it fails."""
+    def apply_single_valve_change(valve_id: int, action: str, user: str, force: bool) -> None:
+        """Applies one valve change, raising with that valve's error message if it fails.
+        InvalidValveStateError passes through unchanged, so the hub sees its prefix."""
         try:
-            operations.set_valve_states({str(valve_id): action}, user)
+            operations.set_valve_states({str(valve_id): action}, user, force=force)
         except ValveChangeError as e:
             raise RuntimeError(next(iter(e.failed.values())))
 
     def set_valve(args: Args) -> None:
-        _check_args(args, ("valve_id", "state"))
+        _check_args(args, ("valve_id", "state"), (FORCE_ARG,))
         valve_id = _parse_int(args, "valve_id")
         state = _parse_valve_state(args, "state")
-        apply_single_valve_change(valve_id, state, _user(args))
+        apply_single_valve_change(valve_id, state, _user(args), _parse_force(args))
 
     def pulse_valve(args: Args) -> None:
-        _check_args(args, ("valve_id", "duration"))
+        _check_args(args, ("valve_id", "duration"), (FORCE_ARG,))
         valve_id = _parse_int(args, "valve_id")
         duration = _parse_float(args, "duration")
         if duration <= 0:
             raise ValueError(f"'duration' must be positive, got: {duration}")
-        apply_single_valve_change(valve_id, f"pulse:{duration}", _user(args))
+        apply_single_valve_change(valve_id, f"pulse:{duration}", _user(args), _parse_force(args))
 
     def set_valves(args: Args) -> None:
-        changes = {key: value for key, value in args.items() if key != OPERATOR_ARG}
+        changes = {key: value for key, value in args.items() if key not in (OPERATOR_ARG, FORCE_ARG)}
         if not changes:
             raise ValueError("No valve changes given (expected args like {'1': 'open', '2': 'pulse:0.5'})")
         # ValveChangeError (some valves failed, the rest applied) propagates; its message lists each failure.
-        operations.set_valve_states(changes, _user(args))
+        # InvalidValveStateError (nothing applied) propagates too.
+        operations.set_valve_states(changes, _user(args), force=_parse_force(args))
 
     def safe_system(args: Args) -> None:
         _check_args(args, ())
@@ -131,8 +165,14 @@ def make_handlers(operations: ControllerOperations) -> Dict[str, Handler]:
         operations.set_safe_mode(_parse_bool(args, "enabled"), _user(args))
 
     def start_step(args: Args) -> None:
-        _check_args(args, ("procedure_index", "step_index"))
-        operations.start_step(_parse_int(args, "procedure_index"), _parse_int(args, "step_index"), _user(args))
+        _check_args(args, ("procedure_index", "step_index"), (FORCE_ARG, "expected_last_step"))
+        operations.start_step(
+            _parse_int(args, "procedure_index"),
+            _parse_int(args, "step_index"),
+            _user(args),
+            force=_parse_force(args),
+            expected_last_step=_parse_expected_last_step(args),
+        )
 
     def set_step_completion(args: Args) -> None:
         _check_args(args, ("procedure_index", "step_index", "completed"))

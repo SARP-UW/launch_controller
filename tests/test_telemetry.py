@@ -34,6 +34,10 @@ def test_idle_sample(operations):
     assert t["step_executing"] is False
     assert t["step_procedure_index"] == -1 and t["step_index"] == -1
     assert t["proc_0_step_0_done"] is False
+    assert t["last_step_procedure_index"] == -1 and t["last_step_index"] == -1
+    assert t["last_step_result"] == "none"
+    assert t["last_successful_procedure_index"] == -1 and t["last_successful_step_index"] == -1
+    assert t["last_successful_step_finished_at"] == 0.0
 
 
 def test_values_are_scalars_and_survive_struct(operations):
@@ -53,7 +57,7 @@ def test_key_set_stable_during_pulse_and_step(operations):
     assert 0.0 < pulsing["valve_2_pulse_remaining"] <= 0.5
     wait_until(lambda: build_telemetry(operations)["valve_2_pulse_remaining"] == 0.0, "pulse to end")
 
-    operations.start_step(0, 0, "test")  # step contains a 2 s wait
+    operations.start_step(0, 0, "test", force=True)  # step contains a 2 s wait; opens 1 and 2 (invalid in demo)
     executing = build_telemetry(operations)
     assert set(executing) == idle_keys
     assert executing["step_executing"] is True
@@ -64,6 +68,9 @@ def test_key_set_stable_during_pulse_and_step(operations):
     assert set(done) == idle_keys
     assert done["step_executing"] is False
     assert done["proc_0_step_0_done"] is True
+    assert done["last_step_result"] == "completed"
+    assert (done["last_successful_procedure_index"], done["last_successful_step_index"]) == (0, 0)
+    assert done["last_successful_step_finished_at"] > 0.0
 
 
 def test_safe_mode_and_safing(operations):
@@ -73,3 +80,16 @@ def test_safe_mode_and_safing(operations):
     assert build_telemetry(operations)["safing"] is True
     wait_until(lambda: is_idle(operations), "safing to finish")
     assert build_telemetry(operations)["safing"] is False
+
+
+def test_aborted_step(operations):
+    idle_keys = set(build_telemetry(operations))
+    operations.start_step(1, 0, "test")  # open valve 1, wait 5 s, ...
+    operations.safe_system("test")
+    wait_until(lambda: build_telemetry(operations)["last_step_result"] == "aborted", "step to abort", timeout=0.5)
+    t = build_telemetry(operations)
+    assert set(t) == idle_keys
+    assert (t["last_step_procedure_index"], t["last_step_index"]) == (1, 0)
+    assert t["last_successful_step_index"] == -1
+    assert t["proc_1_step_0_done"] is False
+    wait_until(lambda: is_idle(operations), "safing to finish")

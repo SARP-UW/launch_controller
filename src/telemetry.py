@@ -15,6 +15,15 @@ Keys (N = valve/sensor id from config, P = procedure index, S = step index):
     step_procedure_index     int     procedure of the executing step (-1 when idle)
     step_index               int     index of the executing step (-1 when idle)
     proc_P_step_S_done       bool    step S of procedure P is marked complete
+    last_step_procedure_index        int    procedure of the last step that finished (-1 when none)
+    last_step_index                  int    index of the last step that finished (-1 when none)
+    last_step_result                 str    "none" | "completed" | "failed" | "aborted"
+    last_successful_procedure_index  int    procedure of the last step that completed (-1 when none)
+    last_successful_step_index       int    index of the last step that completed (-1 when none)
+    last_successful_step_finished_at float  unix time the last successful step finished (0.0 when none)
+
+After a hub reconnect, the hub reads last_successful_* and sends start_step with expected_last_step="P:S" (or
+"none"), so a step whose start_step timed out but actually ran cannot run twice unnoticed.
 
 Names, ranges and procedure/step titles are static and come from the get_config command instead.
 """
@@ -52,5 +61,15 @@ def build_telemetry(operations: ControllerOperations) -> Dict[str, Value]:
         done = completion.get(str(procedure_index), [])
         for step_index in range(len(procedure["steps"])):
             values[f"proc_{procedure_index}_step_{step_index}_done"] = step_index in done
+
+    last = status["last_step"]["last_step"]
+    values["last_step_procedure_index"] = last["procedure_index"] if last else -1
+    values["last_step_index"] = last["step_index"] if last else -1
+    values["last_step_result"] = last["result"] if last else "none"
+
+    last_ok = status["last_step"]["last_successful_step"]
+    values["last_successful_procedure_index"] = last_ok["procedure_index"] if last_ok else -1
+    values["last_successful_step_index"] = last_ok["step_index"] if last_ok else -1
+    values["last_successful_step_finished_at"] = float(last_ok["finished_at"]) if last_ok else 0.0
 
     return values

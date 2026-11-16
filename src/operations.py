@@ -12,6 +12,14 @@ MIN_SAFE_STATE_TIMEOUT = 0.1
 # Maximum permissable safe state timeout in seconds
 MAX_SAFE_STATE_TIMEOUT = 1000.0
 
+# Results of an action sequence (step or safe state)
+RESULT_COMPLETED = "completed"
+RESULT_FAILED = "failed"
+RESULT_ABORTED = "aborted"
+
+# Default for start_step's expected_last_step: don't check the step sequence (the website never sends it).
+NOT_CHECKED = object()
+
 
 class OperationsError(Exception):
     """
@@ -44,6 +52,29 @@ class ValveChangeError(OperationsError):
         self.failed = failed
 
 
+class InvalidValveStateError(OperationsError):
+    """
+    Raised when a manual valve change or a step would put the valves into a state listed in invalid_valve_states.
+    Nothing is changed. The caller can confirm with the operator and resend with force=True.
+
+    The message does not repeat the class name: spoke.py reports failures as "<ExceptionClass>: <text>", so the hub
+    sees "InvalidValveStateError: ..." exactly once and can look for that prefix.
+
+    Attributes:
+        violations: One description per broken rule, e.g. "valve 1 (Main Valve) open and valve 2 (Secondary Valve) open".
+    """
+    def __init__(self, violations: List[str]) -> None:
+        super().__init__("Would cause invalid valve state(s): " + "; ".join(violations) + ". Resend with force=true to override.")
+        self.violations = violations
+
+
+class StepSequenceError(OperationsError):
+    """
+    Raised by start_step when expected_last_step does not match the controller's last successful step. Nothing runs.
+    Guards against running a step twice when an earlier start_step timed out on the hub but actually ran.
+    """
+
+
 class OperationsShutdownError(OperationsError):
     """
     Raised when an operation is attempted after ControllerOperations has been shut down.
@@ -62,6 +93,8 @@ class ControllerOperations:
         ValueError: invalid argument (e.g. procedure index out of range).
         BusyError: blocked by a running step or safe-system operation.
         ValveChangeError: some valve changes in set_valve_states failed.
+        InvalidValveStateError: a valve change or step would cause an invalid valve state (override with force).
+        StepSequenceError: start_step's expected_last_step does not match the last successful step.
         OperationsShutdownError: called after shutdown().
     """
 
@@ -125,51 +158,59 @@ class ControllerOperations:
         """
         Background thread method that safes the system when safe mode times out. Uses the same path as the
         manual safe system command, so valve changes and steps are blocked and "safing" is reported while it
-        runs. If a step is executing when the timeout is reached, safing starts as soon as the step finishes.
+        runs. If a step is executing when the timeout is reached, the step is aborted and the safe state starts
+        right away (the same as a manual safe).
         """
         interval = 1.0 / settings.WEBSITE_THREAD_UPDATE_RATE
-        waiting_for_step = False
         while True:
             with self._thread_lock:
                 if self._shutdown_flag:
                     break
                 try:
                     if self._safe_mode and (time.time() - self._last_user_heartbeat) > self._safe_state_timeout:
-                        if self._safing_system is not None:
-                            # Already being safed (e.g. manually); nothing more to do.
-                            self._safe_mode = False
-                            waiting_for_step = False
-                        elif self._currently_executing is not None:
-                            if not waiting_for_step:
-                                if settings.PRINT_WEBSITE_STATUS:
-                                    print(f"WEBSITE STATUS: Safe mode timeout reached, waiting for executing step to finish before safing.")
-                                self._logger.log_data(["system", "status", "Safe mode timeout reached, waiting for executing step to finish"])
-                                waiting_for_step = True
-                        else:
+                        self._safe_mode = False
+                        if self._safing_system is None:
                             if settings.PRINT_WEBSITE_STATUS:
                                 print(f"WEBSITE STATUS: Safe mode timeout reached, executing safe state.")
                             self._logger.log_data(["system", "status", "Safing system"])
-                            self._safe_mode = False
-                            waiting_for_step = False
                             self._start_safe_system_locked("system")
-                    else:
-                        waiting_for_step = False
+                        # else: already being safed (e.g. manually); nothing more to do.
                 except Exception as e:
                     if settings.PRINT_WEBSITE_ERRORS:
                         print(f"WEBSITE ERROR: Safe mode monitor error: {e}")
             time.sleep(interval)
 
-    def _execute_actions(self, actions: List, user: str = "system") -> bool:
+    def _execute_actions(self, actions: List, user: str = "system", abort_event: Optional[threading.Event] = None) -> str:
         """
         Executes a list of actions (supports both single and grouped/multi actions).
         
         Args:
             actions: List of action dicts or grouped action lists.
             user: The user/source executing the actions (for logging).
+            abort_event: If given, setting it stops the sequence: every wait (wait actions, the wait after a pulse,
+                         a grouped action's longest duration) returns at once, and no further action is started.
+                         Steps pass one; safe states don't, so a safe state always runs to the end.
             
         Returns:
-            True if all actions executed successfully, False if aborted (e.g., due to shutdown).
+            RESULT_COMPLETED if every action ran, RESULT_ABORTED if stopped by abort_event or shutdown,
+            RESULT_FAILED if an action raised.
         """
+        class _Aborted(Exception):
+            pass
+
+        def stop_requested() -> bool:
+            return self._shutdown_flag or (abort_event is not None and abort_event.is_set())
+
+        def wait(duration: float) -> None:
+            """Waits for the duration, returning early (and raising _Aborted) if a stop is requested."""
+            if abort_event is not None:
+                if abort_event.wait(duration):
+                    raise _Aborted()
+            else:
+                time.sleep(duration)
+            if self._shutdown_flag:
+                raise _Aborted()
+
         def execute_single_action(action: Dict) -> None:
             """Executes a single action (set_valve, pulse_valve, or wait)."""
             action_type = action.get("type")
@@ -190,13 +231,13 @@ class ControllerOperations:
                 if settings.PRINT_WEBSITE_STATUS:
                     print(f"WEBSITE STATUS: {user} executed pulse_valve: valve {valve_id} for {duration}s")
                 self._logger.log_data([user, "action", f"Pulsed valve {valve_id} for {duration}s"])
-                time.sleep(duration)
+                wait(duration)
                 
             elif action_type == "wait":
                 duration = float(action.get("duration", 1.0))
                 if settings.PRINT_WEBSITE_STATUS:
                     print(f"WEBSITE STATUS: {user} executing wait: {duration}s")
-                time.sleep(duration)
+                wait(duration)
                 
             else:
                 if settings.PRINT_WEBSITE_ERRORS:
@@ -233,25 +274,117 @@ class ControllerOperations:
             
             # Wait for the longest action to complete
             if max_wait_duration > 0:
-                time.sleep(max_wait_duration)
+                wait(max_wait_duration)
 
+        action_index = 0
         try:
-            for action in actions:
-                # Check for shutdown
-                if self._shutdown_flag:
-                    return False
+            for action_index, action in enumerate(actions):
+                # Stop before the next action on shutdown or abort, so no further valve commands go out
+                if stop_requested():
+                    raise _Aborted()
                 
                 # Handle multi-action (array of actions to execute simultaneously)
                 if isinstance(action, list):
                     execute_multi_action(action)
                 else:
                     execute_single_action(action)
-            return True
+            return RESULT_COMPLETED
+        except _Aborted:
+            self._logger.log_data([user, "status", f"Action sequence aborted at action {action_index}"])
+            return RESULT_ABORTED
         except Exception as e:
             if settings.PRINT_WEBSITE_ERRORS:
                 print(f"WEBSITE ERROR: Action execution failed: {e}")
             self._logger.log_data([user, "error", f"Action execution failed: {e}"])
-            return False
+            return RESULT_FAILED
+
+    ###############################################################################################
+    # Invalid valve states
+    ###############################################################################################
+
+    def _find_invalid_states(self, states: Dict[int, str]) -> List[str]:
+        """
+        Returns a description of every invalid_valve_states rule that the given valve states match (same rules
+        as app.js checkInvalidValveState: every listed valve must match; a rule listing no valves never matches).
+
+        Args:
+            states: valve id -> "open" | "closed".
+        """
+        names = {int(v["id"]): v["name"] for v in self._controller.valve_info}
+        violations = []
+        for rule in self._invalid_valve_states:
+            open_ids = [int(i) for i in rule.get("open", [])]
+            closed_ids = [int(i) for i in rule.get("closed", [])]
+            if not open_ids and not closed_ids:
+                continue
+            if all(states.get(i) == "open" for i in open_ids) and all(states.get(i) == "closed" for i in closed_ids):
+                parts = [f"valve {i} ({names.get(i, '?')}) open" for i in open_ids]
+                parts += [f"valve {i} ({names.get(i, '?')}) closed" for i in closed_ids]
+                violations.append(" and ".join(parts))
+        return violations
+
+    def _current_valve_states(self) -> Dict[int, str]:
+        return {int(v["id"]): v["current_state"].lower() for v in self._controller.valve_info}
+
+    @staticmethod
+    def _toggled(state: str) -> str:
+        return "closed" if state == "open" else "open"
+
+    def _check_valve_changes_invalid_states(self, sets: Dict[int, str], pulses: List[int]) -> List[str]:
+        """
+        Returns the invalid-state violations a manual batch of valve changes would cause: the state while the
+        pulses are active (set changes applied, pulsed valves toggled) and the state after they return.
+        Like app.js, checks the full resulting state: while the system is in an invalid state, any change that
+        leaves it invalid needs force.
+        """
+        after = self._current_valve_states()
+        after.update(sets)
+        during = dict(after)
+        for valve_id in pulses:
+            if valve_id in during:
+                during[valve_id] = self._toggled(during[valve_id])
+        violations = []
+        for states in (during, after):
+            for v in self._find_invalid_states(states):
+                if v not in violations:
+                    violations.append(v)
+        return violations
+
+    def _check_step_invalid_states(self, step: Dict) -> List[str]:
+        """
+        Simulates a step's actions from the current valve states and returns every invalid-state violation that
+        would occur along the way (same simulation as app.js checkStepInvalidStates).
+        """
+        states = self._current_valve_states()
+        violations: List[str] = []
+
+        def check() -> None:
+            for v in self._find_invalid_states(states):
+                if v not in violations:
+                    violations.append(v)
+
+        def pulse(valve_id: int) -> None:
+            original = states.get(valve_id)
+            if original is None:
+                return
+            states[valve_id] = self._toggled(original)
+            check()
+            states[valve_id] = original
+
+        for action in step.get("actions", []):
+            if isinstance(action, list):
+                for sub in action:
+                    if sub.get("type") == "set_valve":
+                        states[int(sub["valve_id"])] = sub["state"].lower()
+                    elif sub.get("type") == "pulse_valve":
+                        pulse(int(sub["valve_id"]))
+                check()
+            elif action.get("type") == "set_valve":
+                states[int(action["valve_id"])] = action["state"].lower()
+                check()
+            elif action.get("type") == "pulse_valve":
+                pulse(int(action["valve_id"]))
+        return violations
 
     def __init__(self, controller: Controller, safe_state_timeout: float, system_safe_states: List[dict], invalid_valve_states: List[dict], procedures: List[dict], logger: Logger) -> None:
         """
@@ -679,6 +812,10 @@ class ControllerOperations:
         self._procedure_step_completion: Dict[int, set] = {}  # procedure_index -> set of completed step indices
         self._currently_executing: Optional[Dict] = None  # {"procedure_index": int, "step_index": int, "user": str, "start_time": float}
         self._safing_system: Optional[Dict] = None  # {"user": str, "start_time": float} when system is being safed
+        self._step_abort = threading.Event()  # set to stop the executing step at once (safing or shutdown)
+        # Last step that finished (any result) and last step that completed successfully; None when there is none.
+        self._last_step: Optional[Dict] = None  # {"procedure_index", "step_index", "result", "finished_at", "user"}
+        self._last_successful_step: Optional[Dict] = None  # {"procedure_index", "step_index", "finished_at"}
 
         self._logger.log_data(["system", "info", f"Safe state timeout: {self._safe_state_timeout}s"])
         self._logger.log_data(["system", "info", f"System safe states: {self._system_safe_states}"])
@@ -749,6 +886,7 @@ class ControllerOperations:
         """
         with self._thread_lock:
             self._shutdown_flag = True
+            self._step_abort.set()  # so a running step doesn't wait out a long wait
 
     def _check_not_shutdown(self) -> None:
         """
@@ -889,9 +1027,25 @@ class ControllerOperations:
                 return {"safing": True, "user": self._safing_system["user"]}
             return {"safing": False, "user": None}
 
+    def get_last_step(self) -> Dict:
+        """
+        Gets the last step that finished and the last one that completed successfully, so the hub and controller
+        can agree on where a procedure stands after a link drop.
+        Returns: {
+            "last_step": {"procedure_index", "step_index", "result": "completed"|"failed"|"aborted", "finished_at", "user"} or None,
+            "last_successful_step": {"procedure_index", "step_index", "finished_at"} or None
+        }
+        """
+        with self._thread_lock:
+            self._check_not_shutdown()
+            return {
+                "last_step": dict(self._last_step) if self._last_step else None,
+                "last_successful_step": dict(self._last_successful_step) if self._last_successful_step else None,
+            }
+
     def get_status(self) -> Dict:
         """
-        Gets a snapshot of live state: valves, sensors, safe mode, safing and procedure status.
+        Gets a snapshot of live state: valves, sensors, safe mode, safing, procedure status and last step.
         """
         return {
             "valves": self.get_valve_info(),
@@ -899,6 +1053,7 @@ class ControllerOperations:
             "safe_mode": self.get_safe_mode(),
             "safing": self.get_safing_status(),
             "procedure_status": self.get_procedure_status(),
+            "last_step": self.get_last_step(),
         }
 
     def get_config(self) -> Dict:
@@ -928,14 +1083,19 @@ class ControllerOperations:
             self._check_not_shutdown()
             self._check_valves_modifiable_locked()
 
-    def set_valve_states(self, changes: Dict[str, object], user: str) -> None:
+    def set_valve_states(self, changes: Dict[str, object], user: str, force: bool = False) -> None:
         """
         Applies valve changes. Applies every change it can, then raises ValveChangeError listing the ones that failed.
+
+        First checks the resulting valve states (and, for pulses, the states while pulsing) against
+        invalid_valve_states. If any rule would be broken, raises InvalidValveStateError and changes nothing,
+        unless force is True.
 
         Args:
             changes: Dict of valve id -> action, where action is "open", "closed" or "pulse:<duration>".
                      Ids may be strings or ints; failures are reported under the id as given.
             user: Who requested the change (for logging).
+            force: Apply the changes even if they cause an invalid valve state (the operator confirmed).
         """
         with self._thread_lock:
             self._check_not_shutdown()
@@ -943,6 +1103,39 @@ class ControllerOperations:
 
             if len(changes) == 0:
                 return
+
+            # Invalid valve state check, over the changes that will actually apply. Changes that will fail anyway
+            # (unknown valve, bad action or duration, valve pulsing) are left out, so they report their own error.
+            # If none will apply, there is nothing to check.
+            known_valves = self._current_valve_states()
+            sets: Dict[int, str] = {}
+            pulses: List[int] = []
+            for valve_id_str, action in changes.items():
+                try:
+                    valve_id = int(valve_id_str)
+                except (ValueError, TypeError):
+                    continue
+                if valve_id not in known_valves or not isinstance(action, str):
+                    continue
+                if self._controller.get_pulse_info(valve_id) is not None:
+                    continue
+                action_lower = action.strip().lower()
+                if action_lower in ("open", "closed"):
+                    sets[valve_id] = action_lower
+                elif action_lower.startswith("pulse:"):
+                    try:
+                        if float(action_lower[6:]) > 0:
+                            pulses.append(valve_id)
+                    except ValueError:
+                        pass
+            violations = self._check_valve_changes_invalid_states(sets, pulses) if (sets or pulses) else []
+            if violations:
+                if not force:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: Valve change from {user} rejected, invalid valve state: {violations}")
+                    self._logger.log_data([user, "error", f"Valve change {changes} rejected, invalid valve state: {violations}"])
+                    raise InvalidValveStateError(violations)
+                self._logger.log_data([user, "action", f"Forced valve change {changes} despite invalid valve state: {violations}"])
 
             failed_valves: Dict[str, str] = {}
             for valve_id_str, action in changes.items():
@@ -1047,8 +1240,10 @@ class ControllerOperations:
 
     def safe_system(self, user: str) -> None:
         """
-        Starts a safe system operation in a background thread and returns immediately. Runs the actions of the
-        first safe state whose requirements are met. Valve changes and steps are blocked while it runs.
+        Starts a safe system operation and returns immediately. Runs the actions of the first safe state whose
+        requirements are met, in a background thread. Valve changes and steps are blocked from this call until
+        it finishes. If a step is executing, it is aborted at once and the safe state starts as soon as the step
+        thread stops (milliseconds). Never checked against invalid_valve_states.
         """
         with self._thread_lock:
             self._check_not_shutdown()
@@ -1057,9 +1252,9 @@ class ControllerOperations:
     def _start_safe_system_locked(self, user: str) -> None:
         """
         Implementation of safe_system. Call with the lock held. Used by both the manual safe system command
-        and the safe mode auto-safe timeout. Raises BusyError if already safing or a step is executing.
+        and the safe mode auto-safe timeout. Raises BusyError if already safing.
         """
-        # Check if system is already being safed
+        # Check if system is already being safed: a second safe never restarts or interrupts the first
         if self._safing_system is not None:
             safing_user = self._safing_system["user"]
             raise BusyError(
@@ -1067,54 +1262,63 @@ class ControllerOperations:
                 {"safing": {"user": safing_user}}
             )
 
-        # Check if a step is executing
-        if self._currently_executing is not None:
-            exec_user = self._currently_executing["user"]
-            exec_step = self._currently_executing["step_index"]
-            exec_proc = self._currently_executing["procedure_index"]
-            raise BusyError(
-                f"Cannot safe system while step is executing (by {exec_user})",
-                {"executing": {
-                    "procedure_index": exec_proc,
-                    "step_index": exec_step,
-                    "user": exec_user
-                }}
-            )
-
-        # Mark system as being safed
+        # Mark system as being safed: blocks valve changes and steps from this instant
         self._safing_system = {
             "user": user,
             "start_time": time.time()
         }
 
+        if self._currently_executing is not None:
+            # Abort the step; the step thread starts the safe state once it has stopped (see start_step).
+            exec_proc = self._currently_executing["procedure_index"]
+            exec_step = self._currently_executing["step_index"]
+            if settings.PRINT_WEBSITE_STATUS:
+                print(f"WEBSITE STATUS: User {user} initiated safe system, aborting step {exec_proc}:{exec_step}")
+            self._logger.log_data([user, "action", f"{user} safing system, aborting step {exec_proc}:{exec_step}"])
+            self._step_abort.set()
+            return
+
         if settings.PRINT_WEBSITE_STATUS:
             print(f"WEBSITE STATUS: User {user} initiated safe system")
         self._logger.log_data([user, "action", "Initiated safe system"])
+        self._run_safe_state_thread(user)
 
-        # Inner function to execute safe system in background thread
+    def _run_safe_state_thread(self, user: str) -> None:
+        """
+        Starts the safe-state thread. Call with the lock held and _safing_system already set. The thread cancels
+        any pending pulse returns, runs the first safe state whose requirements are met (to the end: it has no
+        abort event), then clears _safing_system.
+        """
         def safe_system_thread() -> None:
-            # Find the first safe state whose requirements are met
-            safe_state_executed = False
+            try:
+                # A pulse return firing after the safe state has set the valve could leave it in the wrong state.
+                try:
+                    cancelled = self._controller.cancel_pulses()
+                    if cancelled:
+                        self._logger.log_data([user, "action", f"Cancelled pulse returns for valves {cancelled}"])
+                except Exception as e:
+                    self._logger.log_data([user, "error", f"Failed to cancel pulses: {e}"])
 
-            for safe_state in self._system_safe_states:
-                state_name = safe_state.get("name", "Unnamed")
-                requirements = safe_state.get("requirements", [])
+                # Find the first safe state whose requirements are met
+                for safe_state in self._system_safe_states:
+                    state_name = safe_state.get("name", "Unnamed")
+                    requirements = safe_state.get("requirements", [])
 
-                # Check if all requirements are met
-                requirements_met = all(self._check_safe_state_requirement(req) for req in requirements) if requirements else True
+                    # Check if all requirements are met
+                    requirements_met = all(self._check_safe_state_requirement(req) for req in requirements) if requirements else True
+                    if not requirements_met:
+                        continue
 
-                if requirements_met:
                     if settings.PRINT_WEBSITE_STATUS:
                         print(f"WEBSITE STATUS: Executing safe state '{state_name}'")
                     self._logger.log_data([user, "action", f"Executing safe state '{state_name}'"])
 
-                    actions = safe_state.get("actions", [])
-                    success = self._execute_actions(actions, user=user)
+                    result = self._execute_actions(safe_state.get("actions", []), user=user)
 
                     with self._thread_lock:
                         self._safing_system = None
 
-                    if success:
+                    if result == RESULT_COMPLETED:
                         if settings.PRINT_WEBSITE_STATUS:
                             print(f"WEBSITE STATUS: Safe state '{state_name}' completed successfully")
                         self._logger.log_data([user, "action", f"Safe state '{state_name}' completed"])
@@ -1122,25 +1326,31 @@ class ControllerOperations:
                         if settings.PRINT_WEBSITE_ERRORS:
                             print(f"WEBSITE ERROR: Safe state '{state_name}' execution failed")
                         self._logger.log_data([user, "error", f"Safe state '{state_name}' execution failed"])
+                    return
 
-                    safe_state_executed = True
-                    break
-
-            if not safe_state_executed:
-                with self._thread_lock:
-                    self._safing_system = None
                 if settings.PRINT_WEBSITE_STATUS:
                     print(f"WEBSITE STATUS: No safe state requirements met, no action taken")
                 self._logger.log_data([user, "status", "No safe state requirements met"])
+            finally:
+                with self._thread_lock:
+                    self._safing_system = None
 
-        # Start safe system execution in background thread
         thread = threading.Thread(target=safe_system_thread, daemon=True)
         thread.start()
 
-    def start_step(self, procedure_index: int, step_index: int, user: str) -> None:
+    def start_step(self, procedure_index: int, step_index: int, user: str, force: bool = False,
+                   expected_last_step: object = NOT_CHECKED) -> None:
         """
         Starts executing a step's actions in a background thread and returns immediately.
         Only one step can execute at a time, and not while the system is being safed.
+
+        Args:
+            procedure_index, step_index: The step to run.
+            user: Who started it (for logging).
+            force: Run the step even if it would cause an invalid valve state along the way (the operator confirmed).
+            expected_last_step: If given, the (procedure_index, step_index) the caller believes was the last
+                successful step, or None for "no step yet". If it does not match, raises StepSequenceError and
+                nothing runs. Left out (NOT_CHECKED), the sequence is not checked.
         """
         with self._thread_lock:
             self._check_not_shutdown()
@@ -1174,6 +1384,25 @@ class ControllerOperations:
                     }}
                 )
 
+            # Check the step sequence (hub confirms the last successful step before resending after a reconnect)
+            if expected_last_step is not NOT_CHECKED:
+                last = self._last_successful_step
+                actual = (last["procedure_index"], last["step_index"]) if last else None
+                if expected_last_step != actual:
+                    actual_str = f"{actual[0]}:{actual[1]}" if actual else "none"
+                    self._logger.log_data([user, "error", f"Step {procedure_index}:{step_index} rejected: expected last successful step {expected_last_step}, actual {actual_str}"])
+                    raise StepSequenceError(f"last successful step is {actual_str}")
+
+            # Check for invalid valve states the step would pass through
+            violations = self._check_step_invalid_states(step)
+            if violations:
+                if not force:
+                    if settings.PRINT_WEBSITE_ERRORS:
+                        print(f"WEBSITE ERROR: Step {procedure_index}:{step_index} from {user} rejected, invalid valve state: {violations}")
+                    self._logger.log_data([user, "error", f"Step {procedure_index}:{step_index} rejected, invalid valve state: {violations}"])
+                    raise InvalidValveStateError(violations)
+                self._logger.log_data([user, "action", f"Forced step {procedure_index}:{step_index} despite invalid valve state: {violations}"])
+
             # Mark step as executing
             self._currently_executing = {
                 "procedure_index": procedure_index,
@@ -1181,6 +1410,8 @@ class ControllerOperations:
                 "user": user,
                 "start_time": time.time()
             }
+            self._step_abort.clear()
+            abort_event = self._step_abort
 
             step_name = step["name"]
             if settings.PRINT_WEBSITE_STATUS:
@@ -1189,23 +1420,49 @@ class ControllerOperations:
 
             # Inner function to execute step in background thread
             def execute_step_thread() -> None:
-                actions = step.get("actions", [])
-                success = self._execute_actions(actions, user=user)
+                result = RESULT_FAILED
+                try:
+                    result = self._execute_actions(step.get("actions", []), user=user, abort_event=abort_event)
+                finally:
+                    # Record the result, clear executing state, and hand off to a requested safe, all under one
+                    # lock hold so no other command gets in between. The safe starts whenever one was requested,
+                    # whatever the result: it may have arrived after the last action, before this lock.
+                    with self._thread_lock:
+                        self._currently_executing = None
+                        finished_at = time.time()
+                        self._last_step = {
+                            "procedure_index": procedure_index,
+                            "step_index": step_index,
+                            "result": result,
+                            "finished_at": finished_at,
+                            "user": user,
+                        }
+                        if result == RESULT_COMPLETED:
+                            self._last_successful_step = {
+                                "procedure_index": procedure_index,
+                                "step_index": step_index,
+                                "finished_at": finished_at,
+                            }
+                            if procedure_index not in self._procedure_step_completion:
+                                self._procedure_step_completion[procedure_index] = set()
+                            self._procedure_step_completion[procedure_index].add(step_index)
+                            if settings.PRINT_WEBSITE_STATUS:
+                                print(f"WEBSITE STATUS: Step '{step_name}' completed successfully (procedure {procedure_index}, step {step_index})")
+                            self._logger.log_data([user, "action", f"Step '{step_name}' completed (procedure {procedure_index}, step {step_index})"])
+                        elif result == RESULT_ABORTED:
+                            stopped_by = self._safing_system["user"] if self._safing_system else "shutdown"
+                            if settings.PRINT_WEBSITE_STATUS:
+                                print(f"WEBSITE STATUS: Step '{step_name}' aborted by {stopped_by} (procedure {procedure_index}, step {step_index})")
+                            self._logger.log_data([user, "action", f"Step '{step_name}' aborted by {stopped_by} (procedure {procedure_index}, step {step_index})"])
+                        else:
+                            if settings.PRINT_WEBSITE_STATUS:
+                                print(f"WEBSITE STATUS: Step '{step_name}' execution ended without completion (procedure {procedure_index}, step {step_index})")
+                            self._logger.log_data([user, "action", f"Step '{step_name}' ended without completion (procedure {procedure_index}, step {step_index})"])
 
-                # Mark step complete and clear executing state
-                with self._thread_lock:
-                    self._currently_executing = None
-                    if success:
-                        if procedure_index not in self._procedure_step_completion:
-                            self._procedure_step_completion[procedure_index] = set()
-                        self._procedure_step_completion[procedure_index].add(step_index)
-                        if settings.PRINT_WEBSITE_STATUS:
-                            print(f"WEBSITE STATUS: Step '{step_name}' completed successfully (procedure {procedure_index}, step {step_index})")
-                        self._logger.log_data([user, "action", f"Step '{step_name}' completed (procedure {procedure_index}, step {step_index})"])
-                    else:
-                        if settings.PRINT_WEBSITE_STATUS:
-                            print(f"WEBSITE STATUS: Step '{step_name}' execution ended without completion (procedure {procedure_index}, step {step_index})")
-                        self._logger.log_data([user, "action", f"Step '{step_name}' ended without completion (procedure {procedure_index}, step {step_index})"])
+                        if self._safing_system is not None and not self._shutdown_flag:
+                            safing_user = self._safing_system["user"]
+                            self._logger.log_data([safing_user, "action", "Initiated safe system"])
+                            self._run_safe_state_thread(safing_user)
 
             # Start execution in background thread
             exec_thread = threading.Thread(

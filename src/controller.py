@@ -82,7 +82,7 @@ class Controller:
         self._current_pressure_list = [0.0 for _ in _pressure_sensor_list]
         self._shutdown_flag = False
         self._thread_lock = threading.Lock()
-        self._pulsing_valves: dict[int, dict] = {}  # valve_id -> {"start_time": float, "duration": float}
+        self._pulsing_valves: dict[int, dict] = {}  # valve_id -> {"start_time": float, "duration": float, "cancel": threading.Event}
         
         if len(_pressure_sensor_list) > 0:
             self._sensor_data_logger = Logger(
@@ -237,7 +237,9 @@ class Controller:
         
     def pulse_valve(self, id: int, duration: float) -> None:
         """
-        Toggles a valve state, waits for the duration, then toggles it back.
+        Toggles a valve state, waits for the duration, then toggles it back. Returns right away; the return
+        toggle runs in a separate thread. The first toggle happens before this returns, so a cancel_pulses()
+        call that follows can never be overtaken by it.
         
         Args:
             id: The unique ID of the valve to pulse.
@@ -258,27 +260,26 @@ class Controller:
                 raise ValueError(f"Controller has no valve with ID: {id}")
             if id in self._pulsing_valves:
                 raise RuntimeError(f"Valve {id} is already being pulsed")
-            self._pulsing_valves[id] = {"start_time": time.time(), "duration": duration}
+            
+            # First toggle
+            valve.state = ValveState.OPEN if valve.state == ValveState.CLOSED else ValveState.CLOSED
+            if settings.PRINT_VALVE_STATES:
+                print(f"VALVE STATE: {valve.name} ({valve.id}) = {valve.state.value}")
+            self._valve_data_logger.log_data([str(v.state.name) for v in self._valve_list])
+            
+            pulse = {"start_time": time.time(), "duration": duration, "cancel": threading.Event()}
+            self._pulsing_valves[id] = pulse
         
         def do_pulse():
             """
-            Executes the valve pulsing operation (runs in a separate thread).
+            Waits for the pulse duration, then toggles the valve back unless the pulse was cancelled
+            (runs in a separate thread).
             """
             try:
+                cancelled = pulse["cancel"].wait(duration)
                 with self._thread_lock:
-                    if not self._shutdown_flag:
-                        new_state = ValveState.OPEN if valve.state == ValveState.CLOSED else ValveState.CLOSED
-                        valve.state = new_state
-                        if settings.PRINT_VALVE_STATES:
-                            print(f"VALVE STATE: {valve.name} ({valve.id}) = {valve.state.value}")
-                        self._valve_data_logger.log_data([str(v.state.name) for v in self._valve_list])
-                
-                time.sleep(duration)
-            
-                with self._thread_lock:
-                    if not self._shutdown_flag:
-                        new_state = ValveState.OPEN if valve.state == ValveState.CLOSED else ValveState.CLOSED
-                        valve.state = new_state
+                    if not cancelled and not pulse["cancel"].is_set() and not self._shutdown_flag:
+                        valve.state = ValveState.OPEN if valve.state == ValveState.CLOSED else ValveState.CLOSED
                         if settings.PRINT_VALVE_STATES:
                             print(f"VALVE STATE: {valve.name} ({valve.id}) = {valve.state.value}")
                         self._valve_data_logger.log_data([str(v.state.name) for v in self._valve_list])
@@ -292,11 +293,31 @@ class Controller:
                 
             finally:
                 with self._thread_lock:
-                    if not self._shutdown_flag:
+                    # Only remove this pulse's own entry: after a cancel, a new pulse may already own the slot.
+                    if self._pulsing_valves.get(id) is pulse:
                         self._pulsing_valves.pop(id, None)
         
         thread = threading.Thread(target = do_pulse, daemon = True)
         thread.start()
+    
+    def cancel_pulses(self) -> List[int]:
+        """
+        Cancels every pulse in progress: the pending return toggles are skipped, so each pulsed valve stays
+        in its pulsed state until something else sets it. Used before a safe state runs.
+        
+        Returns:
+            IDs of the valves whose pulses were cancelled.
+        """
+        if self._shutdown_flag:
+            raise RuntimeError("Controller has been shut down")
+        with self._thread_lock:
+            cancelled = list(self._pulsing_valves)
+            for pulse in self._pulsing_valves.values():
+                pulse["cancel"].set()
+            self._pulsing_valves.clear()
+        if cancelled:
+            self._controller_logger.log_data(["status", f"Cancelled pulse returns for valves {cancelled}"])
+        return cancelled
     
     def get_pulse_info(self, id: int) -> dict | None:
         """
@@ -311,7 +332,10 @@ class Controller:
         if self._shutdown_flag:
             raise RuntimeError("Controller has been shut down")
         with self._thread_lock:
-            return self._pulsing_valves.get(id, None)
+            pulse = self._pulsing_valves.get(id, None)
+            if pulse is None:
+                return None
+            return {"start_time": pulse["start_time"], "duration": pulse["duration"]}
     
     def shutdown(self) -> None:
         """

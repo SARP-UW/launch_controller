@@ -4,7 +4,8 @@ import os
 import logging
 from typing import Callable, Dict
 from flask import Flask, render_template, request, jsonify
-from .operations import ControllerOperations, BusyError, ValveChangeError, OperationsShutdownError
+from .operations import (ControllerOperations, BusyError, ValveChangeError, OperationsShutdownError,
+                         InvalidValveStateError, StepSequenceError)
 from . import settings
 
 # Minimum permissable port value
@@ -79,6 +80,16 @@ class ControllerWebsite:
             return jsonify({"status": "error", "message": e.message, **e.details}), 409
         if isinstance(e, ValveChangeError):
             return jsonify({"status": "error", "failed_valves": e.failed}), 400
+        if isinstance(e, InvalidValveStateError):
+            # Same "<ExceptionClass>: <text>" message the spoke sends; app.js confirms and resends with force.
+            return jsonify({
+                "status": "error",
+                "code": "invalid_valve_state",
+                "message": f"InvalidValveStateError: {e}",
+                "violations": e.violations,
+            }), 409
+        if isinstance(e, StepSequenceError):
+            return jsonify({"status": "error", "code": "step_sequence", "message": f"StepSequenceError: {e}"}), 409
         if isinstance(e, OperationsShutdownError):
             return jsonify({"status": "error", "message": str(e)}), 503
         if isinstance(e, ValueError):
@@ -91,7 +102,7 @@ class ControllerWebsite:
         """
         try:
             command()
-        except (BusyError, ValveChangeError, OperationsShutdownError, ValueError) as e:
+        except (BusyError, ValveChangeError, InvalidValveStateError, StepSequenceError, OperationsShutdownError, ValueError) as e:
             return self._error_response(e)
         return jsonify(success_body or {"status": "success"})
 
@@ -210,6 +221,7 @@ class ControllerWebsite:
             """
             Updates valve states based on provided dict.
             Supports: valve_id: "open", "closed", or "pulse:duration" (e.g., "pulse:1.5")
+            Optional "force": true applies the changes even if they cause an invalid valve state.
             """
             user = request.remote_addr
             if self._shutdown_flag:
@@ -226,8 +238,12 @@ class ControllerWebsite:
             data = request.get_json()
             if not isinstance(data, dict):
                 return self._bad_request(user, "Request body must be a dict", "Set valve states request body must be a dict")
+            changes = dict(data)
+            force = changes.pop("force", False)
+            if not isinstance(force, bool):
+                return self._bad_request(user, "'force' must be a boolean")
 
-            return self._run_command(lambda: ops.set_valve_states(data, user))
+            return self._run_command(lambda: ops.set_valve_states(changes, user, force=force))
 
         @self._app.get("/api/get_procedures")
         def get_procedures():
@@ -294,6 +310,7 @@ class ControllerWebsite:
             """
             Triggers a manual safe system operation. Finds the first safe state with
             requirements met and executes its actions. Blocks other operations while running.
+            A step that is executing is aborted at once.
             """
             user = request.remote_addr
             if self._shutdown_flag:
@@ -333,7 +350,7 @@ class ControllerWebsite:
             """
             Starts executing a step. The server executes all step actions in a background thread.
             Only one step can execute at a time across all users.
-            Request body: {"procedure_index": int, "step_index": int}
+            Request body: {"procedure_index": int, "step_index": int, "force": bool (optional)}
             """
             user = request.remote_addr
             if self._shutdown_flag:
@@ -348,8 +365,11 @@ class ControllerWebsite:
             step_index, error = self._parse_int_field(data, "step_index")
             if error:
                 return jsonify({"status": "error", "message": error}), 400
+            force = data.get("force", False)
+            if not isinstance(force, bool):
+                return jsonify({"status": "error", "message": "'force' must be a boolean"}), 400
 
-            return self._run_command(lambda: ops.start_step(procedure_index, step_index, user))
+            return self._run_command(lambda: ops.start_step(procedure_index, step_index, user, force=force))
 
         @self._app.post("/api/set_step_completion")
         def set_step_completion():

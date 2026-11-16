@@ -13,7 +13,10 @@ Notes:
   the config files are not modified.
 - Flask's built-in server is never started; requests go through Flask's test client.
 - Mock sensor pressures are pinned to fixed values so safe-state selection is deterministic.
-- Takes ~25 s because it waits through real step / safe-state actions (2 s and 5 s waits in config).
+- Takes ~40 s because it waits through real step / safe-state actions (2 s and 5 s waits in config).
+- Phase 4 changed the API on purpose (baseline re-recorded): valve changes and steps that would cause an invalid
+  valve state get 409 "invalid_valve_state" unless sent with "force": true; a safe during a step aborts the
+  step instead of failing with 409. Timing checks for the abort are asserts (they raise), not baseline entries.
 """
 import argparse
 import copy
@@ -178,7 +181,9 @@ def run_main_scenarios(log_dir: str) -> list:
     rec.post("set valve 1 open", "/api/set_valve_states", {"1": "open"})
     rec.get("after set valve 1 open", "/api/get_valve_info")
     rec.post("set valve 1 closed (case + whitespace)", "/api/set_valve_states", {"1": "  CLOSED "})
-    rec.post("set two valves", "/api/set_valve_states", {"1": "open", "2": "open"})
+    rec.post("set two valves", "/api/set_valve_states", {"1": "open", "2": "open"})  # invalid state -> 409
+    rec.post("set two valves (force)", "/api/set_valve_states", {"1": "open", "2": "open", "force": True})
+    rec.post("force not a bool", "/api/set_valve_states", {"1": "open", "force": "yes"})
     rec.post("empty dict", "/api/set_valve_states", {})
     rec.post("unknown valve id", "/api/set_valve_states", {"99": "open"})
     rec.post("non-integer valve id", "/api/set_valve_states", {"abc": "open"})
@@ -198,6 +203,9 @@ def run_main_scenarios(log_dir: str) -> list:
     rec.post("modify valve while pulsing", "/api/set_valve_states", {"2": "open"})
     wait_until(lambda: no_valves_pulsing(rec), "pulse to finish")
     rec.get("after pulse", "/api/get_valve_info")
+    rec.post("pulse: invalid state setup", "/api/set_valve_states", {"1": "open"})
+    rec.post("pulse: invalid state", "/api/set_valve_states", {"2": "pulse:0.3"})  # pulsed open with 1 open -> 409
+    rec.post("pulse: reset valve 1", "/api/set_valve_states", {"1": "closed"})
 
     # --- Safe mode ---
     rec.post("safe mode: no JSON body", "/api/set_safe_mode", raw_body="true")
@@ -219,12 +227,15 @@ def run_main_scenarios(log_dir: str) -> list:
 
     # --- Step execution and what is blocked during it ---
     # Procedure 0 step 0: open valve 1, wait 2 s, open valve 2.
-    rec.post("start step 0/0", "/api/start_step_execution", {"procedure_index": 0, "step_index": 0})
+    # Step 0/0 opens valves 1 and 2, an invalid state in the demo config: rejected without force.
+    rec.post("start step 0/0: invalid state", "/api/start_step_execution", {"procedure_index": 0, "step_index": 0})
+    rec.post("start step 0/0: force not a bool", "/api/start_step_execution", {"procedure_index": 0, "step_index": 0, "force": 1})
+    rec.post("start step 0/0", "/api/start_step_execution", {"procedure_index": 0, "step_index": 0, "force": True})
     wait_until(lambda: valve_state(rec, 1) == "open", "step 0/0 first action")
     rec.snapshot("during step 0/0")
     rec.post("during step: set valve", "/api/set_valve_states", {"2": "open"})
     rec.post("during step: start another step", "/api/start_step_execution", {"procedure_index": 0, "step_index": 2})
-    rec.post("during step: safe system", "/api/safe_system")
+    # (safe system during a step now aborts it; covered by run_safe_abort_scenario)
     rec.post("during step: reset same procedure", "/api/reset_procedure", {"procedure_index": 0})
     rec.post("during step: reset other procedure", "/api/reset_procedure", {"procedure_index": 1})
     rec.post("during step: set completion", "/api/set_step_completion", {"procedure_index": 0, "step_index": 1, "completed": True})
@@ -292,14 +303,84 @@ def is_safing(rec: Recorder) -> bool:
     return rec.client.get("/api/is_safing").get_json()["safing"]
 
 
+# Test-only procedure appended to the demo config for the abort scenarios: a step long enough to be safed
+# partway through, with a pulse whose return toggle would land after the safe has started.
+ABORT_TEST_PROCEDURE = {
+    "name": "Abort test",
+    "steps": [{
+        "name": "Long pulse",
+        "actions": [
+            {"type": "pulse_valve", "valve_id": 2, "duration": 3.0},  # the step then waits 3 s for the pulse
+            {"type": "wait", "duration": 5.0},
+            {"type": "set_valve", "valve_id": 1, "state": "open"},  # must never run
+        ],
+    }],
+}
+ABORT_TEST_PROCEDURE_INDEX = 2  # the demo config has 2 procedures
+ABORT_LATENCY = 0.5  # seconds: a safe must abort the step and start safing within this
+
+
+def load_config_with_abort_test(log_dir: str, overrides: dict = None) -> dict:
+    config = load_config("website_config.json", log_dir, overrides)
+    assert len(config["procedures"]) == ABORT_TEST_PROCEDURE_INDEX
+    config["procedures"].append(copy.deepcopy(ABORT_TEST_PROCEDURE))
+    return config
+
+
+def assert_step_aborted(operations: ControllerOperations, procedure_index: int, step_index: int) -> None:
+    last = operations.get_last_step()
+    assert last["last_step"] is not None and last["last_step"]["result"] == "aborted", last
+    assert (last["last_step"]["procedure_index"], last["last_step"]["step_index"]) == (procedure_index, step_index)
+    completion = operations.get_procedure_status()["completion"].get(str(procedure_index), [])
+    assert step_index not in completion, "aborted step must not be marked complete"
+
+
+def run_safe_abort_scenario(log_dir: str) -> list:
+    """Manual safe system while a step is running: the step is aborted at once and the safe state runs."""
+    controller = Controller.from_config(load_config("controller_config.json", log_dir))
+    operations = ControllerOperations.from_config(controller, load_config_with_abort_test(log_dir))
+    website = ControllerWebsite.from_config(operations, load_config("website_config.json", log_dir))
+    rec = Recorder(website, prefix="safe abort: ")
+    set_pressures(controller, {1: 25.0, 2: 50.0})  # selects "Safe state 1" (opens 1, waits 2 s, opens 2)
+
+    step = {"procedure_index": ABORT_TEST_PROCEDURE_INDEX, "step_index": 0}
+    rec.post("start long step", "/api/start_step_execution", step)
+    step_started = time.time()
+    wait_until(lambda: valve_state(rec, 2) == "open", "step's pulse")
+    time.sleep(1.0)
+    rec.snapshot("during step")
+
+    safe_requested = time.time()
+    rec.post("safe system during step", "/api/safe_system")
+    assert time.time() - safe_requested < ABORT_LATENCY
+    wait_until(lambda: rec.client.get("/api/get_procedure_status").get_json()["executing"] is None,
+               "step to stop", timeout=ABORT_LATENCY)
+    assert is_safing(rec)
+    assert_step_aborted(operations, **step)
+    rec.post("safe system again", "/api/safe_system")  # already safing -> 409
+    rec.post("set valve while safing", "/api/set_valve_states", {"1": "closed", "force": True})
+
+    # The pulse would have returned (closing valve 2) 3 s after the step started; it was cancelled.
+    time.sleep(max(0.0, step_started + 3.5 - time.time()))
+    assert valve_state(rec, 2) == "open", "cancelled pulse return must not toggle valve 2 back"
+    wait_until(lambda: is_idle(rec), "safe state to finish")
+    assert valve_state(rec, 2) == "open"
+    assert operations.get_last_step()["last_successful_step"] is None
+    rec.snapshot("after safe")
+
+    website.shutdown()
+    operations.shutdown()
+    return rec.results
+
+
 def run_auto_safe_scenario(log_dir: str) -> list:
     """Safe mode auto-safe timer, using the shortest allowed timeout."""
     timeout = settings.WEBSITE_HEARTBEAT_TIMEOUT
     controller = Controller.from_config(load_config("controller_config.json", log_dir))
-    operations, website = build_website(
-        controller,
-        load_config("website_config.json", log_dir, overrides={"safe_state_timeout": timeout}),
+    operations = ControllerOperations.from_config(
+        controller, load_config_with_abort_test(log_dir, overrides={"safe_state_timeout": timeout})
     )
+    website = ControllerWebsite.from_config(operations, load_config("website_config.json", log_dir))
     rec = Recorder(website, prefix="auto-safe: ")
 
     # 1) Timeout with nothing running: "Safe state 1" runs (opens valve 1, waits 2 s, opens valve 2).
@@ -314,16 +395,28 @@ def run_auto_safe_scenario(log_dir: str) -> list:
     rec.get("safe mode after auto-safe", "/api/get_safe_mode")
     rec.snapshot("after auto-safe")
 
-    # 2) Timeout while a step is executing: safing waits for the step, then runs.
-    #    Step 0/0 takes ~2 s; start it 1.5 s after enabling safe mode so the timeout lands mid-step.
+    # 2) Timeout while a step is executing: the step is aborted and safing starts right away.
+    #    The abort-test step takes ~8 s; start it 1.5 s after enabling safe mode so the timeout lands mid-step,
+    #    during the step's 3 s pulse of valve 2.
     #    Pressure 75 selects "Safe state 2" (waits 5 s, opens valve 1, closes valve 2).
     rec.post("step+timeout: close valves", "/api/set_valve_states", {"1": "closed", "2": "closed"})
     set_pressures(controller, {1: 75.0, 2: 50.0})
     rec.post("step+timeout: enable safe mode", "/api/set_safe_mode", {"safe_mode": True})
+    safe_mode_enabled = time.time()
     time.sleep(timeout / 2)
-    rec.post("step+timeout: start step 0/0", "/api/start_step_execution", {"procedure_index": 0, "step_index": 0})
-    wait_until(lambda: is_safing(rec), "auto-safe to start after step", timeout=timeout + 5)
+    step = {"procedure_index": ABORT_TEST_PROCEDURE_INDEX, "step_index": 0}
+    rec.post("step+timeout: start long step", "/api/start_step_execution", step)
+    step_started = time.time()
+    wait_until(lambda: is_safing(rec), "auto-safe to start", timeout=timeout + 5)
+    assert time.time() - safe_mode_enabled < timeout + ABORT_LATENCY, "auto-safe must not wait for the step"
+    wait_until(lambda: rec.client.get("/api/get_procedure_status").get_json()["executing"] is None,
+               "step to stop", timeout=ABORT_LATENCY)
+    assert_step_aborted(operations, **step)
     rec.snapshot("step+timeout: when safing starts")
+    # Safe state 2 waits 5 s before touching valve 2; the cancelled pulse return (due 3 s after the step
+    # started) must not close it in the meantime.
+    time.sleep(max(0.0, step_started + 3.5 - time.time()))
+    assert valve_state(rec, 2) == "open", "cancelled pulse return must not toggle valve 2 back"
     wait_until(lambda: is_idle(rec), "auto-safe to finish", timeout=10)
     rec.get("step+timeout: safe mode after", "/api/get_safe_mode")
     rec.snapshot("step+timeout: after")
@@ -335,7 +428,7 @@ def run_auto_safe_scenario(log_dir: str) -> list:
 
 def run_all() -> list:
     with tempfile.TemporaryDirectory() as log_dir:
-        return run_main_scenarios(log_dir) + run_auto_safe_scenario(log_dir)
+        return run_main_scenarios(log_dir) + run_safe_abort_scenario(log_dir) + run_auto_safe_scenario(log_dir)
 
 
 def main() -> int:
