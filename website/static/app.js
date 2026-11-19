@@ -131,7 +131,12 @@ const API = {
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `HTTP ${response.status}`);
+                const error = new Error(errorData.message || `HTTP ${response.status}`);
+                // e.g. code 'invalid_valve_state' with violations: the server rejected a change the
+                // operator can confirm and resend with force
+                error.code = errorData.code;
+                error.violations = errorData.violations || [];
+                throw error;
             }
             
             return await response.json();
@@ -153,10 +158,10 @@ const API = {
         return this.request('/api/get_sensor_info');
     },
     
-    async setValveStates(states) {
+    async setValveStates(states, force = false) {
         return this.request('/api/set_valve_states', {
             method: 'POST',
-            body: JSON.stringify(states)
+            body: JSON.stringify(force ? { ...states, force: true } : states)
         });
     },
     
@@ -191,10 +196,10 @@ const API = {
         return this.request('/api/is_safing');
     },
 
-    async startStepExecution(procedureIndex, stepIndex) {
+    async startStepExecution(procedureIndex, stepIndex, force = false) {
         return this.request('/api/start_step_execution', {
             method: 'POST',
-            body: JSON.stringify({ procedure_index: procedureIndex, step_index: stepIndex })
+            body: JSON.stringify({ procedure_index: procedureIndex, step_index: stepIndex, force: force })
         });
     },
 
@@ -412,7 +417,7 @@ async function setValveState(valveId, state) {
         Modal.warning(
             'Invalid Valve Configuration',
             `<p>Setting <strong>${valveName}</strong> to <strong>${state}</strong> will result in an invalid configuration.</p>`,
-            () => executeValveChange(valveId, state)
+            () => executeValveChange(valveId, state, true)
         );
         return;
     }
@@ -423,17 +428,35 @@ async function setValveState(valveId, state) {
 /**
  * Executes valve state change via API
  */
-async function executeValveChange(valveId, state) {
+async function executeValveChange(valveId, state, force = false) {
     try {
-        await API.setValveStates({ [valveId]: state });
-        logStatus(`Valve ${valveId} set to ${state}`);
+        await API.setValveStates({ [valveId]: state }, force);
+        logStatus(`Valve ${valveId} set to ${state}${force ? ' (forced)' : ''}`);
         await pollValves(); // Immediately fetch updated state from server
     } catch (error) {
+        if (showInvalidStateWarning(error, force, () => executeValveChange(valveId, state, true))) return;
         logError(`Failed to set valve ${valveId} to ${state}`, error);
         Modal.show('Error', `<p>Failed to set valve state: ${error.message}</p>`, [
             { label: 'OK', type: 'secondary' }
         ]);
     }
+}
+
+/**
+ * If the server rejected a request for an invalid valve state (and it wasn't already forced), shows the
+ * server's violations and lets the operator resend with force. This covers the case where the client-side
+ * check missed it (e.g. valve states changed since the last poll).
+ * @returns true if the warning was shown
+ */
+function showInvalidStateWarning(error, force, resendWithForce) {
+    if (force || error.code !== 'invalid_valve_state') return false;
+    const items = (error.violations || []).map(v => `<li>Invalid state would occur: ${v}</li>`).join('');
+    Modal.warning(
+        'Invalid Valve Configuration',
+        `<p>The controller rejected this change:</p><ul>${items}</ul>`,
+        resendWithForce
+    );
+    return true;
 }
 
 /**
@@ -506,7 +529,7 @@ function executePulseWithWarningCheck(valveId, duration) {
             'Invalid Valve Configuration',
             `<p>Pulsing <strong>${valveName}</strong> would result in an invalid configuration:</p>
             <ul>${violations.map(v => `<li>${v}</li>`).join('')}</ul>`,
-            () => executePulse(valveId, duration)
+            () => executePulse(valveId, duration, true)
         );
         return;
     }
@@ -517,7 +540,7 @@ function executePulseWithWarningCheck(valveId, duration) {
 /**
  * Executes the pulse operation with visual feedback
  */
-async function executePulse(valveId, duration) {
+async function executePulse(valveId, duration, force = false) {
     // Disable the button immediately to prevent visual changes during API call
     const card = document.querySelector(`.valve-card[data-valve-id="${valveId}"]`);
     const button = card?.querySelector('.pulse-btn');
@@ -527,7 +550,7 @@ async function executePulse(valveId, duration) {
     
     try {
         // Start the pulse on the server using combined endpoint
-        const response = await API.setValveStates({ [valveId]: `pulse:${duration}` });
+        const response = await API.setValveStates({ [valveId]: `pulse:${duration}` }, force);
         
         if (response.status === 'error' && response.failed_valves) {
             // Re-enable on error
@@ -546,6 +569,9 @@ async function executePulse(valveId, duration) {
 
         logStatus(`Valve ${valveId} pulse completed`);
     } catch (error) {
+        if (button) button.disabled = false;
+        if (input) input.disabled = false;
+        if (showInvalidStateWarning(error, force, () => executePulse(valveId, duration, true))) return;
         logError(`Failed to pulse valve ${valveId}`, error);
         Modal.show('Pulse Failed', `<p>Failed to pulse valve: ${error.message}</p>`, [
             { label: 'OK', type: 'secondary' }
@@ -899,17 +925,10 @@ function updateSafeModeUI() {
  * Triggers manual safe system operation
  */
 async function safeSystem() {
-    // Block if any valve is pulsing
-    if (State.pulsingValves.size > 0) {
-        Modal.show(
-            'Valve Pulsing',
-            `<p>Cannot safe the system while a valve is pulsing. Please wait for all pulses to complete.</p>`,
-            [{ label: 'OK', type: 'secondary' }]
-        );
-        return;
-    }
+    // Pulses don't block safing: the server cancels pending pulse returns before the safe state runs.
+    // A running step doesn't block it either: the server aborts the step at once.
     
-    // Block if already safing or executing
+    // Block if already safing
     if (State.safingSystem) {
         const userInfo = State.safingSystemUser ? ` by ${State.safingSystemUser}` : '';
         Modal.show(
@@ -920,21 +939,17 @@ async function safeSystem() {
         return;
     }
     
-    if (State.executingStepIndex !== null) {
-        const userInfo = State.executingStepUser ? ` by ${State.executingStepUser}` : '';
-        Modal.show(
-            'Step Executing',
-            `<p>A step is currently executing${userInfo}. Please wait for it to complete before safing the system.</p>`,
-            [{ label: 'OK', type: 'secondary' }]
-        );
-        return;
-    }
-    
     // Confirmation dialog
+    let confirmMessage = '<p>Are you sure you want to safe the system?</p>';
+    if (State.executingStepIndex !== null) {
+        const step = State.selectedProcedure?.steps[State.executingStepIndex];
+        const stepName = step ? step.name : `Step ${State.executingStepIndex + 1}`;
+        confirmMessage = `<p>Step <strong>${stepName}</strong> is running and will be stopped immediately. Safe the system?</p>`;
+    }
     const confirmed = await new Promise(resolve => {
         Modal.show(
             'Confirm Safe System',
-            '<p>Are you sure you want to safe the system?</p>',
+            confirmMessage,
             [
                 { label: 'Cancel', type: 'secondary', callback: () => resolve(false) },
                 { label: 'Safe System', type: 'primary', callback: () => resolve(true) }
@@ -973,7 +988,7 @@ function updateSafeSystemUI() {
         btn.innerHTML = '<span class="safe-system-text">Safing...</span>';
     } else {
         btn.classList.remove('executing');
-        btn.disabled = State.executingStepIndex !== null;
+        btn.disabled = false;  // a running step is aborted by the safe
         btn.innerHTML = '<span class="safe-system-text">Safe System</span>';
     }
 }
@@ -1881,11 +1896,13 @@ async function executeStep(index, event) {
     invalidStateViolations.forEach(v => warnings.push(v));
     
     if (warnings.length > 0) {
+        // Confirming invalid-state warnings sends force, since the server enforces them too
+        const force = invalidStateViolations.length > 0;
         Modal.warning(
             'Step Execution Warning',
             `<p>The following issues were detected:</p>
             <ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul>`,
-            () => performStepExecution(index, step)
+            () => performStepExecution(index, step, force)
         );
     } else {
         performStepExecution(index, step);
@@ -1896,12 +1913,12 @@ async function executeStep(index, event) {
  * Performs the actual step execution by requesting the server to execute it.
  * The server handles all action execution; the client just polls for status updates.
  */
-async function performStepExecution(index, step) {
-    logStatus(`Requesting execution of step ${index + 1}: ${step.name}`);
+async function performStepExecution(index, step, force = false) {
+    logStatus(`Requesting execution of step ${index + 1}: ${step.name}${force ? ' (forced)' : ''}`);
     
     // Request server to execute the step
     try {
-        const result = await API.startStepExecution(State.selectedProcedureIndex, index);
+        const result = await API.startStepExecution(State.selectedProcedureIndex, index, force);
         if (result.status === 'error') {
             // Another step is already executing
             if (result.executing) {
@@ -1924,6 +1941,7 @@ async function performStepExecution(index, step) {
         // Server is now executing the step - status polling will update the UI
         
     } catch (error) {
+        if (showInvalidStateWarning(error, force, () => performStepExecution(index, step, true))) return;
         logError('Failed to start step execution on server', error);
         Modal.show(
             'Execution Failed',

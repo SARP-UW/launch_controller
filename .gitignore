@@ -1,4 +1,7 @@
 .venv
 log/*
 !log/readme.md
-src/__pycache__
+__pycache__/
+logs/
+config/local/
+config/demo_local/

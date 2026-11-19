@@ -14,9 +14,62 @@ Install required dependencies:
 pip install -r requirements.txt
 ```
 
-Run program (must use absolute paths to configuration files):
+Run program:
 ```bash
 python3 main.py -c <CONTROLLER CONFIG PATH> -w <WEBSITE CONFIG PATH>
+```
+
+If `-c`/`-w` are omitted, the configs in `config/example/` are used. Paths inside the configuration files (log paths) should be absolute.
+
+By default the program also starts a spoke that connects to the GSE hub, so the controller can be commanded from the hub and publishes telemetry to it. The website runs either way.
+
+| Option | Description |
+| --- | --- |
+| `-c`, `--controller_config` | Path to controller configuration file (default: `config/example/controller_config.json`) |
+| `-w`, `--website_config` | Path to website configuration file (default: `config/example/website_config.json`) |
+| `--node_id` | Spoke node id, must be unique per hub (default: `general_config.node_id` in the website config, else `launch_controller`) |
+| `--hub_addr` | Hub address as `host:port` (default: `GSE_HUB_ADDR` environment variable, else `localhost:50051`) |
+| `--telemetry_rate` | Telemetry publish rate in Hz, greater than 0 and at most 50 (default: 10) |
+| `--no_spoke` | Do not connect to the hub (website only) |
+
+Examples:
+```bash
+# Fill controller, connecting to a hub on another machine
+python3 main.py -c config/hotfire_fill/controller_config.json -w config/hotfire_fill/website_config.json --hub_addr 192.168.1.10:50051
+
+# Website only, no hub
+python3 main.py -c config/demo/controller_config.json -w config/demo/website_config.json --no_spoke
+```
+
+If the hub is not running or the connection drops, the spoke keeps retrying in the background; the website and controller are unaffected.
+
+### Mock Mode and Console Output
+Settings in `src/settings.py` control mock mode (`MOCK_MODE = True` simulates the valve and sensor hardware, for running on a computer instead of the Raspberry Pi) and which status/error messages are printed to the console.
+
+### Hub Commands
+When connected to the hub, the controller accepts the commands below (all arguments are strings; `[...]` = optional). Every command also takes an optional `operator` argument, which is recorded in the logs. Unknown arguments are rejected. See `src/spoke_handlers.py` for details.
+
+| Command | Arguments |
+| --- | --- |
+| `set_valve` | `valve_id`, `state` (`open`/`closed`), [`force`] |
+| `pulse_valve` | `valve_id`, `duration` (seconds), [`force`] |
+| `set_valves` | `<valve_id>: <action>` for each valve (`open`/`closed`/`pulse:<seconds>`), [`force`] |
+| `safe_system` | none (returns right away; aborts a running step) |
+| `set_safe_mode` | `enabled` (`true`/`false`) |
+| `start_step` | `procedure_index`, `step_index`, [`force`], [`expected_last_step`] (`P:S` or `none`) |
+| `set_step_completion` | `procedure_index`, `step_index`, `completed` (`true`/`false`) |
+| `reset_procedure` | `procedure_index` |
+| `get_state` | none (live valves, sensors, safe mode, safing, procedure status) |
+| `get_config` | none (valve/sensor names and ranges, procedures, safe states, ...) |
+
+Commands that would put the valves into an invalid state are rejected unless sent with `force` set to `true`.
+
+### Tests
+Run from this folder with `MOCK_MODE = True` in `src/settings.py` (`pytest` must be installed):
+```bash
+python -m pytest tests/                  # spoke handler and telemetry tests
+python tests/smoke_test_website.py       # website API compared against tests/baseline/website_api.json
+python tests/e2e_hub_phase4.py           # end-to-end through a real hub (needs the GSE_Unified_Software repo next to this one, or GSE_REPO set)
 ```
 
 ## User Interface
@@ -97,6 +150,7 @@ The third element in the controller configuration file is the "valve_config" sec
 The first element in the website configuration file is the "general_config" section. This section contains general configuration information for the website/UI.
 ```json
 "general_config": {
+    "node_id": <Optional: spoke node id used to connect to the hub (overridden by --node_id)>,
     "website_title": <Title for website>,
     "website_log_path": <Path to file where website status/error information is logged>,
     "port": <Port where website is hosted>,

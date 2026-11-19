@@ -1,4 +1,6 @@
 Flask
-RPi.GPIO
+RPi.GPIO; sys_platform == "linux"
 adafruit-blinka
 adafruit-circuitpython-ads1x15
+grpcio==1.83.0
+protobuf==7.35.1
